@@ -13,10 +13,10 @@ To build and run this project, you will need:
 ### Installation
 1.  **Clone the repository**:
     ```bash
-    git clone https://github.com/your-username/my-antlr-project.git
+    git clone [https://github.com/AlayhamTaha543/sqlInterpreter.git]
     cd my-antlr-project
     ```
-    (Replace `https://github.com/your-username/my-antlr-project.git` with the actual repository URL)
+
 
 ### Building the Project
 To compile the project and generate the ANTLR4 parser/lexer classes, run the following Maven command from the project root directory:
@@ -30,13 +30,11 @@ This command will:
 
 ## Adding ANTLR4 Grammars
 To add new ANTLR4 grammars to this project:
-1.  Create your new grammar file (e.g., `MyGrammar.g4`).
-2.  Place the `.g4` file in the `antlr4/` directory at the project root. For example:
+1.  Create your new grammar (e.g., `keywords`).
     ```
     my-antlr-project/
     ├── antlr4/
     │   ├── SqlLexer.g4
-    │   └── MyGrammar.g4  <-- Place your new grammar here
     ├── pom.xml
     └── src/
         └── main/java/com/example/App.java
