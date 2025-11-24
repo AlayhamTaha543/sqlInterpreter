@@ -263,6 +263,7 @@ DESC: D E S C;            // Descending sort order
 // -------------------------
 //  BOOLEAN VALUES
 // -------------------------
+
 TRUE: T R U E;            // Boolean true value
 FALSE: F A L S E;         // Boolean false value
 
