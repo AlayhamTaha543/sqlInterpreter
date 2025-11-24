@@ -21,7 +21,7 @@ FIRST: F I R S T;         // Used with FETCH
 ONLY: O N L Y;            // Used with FETCH
 
 // -------------------------
-// DATA MANIPULATION LANGUAGE (DML)
+// DATA MANIPULATION LANGUAGE 
 // -------------------------
 INSERT: I N S E R T;      // Inserts new data into a table
 INTO: I N T O;            // Specifies table for INSERT
@@ -33,7 +33,7 @@ MATCHED: M A T C H E D;   // Used with MERGE for matched conditions
 OUTPUT: O U T P U T;      // Returns information from DML operations
 
 // -------------------------
-// DATA DEFINITION LANGUAGE (DDL)
+// DATA DEFINITION LANGUAGE 
 // -------------------------
 CREATE: C R E A T E;      // Creates database objects
 ALTER: A L T E R;         // Modifies database objects
