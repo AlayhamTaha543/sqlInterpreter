@@ -266,12 +266,6 @@ DESC: D E S C;            // Descending sort order
 TRUE: T R U E;            // Boolean true value
 FALSE: F A L S E;         // Boolean false value
 
-// =============================================
-// CASE INSENSITIVITY FRAGMENTS
-// These fragments allow case-insensitive matching
-// of SQL keywords (both uppercase and lowercase)
-// =============================================
-
 fragment A: [aA];
 fragment B: [bB];
 fragment C: [cC];
