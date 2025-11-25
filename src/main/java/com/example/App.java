@@ -11,7 +11,7 @@ public class App
     public static void main( String[] args )
     {
         // The input string we want to parse
-        String input = "hello World";
+        String input = "select";
 
         // Create a CharStream from the input string
         CharStream charStream = CharStreams.fromString(input);
