@@ -1,0 +1,3 @@
+/home/alayham/Desktop/pa/sqlInterpreter/src/main/java/com/sqlcompiler/compiler/SQLLexerApp.java
+/home/alayham/Desktop/pa/sqlInterpreter/src/main/java/com/sqlcompiler/parser/SQLTokenTypeMapper.java
+/home/alayham/Desktop/pa/sqlInterpreter/target/generated-sources/antlr4/com/sqlcompiler/parser/SQLLexer.java

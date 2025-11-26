@@ -1,0 +1,3 @@
+com/sqlcompiler/parser/SQLTokenTypeMapper.class
+com/sqlcompiler/parser/SQLLexer.class
+com/sqlcompiler/compiler/SQLLexerApp.class
