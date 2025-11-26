@@ -267,6 +267,109 @@ DESC: D E S C;            // Descending sort order
 TRUE: T R U E;            // Boolean true value
 FALSE: F A L S E;         // Boolean false value
 
+// ═══════════════════════════════════════════════════════════════════════════════
+// IDENTIFIERS AND VARIABLES - MAIN TASK
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/**
+ * SYSTEM VARIABLES (Priority: Highest)
+ * 
+ * System variables are global variables maintained by the SQL Server/Database.
+ * Examples: @@VERSION, @@ERROR, @@ROWCOUNT, @@IDENTITY, @@server_name
+ * 
+ * Pattern: @@ followed by identifier characters
+ * These must be recognized BEFORE regular variables to avoid conflicts
+ */
+SYSTEM_VARIABLE: '@@' [a-zA-Z_] [a-zA-Z0-9_]*;
+
+/**
+ * USER VARIABLES (Priority: High)
+ * 
+ * User variables are session-specific variables that can be set by users.
+ * Examples: @comment, @variable_name, @email, @user_id
+ * 
+ * Pattern: @ followed by identifier characters
+ * These must be recognized BEFORE delimited identifiers starting with brackets
+ */
+USER_VARIABLE: '@' [a-zA-Z_] [a-zA-Z0-9_]*;
+
+/**
+ * DELIMITED IDENTIFIERS - Square Brackets
+ * 
+ * Square bracket delimiters allow special characters in identifiers.
+ * Commonly used in SQL Server.
+ * Examples: [ColumnName], [User ID], [2024 Data], [Order #1]
+ * 
+ * Pattern: [ any characters except ] ] or \]
+ * This allows spaces, special characters, and even reserved keywords
+ */
+DELIMITED_IDENTIFIER_BRACKET: '[' (~[\\]|'\\]')* ']';
+
+/**
+ * DELIMITED IDENTIFIERS - Double Quotes
+ * 
+ * Double quote delimiters allow special characters in identifiers.
+ * Compliant with ANSI SQL standard.
+ * Examples: "ColumnName", "User ID", "2024 Data"
+ * 
+ * Pattern: " any characters except " or \"
+ */
+DELIMITED_IDENTIFIER_QUOTE: '"' (~[\\"]|'\\"')* '"';
+
+/**
+ * DELIMITED IDENTIFIERS - Backticks
+ * 
+ * Backtick delimiters allow special characters in identifiers.
+ * Commonly used in MySQL.
+ * Examples: `table_name`, `column_name`, `user ID`
+ * 
+ * Pattern: ` any characters except ` or \`
+ */
+DELIMITED_IDENTIFIER_BACKTICK: '`' (~[\\`]|'\\`')* '`';
+
+/**
+ * REGULAR IDENTIFIERS (Priority: Lowest)
+ * 
+ * Standard identifiers without delimiters.
+ * Alphanumeric characters and underscores only.
+ * Cannot start with a digit (to avoid conflicts with numbers).
+ * Examples: users, employee_name, table1, Column, ORDER_ID
+ * 
+ * Pattern:
+ * - First character: letter or underscore
+ * - Remaining characters: letters, digits, or underscores
+ * 
+ * This rule must come LAST to avoid matching partial identifiers
+ * before system variables and user variables are recognized
+ */
+IDENTIFIER: [a-zA-Z_] [a-zA-Z0-9_]*;
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// LITERALS
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/**
+ * NUMERIC LITERALS - Integer
+ * 
+ * Pattern: one or more digits
+ */
+INTEGER: [0-9]+;
+
+/**
+ * NUMERIC LITERALS - Float/Decimal
+ * 
+ * Pattern: digits, dot, digits
+ */
+FLOATN: [0-9]+ '.' [0-9]+;
+
+/**
+ * STRING LITERALS
+ * 
+ * Single-quoted strings in SQL
+ * Handles escaped quotes: '\''
+ */
+STRING: '\'' (~['\r\n\\] | '\\' .)* '\'';
+
 fragment A: [aA];
 fragment B: [bB];
 fragment C: [cC];

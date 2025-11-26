@@ -30,9 +30,7 @@ import com.sqlcompiler.parser.SQLLexer;
  * STEP 1: Add new rule to SQLLexer.g4
  *         Example:
  *         lexer grammar SQLLexer;
- *         DISTINCT: 'DISTINCT' | 'distinct';
- *         UNION: 'UNION' | 'union';       <-- NEW RULE
- *         ALL: 'ALL' | 'all';             <-- NEW RULE
+ *         MYNEWTOK: 'MYNEWTOK' | 'mynewtok';
  * 
  * STEP 2: Generate new lexer from grammar
  *         Run this command in your project root:
@@ -48,11 +46,10 @@ import com.sqlcompiler.parser.SQLLexer;
  *         mvn compile
  *         
  * STEP 4: Add mapping in THIS CLASS
- *         Add new case statements in the getTokenName() method below:
+ *         Add new case statement in the getTokenName() method below:
  *         
  *         Example:
- *         case SQLLexer.UNION: return "UNION";
- *         case SQLLexer.ALL: return "ALL";
+ *         case SQLLexer.MYNEWTOK: return "MYNEWTOK";
  * 
  * STEP 5: Refresh IDE
  *         Right-click project → Maven → Reload projects (or similar for your IDE)
@@ -79,35 +76,6 @@ import com.sqlcompiler.parser.SQLLexer;
  *   }
  * 
  * ═══════════════════════════════════════════════════════════════════════════════
- * TOKEN CATEGORIES:
- * ═══════════════════════════════════════════════════════════════════════════════
- * 
- * This mapper includes the following token categories from SQLLexer.g4:
- * 
- * 1. SQL KEYWORDS
- *    - Data Manipulation: SELECT, INSERT, UPDATE, DELETE
- *    - Data Definition: CREATE, DROP, ALTER, TABLE
- *    - Clauses: FROM, WHERE, GROUP, BY, HAVING, ORDER, LIMIT, OFFSET
- *    - Join Types: JOIN, INNER, LEFT, RIGHT
- *    - Other: AND, OR, NOT, DISTINCT, AS, NULL
- * 
- * 2. OPERATORS
- *    - Comparison: =, !=, <>, <, >, <=, >=
- *    - Arithmetic: +, -, *, /, %
- *    - Logical: AND, OR, NOT
- *    - Pattern Matching: LIKE, IN, BETWEEN, IS
- * 
- * 3. DELIMITERS
- *    - Parentheses: (, )
- *    - Punctuation: comma, semicolon, dot
- * 
- * 4. LITERALS
- *    - IDENTIFIER (variable names, table names, column names)
- *    - INTEGER (whole numbers)
- *    - FLOAT (decimal numbers)
- *    - STRING (text values in quotes)
- * 
- * ═══════════════════════════════════════════════════════════════════════════════
  */
 public class SQLTokenTypeMapper {
 
@@ -126,104 +94,160 @@ public class SQLTokenTypeMapper {
         switch (tokenType) {
 
             // ═══════════════════════════════════════════════════════════════
-            // SQL KEYWORDS - Data Manipulation Language (DML)
+            // SQL KEYWORDS - SELECT AND FILTERING
             // ═══════════════════════════════════════════════════════════════
             case SQLLexer.SELECT:
                 return "SELECT";
-            case SQLLexer.INSERT:
-                return "INSERT";
-            case SQLLexer.UPDATE:
-                return "UPDATE";
-            case SQLLexer.DELETE:
-                return "DELETE";
-
-            // ═══════════════════════════════════════════════════════════════
-            // SQL KEYWORDS - Data Definition Language (DDL)
-            // ═══════════════════════════════════════════════════════════════
-            case SQLLexer.CREATE:
-                return "CREATE";
-            case SQLLexer.DROP:
-                return "DROP";
-            case SQLLexer.ALTER:
-                return "ALTER";
-            case SQLLexer.TABLE:
-                return "TABLE";
-            // case SQLLexer.ADD:
-            //     return "ADD";
-
-            // ═══════════════════════════════════════════════════════════════
-            // SQL KEYWORDS - SELECT Clause Keywords
-            // ═══════════════════════════════════════════════════════════════
             case SQLLexer.FROM:
                 return "FROM";
             case SQLLexer.WHERE:
                 return "WHERE";
+            case SQLLexer.HAVING:
+                return "HAVING";
+            case SQLLexer.DISTINCT:
+                return "DISTINCT";
+            case SQLLexer.TOP:
+                return "TOP";
             case SQLLexer.GROUP:
                 return "GROUP";
             case SQLLexer.BY:
                 return "BY";
-            case SQLLexer.HAVING:
-                return "HAVING";
             case SQLLexer.ORDER:
                 return "ORDER";
-            // case SQLLexer.LIMIT:
-            //     return "LIMIT";
             case SQLLexer.OFFSET:
                 return "OFFSET";
-            case SQLLexer.DISTINCT:
-                return "DISTINCT";
-            case SQLLexer.ASC:
-                return "ASC";
-            case SQLLexer.DESC:
-                return "DESC";
+            case SQLLexer.FETCH:
+                return "FETCH";
+            case SQLLexer.NEXT:
+                return "NEXT";
+            case SQLLexer.FIRST:
+                return "FIRST";
+            case SQLLexer.ONLY:
+                return "ONLY";
 
             // ═══════════════════════════════════════════════════════════════
-            // SQL KEYWORDS - INSERT/UPDATE/DELETE Related
+            // DATA MANIPULATION LANGUAGE (DML)
             // ═══════════════════════════════════════════════════════════════
+            case SQLLexer.INSERT:
+                return "INSERT";
             case SQLLexer.INTO:
                 return "INTO";
+            case SQLLexer.UPDATE:
+                return "UPDATE";
+            case SQLLexer.DELETE:
+                return "DELETE";
             case SQLLexer.VALUES:
                 return "VALUES";
-            case SQLLexer.SET:
-                return "SET";
+            case SQLLexer.MERGE:
+                return "MERGE";
+            case SQLLexer.MATCHED:
+                return "MATCHED";
+            case SQLLexer.OUTPUT:
+                return "OUTPUT";
 
             // ═══════════════════════════════════════════════════════════════
-            // SQL KEYWORDS - JOIN Related
+            // DATA DEFINITION LANGUAGE (DDL)
             // ═══════════════════════════════════════════════════════════════
-            case SQLLexer.JOIN:
-                return "JOIN";
-            case SQLLexer.INNER:
-                return "INNER";
-            case SQLLexer.LEFT:
-                return "LEFT";
-            case SQLLexer.RIGHT:
-                return "RIGHT";
-            case SQLLexer.ON:
-                return "ON";
+            case SQLLexer.CREATE:
+                return "CREATE";
+            case SQLLexer.ALTER:
+                return "ALTER";
+            case SQLLexer.DROP:
+                return "DROP";
+            case SQLLexer.TABLE:
+                return "TABLE";
+            case SQLLexer.VIEW:
+                return "VIEW";
+            case SQLLexer.PROCEDURE:
+                return "PROCEDURE";
+            case SQLLexer.FUNCTION:
+                return "FUNCTION";
+            case SQLLexer.INDEX:
+                return "INDEX";
+            case SQLLexer.SCHEMA:
+                return "SCHEMA";
+            case SQLLexer.DATABASE:
+                return "DATABASE";
+            case SQLLexer.TRIGGER:
+                return "TRIGGER";
 
             // ═══════════════════════════════════════════════════════════════
-            // SQL KEYWORDS - Logical and Comparison
+            // DATA TYPES - Integer Types
             // ═══════════════════════════════════════════════════════════════
-            case SQLLexer.AND:
-                return "AND";
-            case SQLLexer.OR:
-                return "OR";
-            case SQLLexer.NOT:
-                return "NOT";
+            case SQLLexer.INT:
+                return "INT";
+            case SQLLexer.BIGINT:
+                return "BIGINT";
+            case SQLLexer.SMALLINT:
+                return "SMALLINT";
+            case SQLLexer.TINYINT:
+                return "TINYINT";
 
             // ═══════════════════════════════════════════════════════════════
-            // SQL KEYWORDS - Aliases and References
+            // DATA TYPES - Character/String Types
             // ═══════════════════════════════════════════════════════════════
-            case SQLLexer.AS:
-                return "AS";
-            // case SQLLexer.NULL_KEYWORD:
-            //     return "NULL";
+            case SQLLexer.VARCHAR:
+                return "VARCHAR";
+            case SQLLexer.NVARCHAR:
+                return "NVARCHAR";
+            case SQLLexer.CHAR:
+                return "CHAR";
+            case SQLLexer.NCHAR:
+                return "NCHAR";
+            case SQLLexer.TEXT:
+                return "TEXT";
+            case SQLLexer.NTEXT:
+                return "NTEXT";
 
             // ═══════════════════════════════════════════════════════════════
-            // SQL KEYWORDS - Constraint Related
+            // DATA TYPES - Date/Time Types
             // ═══════════════════════════════════════════════════════════════
-            case SQLLexer.CONSTRAINT:
-                return "CONSTRAINT";
+            case SQLLexer.DATETIME:
+                return "DATETIME";
+            case SQLLexer.DATE:
+                return "DATE";
+            case SQLLexer.TIME:
+                return "TIME";
+            case SQLLexer.TIMESTAMP:
+                return "TIMESTAMP";
+
+            // ═══════════════════════════════════════════════════════════════
+            // DATA TYPES - Numeric/Decimal Types
+            // ═══════════════════════════════════════════════════════════════
+            case SQLLexer.BIT:
+                return "BIT";
+            case SQLLexer.DECIMAL:
+                return "DECIMAL";
+            case SQLLexer.NUMERIC:
+                return "NUMERIC";
+            case SQLLexer.FLOAT:
+                return "FLOAT";
+            case SQLLexer.REAL:
+                return "REAL";
+            case SQLLexer.MONEY:
+                return "MONEY";
+            case SQLLexer.SMALLMONEY:
+                return "SMALLMONEY";
+
+            // ═══════════════════════════════════════════════════════════════
+            // DATA TYPES - Binary and Special Types
+            // ═══════════════════════════════════════════════════════════════
+            case SQLLexer.BINARY:
+                return "BINARY";
+            case SQLLexer.VARBINARY:
+                return "VARBINARY";
+            case SQLLexer.IMAGE:
+                return "IMAGE";
+            case SQLLexer.UNIQUEIDENTIFIER:
+                return "UNIQUEIDENTIFIER";
+            case SQLLexer.XML:
+                return "XML";
+            case SQLLexer.SQL_VARIANT:
+                return "SQL_VARIANT";
+
+            // ═══════════════════════════════════════════════════════════════
+            // TABLE CONSTRAINTS
+            // ═══════════════════════════════════════════════════════════════
             case SQLLexer.PRIMARY:
                 return "PRIMARY";
             case SQLLexer.KEY:
@@ -238,74 +262,320 @@ public class SQLTokenTypeMapper {
                 return "CHECK";
             case SQLLexer.DEFAULT:
                 return "DEFAULT";
+            case SQLLexer.CONSTRAINT:
+                return "CONSTRAINT";
+            case SQLLexer.IDENTITY:
+                return "IDENTITY";
+            case SQLLexer.CLUSTERED:
+                return "CLUSTERED";
+            case SQLLexer.NONCLUSTERED:
+                return "NONCLUSTERED";
 
             // ═══════════════════════════════════════════════════════════════
-            // SQL KEYWORDS - Pattern Matching and Conditions
+            // JOIN OPERATIONS
             // ═══════════════════════════════════════════════════════════════
+            case SQLLexer.JOIN:
+                return "JOIN";
+            case SQLLexer.INNER:
+                return "INNER";
+            case SQLLexer.OUTER:
+                return "OUTER";
+            case SQLLexer.LEFT:
+                return "LEFT";
+            case SQLLexer.RIGHT:
+                return "RIGHT";
+            case SQLLexer.FULL:
+                return "FULL";
+            case SQLLexer.CROSS:
+                return "CROSS";
+            case SQLLexer.ON:
+                return "ON";
+            case SQLLexer.USING:
+                return "USING";
+
+            // ═══════════════════════════════════════════════════════════════
+            // SET OPERATIONS
+            // ═══════════════════════════════════════════════════════════════
+            case SQLLexer.UNION:
+                return "UNION";
+            case SQLLexer.EXCEPT:
+                return "EXCEPT";
+            case SQLLexer.INTERSECT:
+                return "INTERSECT";
+            case SQLLexer.ALL:
+                return "ALL";
+
+            // ═══════════════════════════════════════════════════════════════
+            // LOGICAL OPERATORS
+            // ═══════════════════════════════════════════════════════════════
+            case SQLLexer.AND:
+                return "AND";
+            case SQLLexer.OR:
+                return "OR";
+            case SQLLexer.NOT:
+                return "NOT";
             case SQLLexer.LIKE:
                 return "LIKE";
             case SQLLexer.IN:
                 return "IN";
             case SQLLexer.BETWEEN:
                 return "BETWEEN";
+            case SQLLexer.EXISTS:
+                return "EXISTS";
             case SQLLexer.IS:
                 return "IS";
+            case SQLLexer.NULL:
+                return "NULL";
+            case SQLLexer.ANY:
+                return "ANY";
+            case SQLLexer.SOME:
+                return "SOME";
 
             // ═══════════════════════════════════════════════════════════════
-            // COMPARISON OPERATORS
+            // AGGREGATE FUNCTIONS
             // ═══════════════════════════════════════════════════════════════
-            // case SQLLexer.EQUALS:
-            //     return "EQUALS (=)";
-            // case SQLLexer.NOT_EQUALS:
-            //     return "NOT_EQUALS (!=)";
-            // case SQLLexer.LESS:
-            //     return "LESS (<)";
-            // case SQLLexer.GREATER:
-            //     return "GREATER (>)";
-            // case SQLLexer.LESS_EQUALS:
-            //     return "LESS_EQUALS (<=)";
-            // case SQLLexer.GREATER_EQUALS:
-            //     return "GREATER_EQUALS (>=)";
+            case SQLLexer.COUNT:
+                return "COUNT";
+            case SQLLexer.SUM:
+                return "SUM";
+            case SQLLexer.AVG:
+                return "AVG";
+            case SQLLexer.MIN:
+                return "MIN";
+            case SQLLexer.MAX:
+                return "MAX";
 
             // ═══════════════════════════════════════════════════════════════
-            // ARITHMETIC OPERATORS
+            // STRING FUNCTIONS
             // ═══════════════════════════════════════════════════════════════
-            // case SQLLexer.PLUS:
-            //     return "PLUS (+)";
-            // case SQLLexer.MINUS:
-            //     return "MINUS (-)";
-            // case SQLLexer.MULTIPLY:
-            //     return "MULTIPLY (*)";
-            // case SQLLexer.DIVIDE:
-            //     return "DIVIDE (/)";
-            // case SQLLexer.MODULO:
-            //     return "MODULO (%)";
+            case SQLLexer.LEN:
+                return "LEN";
+            case SQLLexer.SUBSTRING:
+                return "SUBSTRING";
+            case SQLLexer.LTRIM:
+                return "LTRIM";
+            case SQLLexer.RTRIM:
+                return "RTRIM";
+            case SQLLexer.UPPER:
+                return "UPPER";
+            case SQLLexer.LOWER:
+                return "LOWER";
+            case SQLLexer.REPLACE:
+                return "REPLACE";
+            case SQLLexer.CONCAT:
+                return "CONCAT";
+            case SQLLexer.CHARINDEX:
+                return "CHARINDEX";
+            case SQLLexer.PATINDEX:
+                return "PATINDEX";
 
             // ═══════════════════════════════════════════════════════════════
-            // DELIMITERS - Parentheses and Punctuation
+            // DATE FUNCTIONS
             // ═══════════════════════════════════════════════════════════════
-            // case SQLLexer.LPAREN:
-            //     return "LPAREN (";
-            // case SQLLexer.RPAREN:
-            //     return "RPAREN )";
-            // case SQLLexer.COMMA:
-            //     return "COMMA ,";
-            // case SQLLexer.SEMICOLON:
-            //     return "SEMICOLON ;";
-            // case SQLLexer.DOT:
-            //     return "DOT .";
+            case SQLLexer.GETDATE:
+                return "GETDATE";
+            case SQLLexer.GETUTCDATE:
+                return "GETUTCDATE";
+            case SQLLexer.DATEADD:
+                return "DATEADD";
+            case SQLLexer.DATEDIFF:
+                return "DATEDIFF";
+            case SQLLexer.DATEPART:
+                return "DATEPART";
+            case SQLLexer.YEAR:
+                return "YEAR";
+            case SQLLexer.MONTH:
+                return "MONTH";
+            case SQLLexer.DAY:
+                return "DAY";
 
             // ═══════════════════════════════════════════════════════════════
-            // LITERALS - Identifiers and Values
+            // CONVERSION FUNCTIONS
             // ═══════════════════════════════════════════════════════════════
-            // case SQLLexer.IDENTIFIER:
-            //     return "IDENTIFIER";
-            // case SQLLexer.INTEGER:
-            //     return "INTEGER";
-            // case SQLLexer.FLOAT:
-            //     return "FLOAT";
-            // case SQLLexer.STRING:
-            //     return "STRING";
+            case SQLLexer.CAST:
+                return "CAST";
+            case SQLLexer.CONVERT:
+                return "CONVERT";
+            case SQLLexer.TRY_CAST:
+                return "TRY_CAST";
+            case SQLLexer.TRY_CONVERT:
+                return "TRY_CONVERT";
+
+            // ═══════════════════════════════════════════════════════════════
+            // WINDOW FUNCTIONS
+            // ═══════════════════════════════════════════════════════════════
+            case SQLLexer.OVER:
+                return "OVER";
+            case SQLLexer.PARTITION:
+                return "PARTITION";
+            case SQLLexer.ROWS:
+                return "ROWS";
+            case SQLLexer.RANGE:
+                return "RANGE";
+            case SQLLexer.PRECEDING:
+                return "PRECEDING";
+            case SQLLexer.FOLLOWING:
+                return "FOLLOWING";
+            case SQLLexer.CURRENT:
+                return "CURRENT";
+            case SQLLexer.ROW:
+                return "ROW";
+            case SQLLexer.LAG:
+                return "LAG";
+            case SQLLexer.LEAD:
+                return "LEAD";
+            case SQLLexer.FIRST_VALUE:
+                return "FIRST_VALUE";
+            case SQLLexer.LAST_VALUE:
+                return "LAST_VALUE";
+
+            // ═══════════════════════════════════════════════════════════════
+            // PROGRAMMING CONSTRUCTS
+            // ═══════════════════════════════════════════════════════════════
+            case SQLLexer.DECLARE:
+                return "DECLARE";
+            case SQLLexer.SET:
+                return "SET";
+            case SQLLexer.BEGIN:
+                return "BEGIN";
+            case SQLLexer.END:
+                return "END";
+            case SQLLexer.IF:
+                return "IF";
+            case SQLLexer.ELSE:
+                return "ELSE";
+            case SQLLexer.WHILE:
+                return "WHILE";
+            case SQLLexer.BREAK:
+                return "BREAK";
+            case SQLLexer.CONTINUE:
+                return "CONTINUE";
+            case SQLLexer.CASE:
+                return "CASE";
+            case SQLLexer.WHEN:
+                return "WHEN";
+            case SQLLexer.THEN:
+                return "THEN";
+            case SQLLexer.RETURN:
+                return "RETURN";
+
+            // ═══════════════════════════════════════════════════════════════
+            // TRANSACTION CONTROL
+            // ═══════════════════════════════════════════════════════════════
+            case SQLLexer.TRANSACTION:
+                return "TRANSACTION";
+            case SQLLexer.COMMIT:
+                return "COMMIT";
+            case SQLLexer.ROLLBACK:
+                return "ROLLBACK";
+            case SQLLexer.SAVEPOINT:
+                return "SAVEPOINT";
+            case SQLLexer.SAVE:
+                return "SAVE";
+            case SQLLexer.TRY:
+                return "TRY";
+            case SQLLexer.CATCH:
+                return "CATCH";
+            case SQLLexer.THROW:
+                return "THROW";
+
+            // ═══════════════════════════════════════════════════════════════
+            // STORED PROCEDURE EXECUTION
+            // ═══════════════════════════════════════════════════════════════
+            case SQLLexer.EXEC:
+                return "EXEC";
+            case SQLLexer.EXECUTE:
+                return "EXECUTE";
+            case SQLLexer.OPEN:
+                return "OPEN";
+            case SQLLexer.CLOSE:
+                return "CLOSE";
+            case SQLLexer.DEALLOCATE:
+                return "DEALLOCATE";
+
+            // ═══════════════════════════════════════════════════════════════
+            // OUTPUT AND DEBUGGING
+            // ═══════════════════════════════════════════════════════════════
+            case SQLLexer.PRINT:
+                return "PRINT";
+            case SQLLexer.RAISERROR:
+                return "RAISERROR";
+
+            // ═══════════════════════════════════════════════════════════════
+            // DATABASE OPERATIONS
+            // ═══════════════════════════════════════════════════════════════
+            case SQLLexer.USE:
+                return "USE";
+            case SQLLexer.GO:
+                return "GO";
+            case SQLLexer.AS:
+                return "AS";
+            case SQLLexer.WITH:
+                return "WITH";
+            case SQLLexer.OPTION:
+                return "OPTION";
+            case SQLLexer.RECOMPILE:
+                return "RECOMPILE";
+
+            // ═══════════════════════════════════════════════════════════════
+            // SECURITY AND PERMISSIONS
+            // ═══════════════════════════════════════════════════════════════
+            case SQLLexer.GRANT:
+                return "GRANT";
+            case SQLLexer.REVOKE:
+                return "REVOKE";
+            case SQLLexer.DENY:
+                return "DENY";
+            case SQLLexer.LOGIN:
+                return "LOGIN";
+            case SQLLexer.USER:
+                return "USER";
+            case SQLLexer.ROLE:
+                return "ROLE";
+            case SQLLexer.PERMISSION:
+                return "PERMISSION";
+
+            // ═══════════════════════════════════════════════════════════════
+            // SORTING DIRECTIONS
+            // ═══════════════════════════════════════════════════════════════
+            case SQLLexer.ASC:
+                return "ASC";
+            case SQLLexer.DESC:
+                return "DESC";
+
+            // ═══════════════════════════════════════════════════════════════
+            // BOOLEAN VALUES
+            // ═══════════════════════════════════════════════════════════════
+            case SQLLexer.TRUE:
+                return "TRUE";
+            case SQLLexer.FALSE:
+                return "FALSE";
+
+            // ═══════════════════════════════════════════════════════════════
+            // IDENTIFIERS AND VARIABLES (TASK: Identifiers + Variables)
+            // ═══════════════════════════════════════════════════════════════
+            case SQLLexer.SYSTEM_VARIABLE:
+                return "SYSTEM_VARIABLE";
+            case SQLLexer.USER_VARIABLE:
+                return "USER_VARIABLE";
+            case SQLLexer.DELIMITED_IDENTIFIER_BRACKET:
+                return "DELIMITED_IDENTIFIER_BRACKET";
+            case SQLLexer.DELIMITED_IDENTIFIER_QUOTE:
+                return "DELIMITED_IDENTIFIER_QUOTE";
+            case SQLLexer.DELIMITED_IDENTIFIER_BACKTICK:
+                return "DELIMITED_IDENTIFIER_BACKTICK";
+            case SQLLexer.IDENTIFIER:
+                return "IDENTIFIER";
+
+            // ═══════════════════════════════════════════════════════════════
+            // LITERALS - Numeric and String
+            // ═══════════════════════════════════════════════════════════════
+            case SQLLexer.INTEGER:
+                return "INTEGER";
+            case SQLLexer.FLOATN:
+                return "FLOATN";
+            case SQLLexer.STRING:
+                return "STRING";
 
             // ═══════════════════════════════════════════════════════════════
             // DEFAULT - Unknown Token Type
@@ -324,7 +594,10 @@ public class SQLTokenTypeMapper {
      * @return true if token is a SQL keyword, false otherwise
      */
     public static boolean isKeyword(int tokenType) {
-        return tokenType >= SQLLexer.SELECT && tokenType <= SQLLexer.IS;
+        return (tokenType >= SQLLexer.SELECT && tokenType <= SQLLexer.FALSE) ||
+               tokenType == SQLLexer.NULL ||
+               tokenType == SQLLexer.TRUE ||
+               tokenType == SQLLexer.FALSE;
     }
 
     /**
@@ -333,9 +606,16 @@ public class SQLTokenTypeMapper {
      * @param tokenType The token type to check
      * @return true if token is an operator, false otherwise
      */
-    // public static boolean isOperator(int tokenType) {
-    //     return (tokenType >= SQLLexer.EQUALS && tokenType <= SQLLexer.MODULO);
-    // }
+    public static boolean isOperator(int tokenType) {
+        return tokenType == SQLLexer.AND ||
+               tokenType == SQLLexer.OR ||
+               tokenType == SQLLexer.NOT ||
+               tokenType == SQLLexer.LIKE ||
+               tokenType == SQLLexer.IN ||
+               tokenType == SQLLexer.BETWEEN ||
+               tokenType == SQLLexer.EXISTS ||
+               tokenType == SQLLexer.IS;
+    }
 
     /**
      * Checks if a token type is a literal
@@ -343,10 +623,86 @@ public class SQLTokenTypeMapper {
      * @param tokenType The token type to check
      * @return true if token is a literal (identifier, integer, float, or string)
      */
-    // public static boolean isLiteral(int tokenType) {
-    //     return tokenType == SQLLexer.IDENTIFIER ||
-    //             tokenType == SQLLexer.INTEGER ||
-    //             tokenType == SQLLexer.FLOAT ||
-    //             tokenType == SQLLexer.STRING;
-    // }
+    public static boolean isLiteral(int tokenType) {
+        return tokenType == SQLLexer.IDENTIFIER ||
+               tokenType == SQLLexer.INTEGER ||
+               tokenType == SQLLexer.FLOATN ||
+               tokenType == SQLLexer.STRING;
+    }
+
+    /**
+     * Checks if a token type is an identifier or variable
+     * 
+     * @param tokenType The token type to check
+     * @return true if token is an identifier or variable type
+     */
+    public static boolean isIdentifierOrVariable(int tokenType) {
+        return tokenType == SQLLexer.IDENTIFIER ||
+               tokenType == SQLLexer.SYSTEM_VARIABLE ||
+               tokenType == SQLLexer.USER_VARIABLE ||
+               tokenType == SQLLexer.DELIMITED_IDENTIFIER_BRACKET ||
+               tokenType == SQLLexer.DELIMITED_IDENTIFIER_QUOTE ||
+               tokenType == SQLLexer.DELIMITED_IDENTIFIER_BACKTICK;
+    }
+
+    /**
+     * Checks if a token type is a variable (user or system)
+     * 
+     * @param tokenType The token type to check
+     * @return true if token is a variable type
+     */
+    public static boolean isVariable(int tokenType) {
+        return tokenType == SQLLexer.SYSTEM_VARIABLE ||
+               tokenType == SQLLexer.USER_VARIABLE;
+    }
+
+    /**
+     * Checks if a token type is a data type keyword
+     * 
+     * @param tokenType The token type to check
+     * @return true if token is a data type
+     */
+    public static boolean isDataType(int tokenType) {
+        return tokenType == SQLLexer.INT ||
+               tokenType == SQLLexer.BIGINT ||
+               tokenType == SQLLexer.SMALLINT ||
+               tokenType == SQLLexer.TINYINT ||
+               tokenType == SQLLexer.VARCHAR ||
+               tokenType == SQLLexer.NVARCHAR ||
+               tokenType == SQLLexer.CHAR ||
+               tokenType == SQLLexer.NCHAR ||
+               tokenType == SQLLexer.TEXT ||
+               tokenType == SQLLexer.NTEXT ||
+               tokenType == SQLLexer.DATETIME ||
+               tokenType == SQLLexer.DATE ||
+               tokenType == SQLLexer.TIME ||
+               tokenType == SQLLexer.TIMESTAMP ||
+               tokenType == SQLLexer.BIT ||
+               tokenType == SQLLexer.DECIMAL ||
+               tokenType == SQLLexer.NUMERIC ||
+               tokenType == SQLLexer.FLOAT ||
+               tokenType == SQLLexer.REAL ||
+               tokenType == SQLLexer.MONEY ||
+               tokenType == SQLLexer.SMALLMONEY ||
+               tokenType == SQLLexer.BINARY ||
+               tokenType == SQLLexer.VARBINARY ||
+               tokenType == SQLLexer.IMAGE ||
+               tokenType == SQLLexer.UNIQUEIDENTIFIER ||
+               tokenType == SQLLexer.XML ||
+               tokenType == SQLLexer.SQL_VARIANT;
+    }
+
+    /**
+     * Checks if a token type is an aggregate function
+     * 
+     * @param tokenType The token type to check
+     * @return true if token is an aggregate function
+     */
+    public static boolean isAggregateFunction(int tokenType) {
+        return tokenType == SQLLexer.COUNT ||
+               tokenType == SQLLexer.SUM ||
+               tokenType == SQLLexer.AVG ||
+               tokenType == SQLLexer.MIN ||
+               tokenType == SQLLexer.MAX;
+    }
 }
