@@ -27,11 +27,12 @@ public class SQLLexerApp {
         System.out.println("║          Using ANTLR4 Version 4.13.2                          ║");
         System.out.println("╚════════════════════════════════════════════════════════════════╝\n");
 
-        // Option 1: Interactive mode
+        // Options for input mode
         System.out.println("Choose input mode:");
         System.out.println("1. Interactive mode (type SQL queries)");
         System.out.println("2. Test predefined SQL queries");
-        System.out.print("\nEnter choice (1 or 2): ");
+        System.out.println("3. Read SQL script from test.sql");
+        System.out.print("\nEnter choice (1, 2, or 3): ");
 
         Scanner scanner = new Scanner(System.in);
         String choice = scanner.nextLine().trim();
@@ -40,12 +41,37 @@ public class SQLLexerApp {
             interactiveMode(scanner);
         } else if (choice.equals("2")) {
             testPredefinedQueries();
+        } else if (choice.equals("3")) {
+            readFromTestSql();
         } else {
             System.out.println("Invalid choice. Running test mode by default...\n");
             testPredefinedQueries();
         }
 
         scanner.close();
+    }
+
+    /**
+     * Reads and tokenizes SQL queries from the test.sql file in the root folder
+     */
+    private static void readFromTestSql() {
+        System.out.println("\n" + "=".repeat(60));
+        System.out.println("FILE MODE - Reading from test.sql");
+        System.out.println("=".repeat(60) + "\n");
+
+        try {
+            java.nio.file.Path filePath = java.nio.file.Paths.get("test.sql");
+            if (!java.nio.file.Files.exists(filePath)) {
+                System.err.println("Error: test.sql file not found in the root folder.");
+                return;
+            }
+
+            String content = java.nio.file.Files.readString(filePath);
+            tokenizeSQLQuery(content);
+
+        } catch (java.io.IOException e) {
+            System.err.println("Error reading test.sql: " + e.getMessage());
+        }
     }
 
     /**

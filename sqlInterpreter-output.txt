@@ -1,4 +1,1199 @@
-// Generated from /home/alayham/Documents/sql/sqlInterpreter/src/main/antlr4/com/sqlcompiler/parser/SQLLexer.g4 by ANTLR 4.13.1
+====================================================================================================
+PROJECT EXPORT FOR LLMs
+====================================================================================================
+
+PROJECT INFORMATION:
+--------------------------------------------------
+Project Name: sqlInterpreter
+Generated On: 2026-01-04 13:25:37 (Asia/Damascus / GMT+03:00)
+Total Files Processed: 16
+Export Tool: Easy Whole Project to Single Text File for LLMs v1.1.0
+Tool Author: Jota / José Guilherme Pandolfi
+
+EXPORT CONFIGURATION:
+--------------------------------------------------
+Language: en
+Max File Size: 1 MB
+Include Hidden Files: false
+Output Format: both
+Notification Level: minimal
+Custom File Name Pattern: {workspaceName}-output
+
+================================================================================
+PROJECT STRUCTURE
+================================================================================
+├── 📁 src/
+│   └── 📁 main/
+│       ├── 📁 antlr4/
+│       │   └── 📁 com/
+│       │       └── 📁 sqlcompiler/
+│       │           └── 📁 parser/
+│       │               └── 📄 SQLLexer.g4 (16.91 KB)
+│       └── 📁 java/
+│           └── 📁 com/
+│               └── 📁 sqlcompiler/
+│                   ├── 📁 compiler/
+│                   │   └── 📄 SQLLexerApp.java (10.83 KB)
+│                   └── 📁 parser/
+│                       └── 📄 SQLTokenTypeMapper.java (35.52 KB)
+├── 📁 target/
+│   ├── 📁 classes/
+│   │   ├── 📁 com/
+│   │   │   └── 📁 sqlcompiler/
+│   │   │       ├── 📁 compiler/
+│   │   │       │   └── 📄 SQLLexerApp.class (7.4 KB)
+│   │   │       └── 📁 parser/
+│   │   │           ├── 📄 SQLLexer.class (39.22 KB)
+│   │   │           ├── 📄 SQLLexer.interp (66.68 KB)
+│   │   │           └── 📄 SQLTokenTypeMapper.class (7.82 KB)
+│   │   └── 📄 SQLLexer.tokens (2.36 KB)
+│   ├── 📁 generated-sources/
+│   │   ├── 📁 annotations/
+│   │   └── 📁 antlr4/
+│   │       ├── 📁 com/
+│   │       │   └── 📁 sqlcompiler/
+│   │       │       └── 📁 parser/
+│   │       │           ├── 📄 SQLLexer.interp (66.68 KB)
+│   │       │           └── 📄 SQLLexer.java (102.36 KB)
+│   │       └── 📄 SQLLexer.tokens (2.36 KB)
+│   └── 📁 maven-status/
+│       ├── 📁 antlr4/
+│       └── 📁 maven-compiler-plugin/
+│           └── 📁 compile/
+│               └── 📁 default-compile/
+│                   ├── 📄 createdFiles.lst (129 B)
+│                   └── 📄 inputFiles.lst (315 B)
+├── 📄 dependency-reduced-pom.xml (4.38 KB)
+├── 📄 pom.xml (6.59 KB)
+└── 📄 test.sql (29 B)
+
+================================================================================
+PROJECT STATISTICS
+================================================================================
+Total Files: 16
+Total Directories: 28
+Text Files: 6
+Binary Files: 10
+Total Size: 369.56 KB
+
+FILE TYPES DISTRIBUTION:
+------------------------------
+.java           : 3
+.class          : 3
+.interp         : 2
+.tokens         : 2
+.lst            : 2
+.xml            : 2
+.g4             : 1
+.sql            : 1
+
+================================================================================
+FILE CODE CONTENTS
+================================================================================
+
+
+================================================================================
+BINARY/EXCLUDED FILES (not included in text content)
+================================================================================
+- src/main/antlr4/com/sqlcompiler/parser/SQLLexer.g4
+
+
+================================================================================
+FILE: src/main/java/com/sqlcompiler/compiler/SQLLexerApp.java
+================================================================================
+
+FILE INFORMATION:
+----------------------------------------
+Size: 10.83 KB
+Extension: .java
+Language: java
+Location: src/main/java/com/sqlcompiler/compiler/SQLLexerApp.java
+Relative Path: src/main/java/com/sqlcompiler/compiler
+Created: 2026-01-04 11:42:30 (Asia/Damascus / GMT+03:00)
+Modified: 2026-01-04 13:17:35 (Asia/Damascus / GMT+03:00)
+MD5: 420a5de64f95fe9c09be27d13491a639
+SHA256: 9878e06dcb5cddd7c26038a12c5f3754ac7afd66171b94acecbeb36325243930
+Encoding: UTF-8
+
+FILE CONTENT:
+----------------------------------------
+package com.sqlcompiler.compiler;
+
+import org.antlr.v4.runtime.*;
+// import org.antlr.v4.runtime.atn.PredictionMode;
+import com.sqlcompiler.parser.SQLLexer;
+import com.sqlcompiler.parser.SQLTokenTypeMapper;
+import java.util.Scanner;
+
+/**
+ * IMPORTANT: Before running this class, execute these Maven commands:
+ * 1. mvn clean generate-sources
+ * 2. mvn compile
+ * 
+ * This will generate the SQLLexer.java file from SQLLexer.g4
+ * Generated files location: target/generated-sources/antlr4/
+ */
+
+/**
+ * SQL Lexer Testing Application
+ * Tests the SQL lexer grammar by tokenizing SQL input
+ */
+public class SQLLexerApp {
+
+    public static void main(String[] args) {
+        System.out.println("╔════════════════════════════════════════════════════════════════╗");
+        System.out.println("║          SQL LEXER TOKENIZATION TESTER                         ║");
+        System.out.println("║          Using ANTLR4 Version 4.13.2                          ║");
+        System.out.println("╚════════════════════════════════════════════════════════════════╝\n");
+
+        // Options for input mode
+        System.out.println("Choose input mode:");
+        System.out.println("1. Interactive mode (type SQL queries)");
+        System.out.println("2. Test predefined SQL queries");
+        System.out.println("3. Read SQL script from test.sql");
+        System.out.print("\nEnter choice (1, 2, or 3): ");
+
+        Scanner scanner = new Scanner(System.in);
+        String choice = scanner.nextLine().trim();
+
+        if (choice.equals("1")) {
+            interactiveMode(scanner);
+        } else if (choice.equals("2")) {
+            testPredefinedQueries();
+        } else if (choice.equals("3")) {
+            readFromTestSql();
+        } else {
+            System.out.println("Invalid choice. Running test mode by default...\n");
+            testPredefinedQueries();
+        }
+
+        scanner.close();
+    }
+
+    /**
+     * Reads and tokenizes SQL queries from the test.sql file in the root folder
+     */
+    private static void readFromTestSql() {
+        System.out.println("\n" + "=".repeat(60));
+        System.out.println("FILE MODE - Reading from test.sql");
+        System.out.println("=".repeat(60) + "\n");
+
+        try {
+            java.nio.file.Path filePath = java.nio.file.Paths.get("test.sql");
+            if (!java.nio.file.Files.exists(filePath)) {
+                System.err.println("Error: test.sql file not found in the root folder.");
+                return;
+            }
+
+            String content = java.nio.file.Files.readString(filePath);
+            tokenizeSQLQuery(content);
+
+        } catch (java.io.IOException e) {
+            System.err.println("Error reading test.sql: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Interactive mode - allows user to input SQL queries one by one
+     * 
+     * In this mode, users can:
+     * 1. Enter any SQL query they want to test
+     * 2. See the tokens generated by the lexer immediately
+     * 3. Type 'exit' to quit the application
+     * 
+     * This is useful for testing specific SQL queries or debugging the lexer
+     * 
+     * @param scanner Scanner object to read user input from console
+     */
+    private static void interactiveMode(Scanner scanner) {
+        System.out.println("\n" + "=".repeat(60));
+        System.out.println("INTERACTIVE MODE - Enter SQL queries to tokenize");
+        System.out.println("Type 'exit' to quit");
+        System.out.println("=".repeat(60) + "\n");
+
+        while (true) {
+            System.out.print("\nSQL> ");
+            String input = scanner.nextLine().trim();
+
+            if (input.equalsIgnoreCase("exit")) {
+                System.out.println("\nExiting lexer tester. Goodbye!");
+                break;
+            }
+
+            if (input.isEmpty()) {
+                System.out.println("Please enter a SQL query.");
+                continue;
+            }
+
+            tokenizeSQLQuery(input);
+        }
+    }
+
+    /**
+     * Test predefined SQL queries
+     * 
+     * This method runs 10 sample SQL queries through the lexer to demonstrate
+     * that the lexer correctly tokenizes various SQL statement types:
+     * - SELECT queries with WHERE, GROUP BY, ORDER BY, LIMIT clauses
+     * - INSERT statements with column lists and values
+     * - UPDATE statements with SET clauses
+     * - DELETE statements
+     * - CREATE TABLE statements
+     * - JOIN operations with different join types
+     * 
+     * This is useful for:
+     * 1. Verifying that the lexer grammar works for common SQL patterns
+     * 2. Demonstrating the capabilities of the lexer
+     * 3. Regression testing to ensure changes don't break existing functionality
+     */
+    private static void testPredefinedQueries() {
+        // Sample SQL queries covering different SQL statement types
+        String[] testQueries = {
+            "SELECT * FROM employees",
+            "SELECT id, name, salary FROM employees WHERE department = 'IT'",
+            "SELECT name, AVG(salary) FROM employees GROUP BY department HAVING AVG(salary) > 50000",
+            "INSERT INTO users (id, name, email) VALUES (1, 'John Doe', 'john@example.com')",
+            "UPDATE employees SET salary = 65000 WHERE id = 5",
+            "DELETE FROM employees WHERE department = 'HR'",
+            "CREATE TABLE employees (id INT, name VARCHAR(100), salary FLOAT)",
+            "SELECT * FROM orders WHERE date BETWEEN '2024-01-01' AND '2024-12-31'",
+            "SELECT e.name, d.department FROM employees e JOIN departments d ON e.dept_id = d.id",
+            "SELECT DISTINCT country FROM customers ORDER BY country ASC LIMIT 10"
+        };
+
+        System.out.println("\n" + "=".repeat(60));
+        System.out.println("TEST MODE - Predefined SQL Queries");
+        System.out.println("=".repeat(60) + "\n");
+
+        for (int i = 0; i < testQueries.length; i++) {
+            System.out.println("\n" + "-".repeat(60));
+            System.out.println("Query " + (i + 1) + ":");
+            System.out.println("-".repeat(60));
+            tokenizeSQLQuery(testQueries[i]);
+        }
+    }
+
+    /**
+     * Tokenizes a SQL query and displays the tokens generated by the lexer
+     * 
+     * This is the core method that:
+     * 1. Takes a SQL query string as input
+     * 2. Creates an ANTLR CharStream from the input
+     * 3. Creates an SQLLexer instance with the input stream
+     * 4. Generates all tokens from the query
+     * 5. Displays each token with its type, value, and position
+     * 
+     * Process Flow:
+     *   Input SQL Query
+     *        ↓
+     *   CharStreams.fromString() → Creates input stream
+     *        ↓
+     *   SQLLexer(input) → Creates lexer from grammar
+     *        ↓
+     *   CommonTokenStream → Collects all tokens
+     *        ↓
+     *   Display results in formatted table
+     * 
+     * @param sqlQuery The SQL query string to tokenize
+     *                 Example: "SELECT * FROM employees WHERE id = 1"
+     */
+    private static void tokenizeSQLQuery(String sqlQuery) {
+        try {
+            // Step 1: Create input stream from SQL query string
+            // CharStreams provides an input stream that ANTLR can read
+            CharStream input = CharStreams.fromString(sqlQuery);
+
+            // Step 2: Create lexer instance
+            // The lexer uses the SQLLexer.g4 grammar rules to recognize tokens
+            SQLLexer lexer = new SQLLexer(input);
+
+            // Step 3: Set prediction mode for better performance
+            // SLL = Stronger LL prediction (faster but less powerful)
+            // This is optimized for typical SQL queries
+            // lexer.getInterpreter().setPredictionMode(PredictionMode.SLL);
+
+            // Step 4: Create token stream
+            // CommonTokenStream collects all tokens from the lexer
+            CommonTokenStream tokens = new CommonTokenStream(lexer);
+
+            // Step 5: Fill the token stream (force lexer to tokenize entire input)
+            // This ensures all tokens are generated before we process them
+            tokens.fill();
+
+            // Display input query
+            System.out.println("\nInput Query: " + sqlQuery);
+            System.out.println("\nTokens Generated:");
+            System.out.println(String.format("%-5s | %-20s | %-15s | %s", "Line", "Token Type", "Value", "Range"));
+            System.out.println("-".repeat(70));
+
+            int tokenCount = 0;
+
+            // Step 6: Iterate through all tokens and display their information
+            for (Token token : tokens.getTokens()) {
+                // Skip EOF (End of File) token as it's not a real token
+                if (token.getType() == Token.EOF) {
+                    break;
+                }
+
+                // Get human-readable token type name (e.g., "SELECT" instead of "1")
+                String tokenType = getTokenTypeName(lexer, token.getType());
+                
+                // Get the actual text of the token from the input
+                String tokenValue = token.getText();
+                
+                // Get line number (which line in input this token appears)
+                int line = token.getLine();
+                
+                // Get column (character position in the line)
+                int column = token.getCharPositionInLine();
+                
+                // Calculate token length for range display
+                int tokenLength = tokenValue.length();
+
+                // Display formatted token information
+                System.out.println(String.format("%-5d | %-20s | %-15s | [%d:%d-%d]",
+                        line, tokenType, tokenValue, column, column, column + tokenLength));
+
+                tokenCount++;
+            }
+
+            System.out.println("-".repeat(70));
+            System.out.println("Total Tokens: " + tokenCount);
+
+        } catch (Exception e) {
+            // Handle any errors that occur during tokenization
+            System.err.println("Error tokenizing query: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Gets the human-readable name of a token type
+     * 
+     * This method now delegates to the SQLTokenTypeMapper utility class.
+     * All token type mappings are now centralized in SQLTokenTypeMapper.
+     * 
+     * IMPORTANT FOR DEVELOPERS:
+     * When adding new tokens to the lexer grammar (SQLLexer.g4),
+     * add the corresponding case statement in SQLTokenTypeMapper.getTokenName()
+     * Do NOT add it here!
+     * 
+     * @param lexer The SQLLexer instance (no longer used, kept for backward compatibility)
+     * @param tokenType The token type code from ANTLR
+     * @return The human-readable token type name
+     */
+    private static String getTokenTypeName(SQLLexer lexer, int tokenType) {
+        return SQLTokenTypeMapper.getTokenName(tokenType);
+    }
+}
+
+================================================================================
+
+
+================================================================================
+FILE: src/main/java/com/sqlcompiler/parser/SQLTokenTypeMapper.java
+================================================================================
+
+FILE INFORMATION:
+----------------------------------------
+Size: 35.52 KB
+Extension: .java
+Language: java
+Location: src/main/java/com/sqlcompiler/parser/SQLTokenTypeMapper.java
+Relative Path: src/main/java/com/sqlcompiler/parser
+Created: 2026-01-04 13:01:02 (Asia/Damascus / GMT+03:00)
+Modified: 2026-01-04 13:15:01 (Asia/Damascus / GMT+03:00)
+MD5: bb10049ce5fa41c78bebc5d86c98b474
+SHA256: c8559c84b48c3d17e8718173625c6640785919757d1ca3f23efadb40d85c05c1
+Encoding: UTF-8
+
+FILE CONTENT:
+----------------------------------------
+package com.sqlcompiler.parser;
+
+import com.sqlcompiler.parser.SQLLexer;
+
+/**
+ * ═══════════════════════════════════════════════════════════════════════════════
+ * SQL TOKEN TYPE MAPPER - Token Type Name Mapping Utility
+ * ═══════════════════════════════════════════════════════════════════════════════
+ * 
+ * PURPOSE:
+ *   This class maps ANTLR token type codes (integers) to human-readable token
+ *   type names (strings). It serves as the central mapping utility for all
+ *   lexer tokens defined in SQLLexer.g4.
+ * 
+ * UPDATED FOR: String Mode Tokenization
+ *   This version includes support for granular string tokens produced by
+ *   STRING_MODE_SINGLE and STRING_MODE_DOUBLE modes in the lexer.
+ * 
+ * ═══════════════════════════════════════════════════════════════════════════════
+ */
+public class SQLTokenTypeMapper {
+
+    /**
+     * Maps ANTLR token type codes to human-readable token type names
+     * 
+     * This is the main method you will update when adding new tokens to the lexer.
+     * Each case statement maps one token type constant to its string representation.
+     * 
+     * IMPORTANT: Keep token names synchronized with SQLLexer.g4
+     * 
+     * @param tokenType The integer token type code from ANTLR (e.g., SQLLexer.SELECT)
+     * @return The human-readable token type name (e.g., "SELECT")
+     */
+    public static String getTokenName(int tokenType) {
+        switch (tokenType) {
+
+            // ═══════════════════════════════════════════════════════════════
+            // SQL KEYWORDS - SELECT AND FILTERING
+            // ═══════════════════════════════════════════════════════════════
+            case SQLLexer.SELECT:
+                return "SELECT";
+            case SQLLexer.FROM:
+                return "FROM";
+            case SQLLexer.WHERE:
+                return "WHERE";
+            case SQLLexer.HAVING:
+                return "HAVING";
+            case SQLLexer.DISTINCT:
+                return "DISTINCT";
+            case SQLLexer.TOP:
+                return "TOP";
+            case SQLLexer.GROUP:
+                return "GROUP";
+            case SQLLexer.BY:
+                return "BY";
+            case SQLLexer.ORDER:
+                return "ORDER";
+            case SQLLexer.OFFSET:
+                return "OFFSET";
+            case SQLLexer.FETCH:
+                return "FETCH";
+            case SQLLexer.NEXT:
+                return "NEXT";
+            case SQLLexer.FIRST:
+                return "FIRST";
+            case SQLLexer.ONLY:
+                return "ONLY";
+
+            // ═══════════════════════════════════════════════════════════════
+            // DATA MANIPULATION LANGUAGE (DML)
+            // ═══════════════════════════════════════════════════════════════
+            case SQLLexer.INSERT:
+                return "INSERT";
+            case SQLLexer.INTO:
+                return "INTO";
+            case SQLLexer.UPDATE:
+                return "UPDATE";
+            case SQLLexer.DELETE:
+                return "DELETE";
+            case SQLLexer.VALUES:
+                return "VALUES";
+            case SQLLexer.MERGE:
+                return "MERGE";
+            case SQLLexer.MATCHED:
+                return "MATCHED";
+            case SQLLexer.OUTPUT:
+                return "OUTPUT";
+
+            // ═══════════════════════════════════════════════════════════════
+            // DATA DEFINITION LANGUAGE (DDL)
+            // ═══════════════════════════════════════════════════════════════
+            case SQLLexer.CREATE:
+                return "CREATE";
+            case SQLLexer.ALTER:
+                return "ALTER";
+            case SQLLexer.DROP:
+                return "DROP";
+            case SQLLexer.TABLE:
+                return "TABLE";
+            case SQLLexer.VIEW:
+                return "VIEW";
+            case SQLLexer.PROCEDURE:
+                return "PROCEDURE";
+            case SQLLexer.FUNCTION:
+                return "FUNCTION";
+            case SQLLexer.INDEX:
+                return "INDEX";
+            case SQLLexer.SCHEMA:
+                return "SCHEMA";
+            case SQLLexer.DATABASE:
+                return "DATABASE";
+            case SQLLexer.TRIGGER:
+                return "TRIGGER";
+
+            // ═══════════════════════════════════════════════════════════════
+            // DATA TYPES - Integer Types
+            // ═══════════════════════════════════════════════════════════════
+            case SQLLexer.INT:
+                return "INT";
+            case SQLLexer.BIGINT:
+                return "BIGINT";
+            case SQLLexer.SMALLINT:
+                return "SMALLINT";
+            case SQLLexer.TINYINT:
+                return "TINYINT";
+
+            // ═══════════════════════════════════════════════════════════════
+            // DATA TYPES - Character/String Types
+            // ═══════════════════════════════════════════════════════════════
+            case SQLLexer.VARCHAR:
+                return "VARCHAR";
+            case SQLLexer.NVARCHAR:
+                return "NVARCHAR";
+            case SQLLexer.CHAR:
+                return "CHAR";
+            case SQLLexer.NCHAR:
+                return "NCHAR";
+            case SQLLexer.TEXT:
+                return "TEXT";
+            case SQLLexer.NTEXT:
+                return "NTEXT";
+
+            // ═══════════════════════════════════════════════════════════════
+            // DATA TYPES - Date/Time Types
+            // ═══════════════════════════════════════════════════════════════
+            case SQLLexer.DATETIME:
+                return "DATETIME";
+            case SQLLexer.DATE:
+                return "DATE";
+            case SQLLexer.TIME:
+                return "TIME";
+            case SQLLexer.TIMESTAMP:
+                return "TIMESTAMP";
+
+            // ═══════════════════════════════════════════════════════════════
+            // DATA TYPES - Numeric/Decimal Types
+            // ═══════════════════════════════════════════════════════════════
+            case SQLLexer.BIT:
+                return "BIT";
+            case SQLLexer.DECIMAL:
+                return "DECIMAL";
+            case SQLLexer.NUMERIC:
+                return "NUMERIC";
+            case SQLLexer.FLOAT:
+                return "FLOAT";
+            case SQLLexer.REAL:
+                return "REAL";
+            case SQLLexer.MONEY:
+                return "MONEY";
+            case SQLLexer.SMALLMONEY:
+                return "SMALLMONEY";
+
+            // ═══════════════════════════════════════════════════════════════
+            // DATA TYPES - Binary and Special Types
+            // ═══════════════════════════════════════════════════════════════
+            case SQLLexer.BINARY:
+                return "BINARY";
+            case SQLLexer.VARBINARY:
+                return "VARBINARY";
+            case SQLLexer.IMAGE:
+                return "IMAGE";
+            case SQLLexer.UNIQUEIDENTIFIER:
+                return "UNIQUEIDENTIFIER";
+            case SQLLexer.XML:
+                return "XML";
+            case SQLLexer.SQL_VARIANT:
+                return "SQL_VARIANT";
+
+            // ═══════════════════════════════════════════════════════════════
+            // TABLE CONSTRAINTS
+            // ═══════════════════════════════════════════════════════════════
+            case SQLLexer.PRIMARY:
+                return "PRIMARY";
+            case SQLLexer.KEY:
+                return "KEY";
+            case SQLLexer.FOREIGN:
+                return "FOREIGN";
+            case SQLLexer.REFERENCES:
+                return "REFERENCES";
+            case SQLLexer.UNIQUE:
+                return "UNIQUE";
+            case SQLLexer.CHECK:
+                return "CHECK";
+            case SQLLexer.DEFAULT:
+                return "DEFAULT";
+            case SQLLexer.CONSTRAINT:
+                return "CONSTRAINT";
+            case SQLLexer.IDENTITY:
+                return "IDENTITY";
+            case SQLLexer.CLUSTERED:
+                return "CLUSTERED";
+            case SQLLexer.NONCLUSTERED:
+                return "NONCLUSTERED";
+
+            // ═══════════════════════════════════════════════════════════════
+            // JOIN OPERATIONS
+            // ═══════════════════════════════════════════════════════════════
+            case SQLLexer.JOIN:
+                return "JOIN";
+            case SQLLexer.INNER:
+                return "INNER";
+            case SQLLexer.OUTER:
+                return "OUTER";
+            case SQLLexer.LEFT:
+                return "LEFT";
+            case SQLLexer.RIGHT:
+                return "RIGHT";
+            case SQLLexer.FULL:
+                return "FULL";
+            case SQLLexer.CROSS:
+                return "CROSS";
+            case SQLLexer.ON:
+                return "ON";
+            case SQLLexer.USING:
+                return "USING";
+
+            // ═══════════════════════════════════════════════════════════════
+            // SET OPERATIONS
+            // ═══════════════════════════════════════════════════════════════
+            case SQLLexer.UNION:
+                return "UNION";
+            case SQLLexer.EXCEPT:
+                return "EXCEPT";
+            case SQLLexer.INTERSECT:
+                return "INTERSECT";
+            case SQLLexer.ALL:
+                return "ALL";
+
+            // ═══════════════════════════════════════════════════════════════
+            // LOGICAL OPERATORS
+            // ═══════════════════════════════════════════════════════════════
+            case SQLLexer.AND:
+                return "AND";
+            case SQLLexer.OR:
+                return "OR";
+            case SQLLexer.NOT:
+                return "NOT";
+            case SQLLexer.LIKE:
+                return "LIKE";
+            case SQLLexer.IN:
+                return "IN";
+            case SQLLexer.BETWEEN:
+                return "BETWEEN";
+            case SQLLexer.EXISTS:
+                return "EXISTS";
+            case SQLLexer.IS:
+                return "IS";
+            case SQLLexer.NULL:
+                return "NULL";
+            case SQLLexer.ANY:
+                return "ANY";
+            case SQLLexer.SOME:
+                return "SOME";
+
+            // ═══════════════════════════════════════════════════════════════
+            // AGGREGATE FUNCTIONS
+            // ═══════════════════════════════════════════════════════════════
+            case SQLLexer.COUNT:
+                return "COUNT";
+            case SQLLexer.SUM:
+                return "SUM";
+            case SQLLexer.AVG:
+                return "AVG";
+            case SQLLexer.MIN:
+                return "MIN";
+            case SQLLexer.MAX:
+                return "MAX";
+
+            // ═══════════════════════════════════════════════════════════════
+            // STRING FUNCTIONS
+            // ═══════════════════════════════════════════════════════════════
+            case SQLLexer.LEN:
+                return "LEN";
+            case SQLLexer.SUBSTRING:
+                return "SUBSTRING";
+            case SQLLexer.LTRIM:
+                return "LTRIM";
+            case SQLLexer.RTRIM:
+                return "RTRIM";
+            case SQLLexer.UPPER:
+                return "UPPER";
+            case SQLLexer.LOWER:
+                return "LOWER";
+            case SQLLexer.REPLACE:
+                return "REPLACE";
+            case SQLLexer.CONCAT:
+                return "CONCAT";
+            case SQLLexer.CHARINDEX:
+                return "CHARINDEX";
+            case SQLLexer.PATINDEX:
+                return "PATINDEX";
+
+            // ═══════════════════════════════════════════════════════════════
+            // DATE FUNCTIONS
+            // ═══════════════════════════════════════════════════════════════
+            case SQLLexer.GETDATE:
+                return "GETDATE";
+            case SQLLexer.GETUTCDATE:
+                return "GETUTCDATE";
+            case SQLLexer.DATEADD:
+                return "DATEADD";
+            case SQLLexer.DATEDIFF:
+                return "DATEDIFF";
+            case SQLLexer.DATEPART:
+                return "DATEPART";
+            case SQLLexer.YEAR:
+                return "YEAR";
+            case SQLLexer.MONTH:
+                return "MONTH";
+            case SQLLexer.DAY:
+                return "DAY";
+
+            // ═══════════════════════════════════════════════════════════════
+            // CONVERSION FUNCTIONS
+            // ═══════════════════════════════════════════════════════════════
+            case SQLLexer.CAST:
+                return "CAST";
+            case SQLLexer.CONVERT:
+                return "CONVERT";
+            case SQLLexer.TRY_CAST:
+                return "TRY_CAST";
+            case SQLLexer.TRY_CONVERT:
+                return "TRY_CONVERT";
+
+            // ═══════════════════════════════════════════════════════════════
+            // WINDOW FUNCTIONS
+            // ═══════════════════════════════════════════════════════════════
+            case SQLLexer.OVER:
+                return "OVER";
+            case SQLLexer.PARTITION:
+                return "PARTITION";
+            case SQLLexer.ROWS:
+                return "ROWS";
+            case SQLLexer.RANGE:
+                return "RANGE";
+            case SQLLexer.PRECEDING:
+                return "PRECEDING";
+            case SQLLexer.FOLLOWING:
+                return "FOLLOWING";
+            case SQLLexer.CURRENT:
+                return "CURRENT";
+            case SQLLexer.ROW:
+                return "ROW";
+            case SQLLexer.LAG:
+                return "LAG";
+            case SQLLexer.LEAD:
+                return "LEAD";
+            case SQLLexer.FIRST_VALUE:
+                return "FIRST_VALUE";
+            case SQLLexer.LAST_VALUE:
+                return "LAST_VALUE";
+
+            // ═══════════════════════════════════════════════════════════════
+            // PROGRAMMING CONSTRUCTS
+            // ═══════════════════════════════════════════════════════════════
+            case SQLLexer.DECLARE:
+                return "DECLARE";
+            case SQLLexer.SET:
+                return "SET";
+            case SQLLexer.BEGIN:
+                return "BEGIN";
+            case SQLLexer.END:
+                return "END";
+            case SQLLexer.IF:
+                return "IF";
+            case SQLLexer.ELSE:
+                return "ELSE";
+            case SQLLexer.WHILE:
+                return "WHILE";
+            case SQLLexer.BREAK:
+                return "BREAK";
+            case SQLLexer.CONTINUE:
+                return "CONTINUE";
+            case SQLLexer.CASE:
+                return "CASE";
+            case SQLLexer.WHEN:
+                return "WHEN";
+            case SQLLexer.THEN:
+                return "THEN";
+            case SQLLexer.RETURN:
+                return "RETURN";
+
+            // ═══════════════════════════════════════════════════════════════
+            // TRANSACTION CONTROL
+            // ═══════════════════════════════════════════════════════════════
+            case SQLLexer.TRANSACTION:
+                return "TRANSACTION";
+            case SQLLexer.COMMIT:
+                return "COMMIT";
+            case SQLLexer.ROLLBACK:
+                return "ROLLBACK";
+            case SQLLexer.SAVEPOINT:
+                return "SAVEPOINT";
+            case SQLLexer.SAVE:
+                return "SAVE";
+            case SQLLexer.TRY:
+                return "TRY";
+            case SQLLexer.CATCH:
+                return "CATCH";
+            case SQLLexer.THROW:
+                return "THROW";
+
+            // ═══════════════════════════════════════════════════════════════
+            // STORED PROCEDURE EXECUTION
+            // ═══════════════════════════════════════════════════════════════
+            case SQLLexer.EXEC:
+                return "EXEC";
+            case SQLLexer.EXECUTE:
+                return "EXECUTE";
+            case SQLLexer.OPEN:
+                return "OPEN";
+            case SQLLexer.CLOSE:
+                return "CLOSE";
+            case SQLLexer.DEALLOCATE:
+                return "DEALLOCATE";
+
+            // ═══════════════════════════════════════════════════════════════
+            // OUTPUT AND DEBUGGING
+            // ═══════════════════════════════════════════════════════════════
+            case SQLLexer.PRINT:
+                return "PRINT";
+            case SQLLexer.RAISERROR:
+                return "RAISERROR";
+
+            // ═══════════════════════════════════════════════════════════════
+            // DATABASE OPERATIONS
+            // ═══════════════════════════════════════════════════════════════
+            case SQLLexer.USE:
+                return "USE";
+            case SQLLexer.GO:
+                return "GO";
+            case SQLLexer.AS:
+                return "AS";
+            case SQLLexer.WITH:
+                return "WITH";
+            case SQLLexer.OPTION:
+                return "OPTION";
+            case SQLLexer.RECOMPILE:
+                return "RECOMPILE";
+
+            // ═══════════════════════════════════════════════════════════════
+            // SECURITY AND PERMISSIONS
+            // ═══════════════════════════════════════════════════════════════
+            case SQLLexer.GRANT:
+                return "GRANT";
+            case SQLLexer.REVOKE:
+                return "REVOKE";
+            case SQLLexer.DENY:
+                return "DENY";
+            case SQLLexer.LOGIN:
+                return "LOGIN";
+            case SQLLexer.USER:
+                return "USER";
+            case SQLLexer.ROLE:
+                return "ROLE";
+            case SQLLexer.PERMISSION:
+                return "PERMISSION";
+
+            // ═══════════════════════════════════════════════════════════════
+            // SORTING DIRECTIONS
+            // ═══════════════════════════════════════════════════════════════
+            case SQLLexer.ASC:
+                return "ASC";
+            case SQLLexer.DESC:
+                return "DESC";
+
+            // ═══════════════════════════════════════════════════════════════
+            // BOOLEAN VALUES
+            // ═══════════════════════════════════════════════════════════════
+            case SQLLexer.TRUE:
+                return "TRUE";
+            case SQLLexer.FALSE:
+                return "FALSE";
+
+            // ═══════════════════════════════════════════════════════════════
+            // IDENTIFIERS AND VARIABLES
+            // ═══════════════════════════════════════════════════════════════
+            case SQLLexer.SYSTEM_VARIABLE:
+                return "SYSTEM_VARIABLE";
+            case SQLLexer.USER_VARIABLE:
+                return "USER_VARIABLE";
+            case SQLLexer.DELIMITED_IDENTIFIER_BRACKET:
+                return "DELIMITED_IDENTIFIER_BRACKET";
+            case SQLLexer.DELIMITED_IDENTIFIER_QUOTE:
+                return "DELIMITED_IDENTIFIER_QUOTE";
+            case SQLLexer.DELIMITED_IDENTIFIER_BACKTICK:
+                return "DELIMITED_IDENTIFIER_BACKTICK";
+            case SQLLexer.IDENTIFIER:
+                return "IDENTIFIER";
+
+            // ═══════════════════════════════════════════════════════════════
+            // LITERALS - Numeric
+            // ═══════════════════════════════════════════════════════════════
+            case SQLLexer.INTEGER:
+                return "INTEGER";
+            case SQLLexer.FLOATN:
+                return "FLOATN";
+
+            // ═══════════════════════════════════════════════════════════════
+            // TASK 3: STRING LITERALS - Single Quote Mode
+            // ═══════════════════════════════════════════════════════════════
+            case SQLLexer.STRING_START_SINGLE:
+                return "STRING_START_SINGLE (')";
+            case SQLLexer.STRING_END_SINGLE:
+                return "STRING_END_SINGLE (')";
+            case SQLLexer.STRING_SINGLE_ESCAPED_QUOTE:
+                return "STRING_SINGLE_ESCAPED_QUOTE ('')";
+            case SQLLexer.STRING_SINGLE_BACKSLASH_ESCAPE:
+                return "STRING_SINGLE_BACKSLASH_ESCAPE";
+            case SQLLexer.STRING_SINGLE_LINE_CONTINUATION:
+                return "STRING_SINGLE_LINE_CONTINUATION";
+            case SQLLexer.STRING_SINGLE_NEWLINE:
+                return "STRING_SINGLE_NEWLINE";
+            case SQLLexer.STRING_SINGLE_CHAR:
+                return "STRING_SINGLE_CHAR";
+            case SQLLexer.STRING_SINGLE_ANY:
+                return "STRING_SINGLE_ANY";
+
+            // ═══════════════════════════════════════════════════════════════
+            // TASK 3: STRING LITERALS - Double Quote Mode
+            // ═══════════════════════════════════════════════════════════════
+            case SQLLexer.STRING_START_DOUBLE:
+                return "STRING_START_DOUBLE (\")";
+            case SQLLexer.STRING_END_DOUBLE:
+                return "STRING_END_DOUBLE (\")";
+            case SQLLexer.STRING_DOUBLE_ESCAPED_QUOTE:
+                return "STRING_DOUBLE_ESCAPED_QUOTE (\"\")";
+            case SQLLexer.STRING_DOUBLE_BACKSLASH_ESCAPE:
+                return "STRING_DOUBLE_BACKSLASH_ESCAPE";
+            case SQLLexer.STRING_DOUBLE_LINE_CONTINUATION:
+                return "STRING_DOUBLE_LINE_CONTINUATION";
+            case SQLLexer.STRING_DOUBLE_NEWLINE:
+                return "STRING_DOUBLE_NEWLINE";
+            case SQLLexer.STRING_DOUBLE_CHAR:
+                return "STRING_DOUBLE_CHAR";
+            case SQLLexer.STRING_DOUBLE_ANY:
+                return "STRING_DOUBLE_ANY";
+
+            // ═══════════════════════════════════════════════════════════════
+            // DEFAULT - Unknown Token Type
+            // ═══════════════════════════════════════════════════════════════
+            default:
+                return "UNKNOWN (Type Code: " + tokenType + ")";
+        }
+    }
+
+    /**
+     * Checks if a token type is a keyword
+     * 
+     * @param tokenType The token type to check
+     * @return true if token is a SQL keyword
+     */
+    public static boolean isKeyword(int tokenType) {
+        return (tokenType >= SQLLexer.SELECT && tokenType <= SQLLexer.FALSE) ||
+               tokenType == SQLLexer.NULL ||
+               tokenType == SQLLexer.TRUE ||
+               tokenType == SQLLexer.FALSE;
+    }
+
+    /**
+     * Checks if a token type is an operator
+     * 
+     * @param tokenType The token type to check
+     * @return true if token is an operator
+     */
+    public static boolean isOperator(int tokenType) {
+        return tokenType == SQLLexer.AND ||
+               tokenType == SQLLexer.OR ||
+               tokenType == SQLLexer.NOT ||
+               tokenType == SQLLexer.LIKE ||
+               tokenType == SQLLexer.IN ||
+               tokenType == SQLLexer.BETWEEN ||
+               tokenType == SQLLexer.EXISTS ||
+               tokenType == SQLLexer.IS;
+    }
+
+    /**
+     * Checks if a token type is a numeric literal
+     * 
+     * @param tokenType The token type to check
+     * @return true if token is numeric
+     */
+    public static boolean isNumericLiteral(int tokenType) {
+        return tokenType == SQLLexer.INTEGER || tokenType == SQLLexer.FLOATN;
+    }
+
+    /**
+     * Checks if a token type is a string literal component
+     * 
+     * @param tokenType The token type to check
+     * @return true if token is part of a string literal
+     */
+    public static boolean isStringLiteralComponent(int tokenType) {
+        return tokenType == SQLLexer.STRING_START_SINGLE ||
+               tokenType == SQLLexer.STRING_END_SINGLE ||
+               tokenType == SQLLexer.STRING_SINGLE_ESCAPED_QUOTE ||
+               tokenType == SQLLexer.STRING_SINGLE_BACKSLASH_ESCAPE ||
+               tokenType == SQLLexer.STRING_SINGLE_LINE_CONTINUATION ||
+               tokenType == SQLLexer.STRING_SINGLE_NEWLINE ||
+               tokenType == SQLLexer.STRING_SINGLE_CHAR ||
+               tokenType == SQLLexer.STRING_SINGLE_ANY ||
+               tokenType == SQLLexer.STRING_START_DOUBLE ||
+               tokenType == SQLLexer.STRING_END_DOUBLE ||
+               tokenType == SQLLexer.STRING_DOUBLE_ESCAPED_QUOTE ||
+               tokenType == SQLLexer.STRING_DOUBLE_BACKSLASH_ESCAPE ||
+               tokenType == SQLLexer.STRING_DOUBLE_LINE_CONTINUATION ||
+               tokenType == SQLLexer.STRING_DOUBLE_NEWLINE ||
+               tokenType == SQLLexer.STRING_DOUBLE_CHAR ||
+               tokenType == SQLLexer.STRING_DOUBLE_ANY;
+    }
+
+    /**
+     * Checks if a token type is a literal
+     * 
+     * @param tokenType The token type to check
+     * @return true if token is a literal
+     */
+    public static boolean isLiteral(int tokenType) {
+        return tokenType == SQLLexer.IDENTIFIER ||
+               isNumericLiteral(tokenType) ||
+               isStringLiteralComponent(tokenType);
+    }
+
+    /**
+     * Checks if a token type is an identifier or variable
+     * 
+     * @param tokenType The token type to check
+     * @return true if token is an identifier or variable type
+     */
+    public static boolean isIdentifierOrVariable(int tokenType) {
+        return tokenType == SQLLexer.IDENTIFIER ||
+               tokenType == SQLLexer.SYSTEM_VARIABLE ||
+               tokenType == SQLLexer.USER_VARIABLE ||
+               tokenType == SQLLexer.DELIMITED_IDENTIFIER_BRACKET ||
+               tokenType == SQLLexer.DELIMITED_IDENTIFIER_QUOTE ||
+               tokenType == SQLLexer.DELIMITED_IDENTIFIER_BACKTICK;
+    }
+
+    /**
+     * Checks if a token type is a variable (user or system)
+     * 
+     * @param tokenType The token type to check
+     * @return true if token is a variable type
+     */
+    public static boolean isVariable(int tokenType) {
+        return tokenType == SQLLexer.SYSTEM_VARIABLE ||
+               tokenType == SQLLexer.USER_VARIABLE;
+    }
+
+    /**
+     * Checks if a token type is a data type keyword
+     * 
+     * @param tokenType The token type to check
+     * @return true if token is a data type
+     */
+    public static boolean isDataType(int tokenType) {
+        return tokenType == SQLLexer.INT ||
+               tokenType == SQLLexer.BIGINT ||
+               tokenType == SQLLexer.SMALLINT ||
+               tokenType == SQLLexer.TINYINT ||
+               tokenType == SQLLexer.VARCHAR ||
+               tokenType == SQLLexer.NVARCHAR ||
+               tokenType == SQLLexer.CHAR ||
+               tokenType == SQLLexer.NCHAR ||
+               tokenType == SQLLexer.TEXT ||
+               tokenType == SQLLexer.NTEXT ||
+               tokenType == SQLLexer.DATETIME ||
+               tokenType == SQLLexer.DATE ||
+               tokenType == SQLLexer.TIME ||
+               tokenType == SQLLexer.TIMESTAMP ||
+               tokenType == SQLLexer.BIT ||
+               tokenType == SQLLexer.DECIMAL ||
+               tokenType == SQLLexer.NUMERIC ||
+               tokenType == SQLLexer.FLOAT ||
+               tokenType == SQLLexer.REAL ||
+               tokenType == SQLLexer.MONEY ||
+               tokenType == SQLLexer.SMALLMONEY ||
+               tokenType == SQLLexer.BINARY ||
+               tokenType == SQLLexer.VARBINARY ||
+               tokenType == SQLLexer.IMAGE ||
+               tokenType == SQLLexer.UNIQUEIDENTIFIER ||
+               tokenType == SQLLexer.XML ||
+               tokenType == SQLLexer.SQL_VARIANT;
+    }
+
+    /**
+     * Checks if a token type is an aggregate function
+     * 
+     * @param tokenType The token type to check
+     * @return true if token is an aggregate function
+     */
+    public static boolean isAggregateFunction(int tokenType) {
+        return tokenType == SQLLexer.COUNT ||
+               tokenType == SQLLexer.SUM ||
+               tokenType == SQLLexer.AVG ||
+               tokenType == SQLLexer.MIN ||
+               tokenType == SQLLexer.MAX;
+    }
+
+    /**
+     * Checks if a token type is a string start marker
+     * 
+     * @param tokenType The token type to check
+     * @return true if token starts a string
+     */
+    public static boolean isStringStart(int tokenType) {
+        return tokenType == SQLLexer.STRING_START_SINGLE ||
+               tokenType == SQLLexer.STRING_START_DOUBLE;
+    }
+
+    /**
+     * Checks if a token type is a string end marker
+     * 
+     * @param tokenType The token type to check
+     * @return true if token ends a string
+     */
+    public static boolean isStringEnd(int tokenType) {
+        return tokenType == SQLLexer.STRING_END_SINGLE ||
+               tokenType == SQLLexer.STRING_END_DOUBLE;
+    }
+}             
+================================================================================
+
+
+================================================================================
+BINARY/EXCLUDED FILES (not included in text content)
+================================================================================
+- target/classes/com/sqlcompiler/compiler/SQLLexerApp.class
+
+
+================================================================================
+BINARY/EXCLUDED FILES (not included in text content)
+================================================================================
+- target/classes/com/sqlcompiler/parser/SQLLexer.class
+- target/classes/com/sqlcompiler/parser/SQLLexer.interp
+- target/classes/com/sqlcompiler/parser/SQLTokenTypeMapper.class
+
+
+================================================================================
+BINARY/EXCLUDED FILES (not included in text content)
+================================================================================
+- target/classes/SQLLexer.tokens
+
+
+================================================================================
+FILE: target/generated-sources/antlr4/com/sqlcompiler/parser/SQLLexer.java
+================================================================================
+
+FILE INFORMATION:
+----------------------------------------
+Size: 102.36 KB
+Extension: .java
+Language: java
+Location: target/generated-sources/antlr4/com/sqlcompiler/parser/SQLLexer.java
+Relative Path: target/generated-sources/antlr4/com/sqlcompiler/parser
+Created: 2026-01-04 13:14:31 (Asia/Damascus / GMT+03:00)
+Modified: 2026-01-04 13:14:31 (Asia/Damascus / GMT+03:00)
+MD5: 8fcbe19027cb0b3054db908a81b6597a
+SHA256: 11134b5e4e2ba33f01486dd7f96504cf1fdc572b6dda9fc669329cfb6b289b2c
+Encoding: ASCII
+
+FILE CONTENT:
+----------------------------------------
+// Generated from com/sqlcompiler/parser/SQLLexer.g4 by ANTLR 4.13.2
+package com.sqlcompiler.parser;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.Token;
@@ -10,7 +1205,7 @@ import org.antlr.v4.runtime.misc.*;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast", "CheckReturnValue", "this-escape"})
 public class SQLLexer extends Lexer {
-	static { RuntimeMetaData.checkVersion("4.13.1", RuntimeMetaData.VERSION); }
+	static { RuntimeMetaData.checkVersion("4.13.2", RuntimeMetaData.VERSION); }
 
 	protected static final DFA[] _decisionToDFA;
 	protected static final PredictionContextCache _sharedContextCache =
@@ -1412,3 +2607,396 @@ public class SQLLexer extends Lexer {
 		}
 	}
 }
+================================================================================
+
+
+================================================================================
+BINARY/EXCLUDED FILES (not included in text content)
+================================================================================
+- target/generated-sources/antlr4/com/sqlcompiler/parser/SQLLexer.interp
+
+
+================================================================================
+BINARY/EXCLUDED FILES (not included in text content)
+================================================================================
+- target/generated-sources/antlr4/SQLLexer.tokens
+
+
+================================================================================
+BINARY/EXCLUDED FILES (not included in text content)
+================================================================================
+- target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst
+- target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst
+
+
+================================================================================
+FILE: dependency-reduced-pom.xml
+================================================================================
+
+FILE INFORMATION:
+----------------------------------------
+Size: 4.38 KB
+Extension: .xml
+Language: xml
+Location: dependency-reduced-pom.xml
+Relative Path: root
+Created: 2026-01-04 11:42:30 (Asia/Damascus / GMT+03:00)
+Modified: 2026-01-04 11:42:30 (Asia/Damascus / GMT+03:00)
+MD5: 6a4b72fe0e9d04986a1ceac13fc174c5
+SHA256: 4b057e36de77c59d1393b7395e59819a85cfad7e748349d90490a017bc73823f
+Encoding: ASCII
+
+FILE CONTENT:
+----------------------------------------
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.sqlcompiler</groupId>
+  <artifactId>sql-compiler</artifactId>
+  <name>SQL Compiler with ANTLR4</name>
+  <version>1.0-SNAPSHOT</version>
+  <description>A SQL compiler implementation using ANTLR4</description>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>3.1.0</version>
+        <configuration>
+          <mainClass>com.sqlcompiler.compiler.SQLLexerApp</mainClass>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.11.0</version>
+        <configuration>
+          <source>11</source>
+          <target>11</target>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.antlr</groupId>
+        <artifactId>antlr4-maven-plugin</artifactId>
+        <version>${antlr4.maven.plugin.version}</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>antlr4</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <visitor>true</visitor>
+          <listener>true</listener>
+          <outputDirectory>target/generated-sources/antlr4</outputDirectory>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>3.6.0</version>
+        <configuration>
+          <archive>
+            <manifest>
+              <mainClass>com.sqlcompiler.compiler.SQLCompiler</mainClass>
+            </manifest>
+          </archive>
+          <descriptorRefs>
+            <descriptorRef>jar-with-dependencies</descriptorRef>
+          </descriptorRefs>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.5.0</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <transformers>
+                <transformer>
+                  <mainClass>com.sqlcompiler.compiler.SQLCompiler</mainClass>
+                </transformer>
+              </transformers>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.0.0</version>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>3.4.0</version>
+        <executions>
+          <execution>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>add-source</goal>
+            </goals>
+            <configuration>
+              <sources>
+                <source>target/generated-sources/antlr4</source>
+              </sources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>3.1.0</version>
+        <configuration>
+          <mainClass>com.sqlcompiler.compiler.SQLLexerApp</mainClass>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.13.2</version>
+      <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <artifactId>hamcrest-core</artifactId>
+          <groupId>org.hamcrest</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+  </dependencies>
+  <properties>
+    <maven.compiler.source>11</maven.compiler.source>
+    <antlr4.version>4.13.2</antlr4.version>
+    <antlr4.maven.plugin.version>4.13.2</antlr4.maven.plugin.version>
+    <antlr4.listener>true</antlr4.listener>
+    <maven.compiler.target>11</maven.compiler.target>
+    <antlr4.visitor>true</antlr4.visitor>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+</project>
+
+================================================================================
+
+
+================================================================================
+FILE: pom.xml
+================================================================================
+
+FILE INFORMATION:
+----------------------------------------
+Size: 6.59 KB
+Extension: .xml
+Language: xml
+Location: pom.xml
+Relative Path: root
+Created: 2026-01-04 11:42:30 (Asia/Damascus / GMT+03:00)
+Modified: 2026-01-04 11:42:30 (Asia/Damascus / GMT+03:00)
+MD5: 6c3c9f9ba26e722238fb10e27f8e38b0
+SHA256: eec7a3e82e680eae72de911a2ef353667647a253587dc2358330f158bdbc3389
+Encoding: ASCII
+
+FILE CONTENT:
+----------------------------------------
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.sqlcompiler</groupId>
+    <artifactId>sql-compiler</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+    <name>SQL Compiler with ANTLR4</name>
+    <description>A SQL compiler implementation using ANTLR4</description>
+
+    <!-- Properties -->
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <antlr4.version>4.13.2</antlr4.version>
+        <antlr4.maven.plugin.version>4.13.2</antlr4.maven.plugin.version>
+        <antlr4.visitor>true</antlr4.visitor>
+        <antlr4.listener>true</antlr4.listener>
+    </properties>
+
+    <!-- Dependencies -->
+    <dependencies>
+        <!-- ANTLR4 Runtime -->
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr4-runtime</artifactId>
+            <version>${antlr4.version}</version>
+        </dependency>
+
+        <!-- JUnit for Testing -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.13.2</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Optional: Logging Framework (SLF4J + Logback) -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>2.0.9</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.4.11</version>
+        </dependency>
+    </dependencies>
+
+    <!-- Build Configuration -->
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.1.0</version>
+                <configuration>
+                    <mainClass>com.sqlcompiler.compiler.SQLLexerApp</mainClass>
+                </configuration>
+            </plugin>
+            <!-- Java Compiler Plugin -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+                <configuration>
+                    <source>11</source>
+                    <target>11</target>
+                </configuration>
+            </plugin>
+
+            <!-- ANTLR4 Maven Plugin -->
+            <plugin>
+                <groupId>org.antlr</groupId>
+                <artifactId>antlr4-maven-plugin</artifactId>
+                <version>${antlr4.maven.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>antlr4</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <visitor>true</visitor>
+                    <listener>true</listener>
+                    <outputDirectory>target/generated-sources/antlr4</outputDirectory>
+                </configuration>
+            </plugin>
+
+            <!-- Maven Assembly Plugin (Optional: for creating JAR with dependencies) -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.6.0</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>com.sqlcompiler.compiler.SQLCompiler</mainClass>
+                        </manifest>
+                    </archive>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                </configuration>
+            </plugin>
+
+            <!-- Maven Shade Plugin (Alternative for creating fat JAR) -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.5.0</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>com.sqlcompiler.compiler.SQLCompiler</mainClass>
+                                </transformer>
+                            </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Surefire Plugin for Running Tests -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0</version>
+            </plugin>
+            <!-- Build Helper Maven Plugin -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.4.0</version>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>target/generated-sources/antlr4</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Also add the Exec Maven Plugin for easy running -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.1.0</version>
+                <configuration>
+                    <mainClass>com.sqlcompiler.compiler.SQLLexerApp</mainClass>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
+================================================================================
+
+
+================================================================================
+FILE: test.sql
+================================================================================
+
+FILE INFORMATION:
+----------------------------------------
+Size: 29 B
+Extension: .sql
+Language: sql
+Location: test.sql
+Relative Path: root
+Created: 2026-01-04 13:13:29 (Asia/Damascus / GMT+03:00)
+Modified: 2026-01-04 13:23:20 (Asia/Damascus / GMT+03:00)
+MD5: ce37873007a5ca369bc4da60a301c208
+SHA256: 1211de011d4ba0152c3001c32735b28fec6968abf334434d92f164228c1f5364
+Encoding: ASCII
+
+FILE CONTENT:
+----------------------------------------
+SELECT 'with \'backslash\''  
+================================================================================

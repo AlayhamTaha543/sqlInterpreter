@@ -12,68 +12,9 @@ import com.sqlcompiler.parser.SQLLexer;
  *   type names (strings). It serves as the central mapping utility for all
  *   lexer tokens defined in SQLLexer.g4.
  * 
- * WHY THIS CLASS EXISTS:
- *   ANTLR internally represents tokens as integer constants. For example:
- *   - SQLLexer.SELECT = 1
- *   - SQLLexer.FROM = 2
- *   - SQLLexer.WHERE = 3
- *   
- *   This class converts those numeric codes to human-readable names like
- *   "SELECT", "FROM", "WHERE" for better logging and debugging.
- * 
- * ═══════════════════════════════════════════════════════════════════════════════
- * DEVELOPER INSTRUCTIONS - ADD NEW TOKEN TYPES HERE:
- * ═══════════════════════════════════════════════════════════════════════════════
- * 
- * When you add new grammar rules to SQLLexer.g4, follow these steps:
- * 
- * STEP 1: Add new rule to SQLLexer.g4
- *         Example:
- *         lexer grammar SQLLexer;
- *         MYNEWTOK: 'MYNEWTOK' | 'mynewtok';
- * 
- * STEP 2: Generate new lexer from grammar
- *         Run this command in your project root:
- *         
- *         mvn clean generate-sources
- *         
- *         This creates/updates: target/generated-sources/antlr4/com/sqlcompiler/parser/SQLLexer.java
- *         The new token constants will be added automatically.
- * 
- * STEP 3: Compile the project
- *         Run:
- *         
- *         mvn compile
- *         
- * STEP 4: Add mapping in THIS CLASS
- *         Add new case statement in the getTokenName() method below:
- *         
- *         Example:
- *         case SQLLexer.MYNEWTOK: return "MYNEWTOK";
- * 
- * STEP 5: Refresh IDE
- *         Right-click project → Maven → Reload projects (or similar for your IDE)
- * 
- * STEP 6: Test
- *         Run SQLLexerApp and test your new tokens
- * 
- * ═══════════════════════════════════════════════════════════════════════════════
- * HOW TO USE THIS CLASS:
- * ═══════════════════════════════════════════════════════════════════════════════
- * 
- * In any Java class where you need token type names:
- * 
- *   Example 1: Get token name directly
- *   ────────────────────────────────────
- *   String tokenName = SQLTokenTypeMapper.getTokenName(tokenType);
- *   System.out.println("Token type: " + tokenName);
- * 
- *   Example 2: In a loop processing tokens
- *   ──────────────────────────────────────
- *   for (Token token : tokens.getTokens()) {
- *       String name = SQLTokenTypeMapper.getTokenName(token.getType());
- *       System.out.println(name + ": " + token.getText());
- *   }
+ * UPDATED FOR: String Mode Tokenization
+ *   This version includes support for granular string tokens produced by
+ *   STRING_MODE_SINGLE and STRING_MODE_DOUBLE modes in the lexer.
  * 
  * ═══════════════════════════════════════════════════════════════════════════════
  */
@@ -552,7 +493,7 @@ public class SQLTokenTypeMapper {
                 return "FALSE";
 
             // ═══════════════════════════════════════════════════════════════
-            // IDENTIFIERS AND VARIABLES (TASK: Identifiers + Variables)
+            // IDENTIFIERS AND VARIABLES
             // ═══════════════════════════════════════════════════════════════
             case SQLLexer.SYSTEM_VARIABLE:
                 return "SYSTEM_VARIABLE";
@@ -568,14 +509,52 @@ public class SQLTokenTypeMapper {
                 return "IDENTIFIER";
 
             // ═══════════════════════════════════════════════════════════════
-            // LITERALS - Numeric and String
+            // LITERALS - Numeric
             // ═══════════════════════════════════════════════════════════════
             case SQLLexer.INTEGER:
                 return "INTEGER";
             case SQLLexer.FLOATN:
                 return "FLOATN";
-            case SQLLexer.STRING:
-                return "STRING";
+
+            // ═══════════════════════════════════════════════════════════════
+            // TASK 3: STRING LITERALS - Single Quote Mode
+            // ═══════════════════════════════════════════════════════════════
+            case SQLLexer.STRING_START_SINGLE:
+                return "STRING_START_SINGLE (')";
+            case SQLLexer.STRING_END_SINGLE:
+                return "STRING_END_SINGLE (')";
+            case SQLLexer.STRING_SINGLE_ESCAPED_QUOTE:
+                return "STRING_SINGLE_ESCAPED_QUOTE ('')";
+            case SQLLexer.STRING_SINGLE_BACKSLASH_ESCAPE:
+                return "STRING_SINGLE_BACKSLASH_ESCAPE";
+            case SQLLexer.STRING_SINGLE_LINE_CONTINUATION:
+                return "STRING_SINGLE_LINE_CONTINUATION";
+            case SQLLexer.STRING_SINGLE_NEWLINE:
+                return "STRING_SINGLE_NEWLINE";
+            case SQLLexer.STRING_SINGLE_CHAR:
+                return "STRING_SINGLE_CHAR";
+            case SQLLexer.STRING_SINGLE_ANY:
+                return "STRING_SINGLE_ANY";
+
+            // ═══════════════════════════════════════════════════════════════
+            // TASK 3: STRING LITERALS - Double Quote Mode
+            // ═══════════════════════════════════════════════════════════════
+            case SQLLexer.STRING_START_DOUBLE:
+                return "STRING_START_DOUBLE (\")";
+            case SQLLexer.STRING_END_DOUBLE:
+                return "STRING_END_DOUBLE (\")";
+            case SQLLexer.STRING_DOUBLE_ESCAPED_QUOTE:
+                return "STRING_DOUBLE_ESCAPED_QUOTE (\"\")";
+            case SQLLexer.STRING_DOUBLE_BACKSLASH_ESCAPE:
+                return "STRING_DOUBLE_BACKSLASH_ESCAPE";
+            case SQLLexer.STRING_DOUBLE_LINE_CONTINUATION:
+                return "STRING_DOUBLE_LINE_CONTINUATION";
+            case SQLLexer.STRING_DOUBLE_NEWLINE:
+                return "STRING_DOUBLE_NEWLINE";
+            case SQLLexer.STRING_DOUBLE_CHAR:
+                return "STRING_DOUBLE_CHAR";
+            case SQLLexer.STRING_DOUBLE_ANY:
+                return "STRING_DOUBLE_ANY";
 
             // ═══════════════════════════════════════════════════════════════
             // DEFAULT - Unknown Token Type
@@ -588,10 +567,8 @@ public class SQLTokenTypeMapper {
     /**
      * Checks if a token type is a keyword
      * 
-     * Useful for syntax highlighting or categorizing tokens
-     * 
      * @param tokenType The token type to check
-     * @return true if token is a SQL keyword, false otherwise
+     * @return true if token is a SQL keyword
      */
     public static boolean isKeyword(int tokenType) {
         return (tokenType >= SQLLexer.SELECT && tokenType <= SQLLexer.FALSE) ||
@@ -604,7 +581,7 @@ public class SQLTokenTypeMapper {
      * Checks if a token type is an operator
      * 
      * @param tokenType The token type to check
-     * @return true if token is an operator, false otherwise
+     * @return true if token is an operator
      */
     public static boolean isOperator(int tokenType) {
         return tokenType == SQLLexer.AND ||
@@ -618,16 +595,50 @@ public class SQLTokenTypeMapper {
     }
 
     /**
+     * Checks if a token type is a numeric literal
+     * 
+     * @param tokenType The token type to check
+     * @return true if token is numeric
+     */
+    public static boolean isNumericLiteral(int tokenType) {
+        return tokenType == SQLLexer.INTEGER || tokenType == SQLLexer.FLOATN;
+    }
+
+    /**
+     * Checks if a token type is a string literal component
+     * 
+     * @param tokenType The token type to check
+     * @return true if token is part of a string literal
+     */
+    public static boolean isStringLiteralComponent(int tokenType) {
+        return tokenType == SQLLexer.STRING_START_SINGLE ||
+               tokenType == SQLLexer.STRING_END_SINGLE ||
+               tokenType == SQLLexer.STRING_SINGLE_ESCAPED_QUOTE ||
+               tokenType == SQLLexer.STRING_SINGLE_BACKSLASH_ESCAPE ||
+               tokenType == SQLLexer.STRING_SINGLE_LINE_CONTINUATION ||
+               tokenType == SQLLexer.STRING_SINGLE_NEWLINE ||
+               tokenType == SQLLexer.STRING_SINGLE_CHAR ||
+               tokenType == SQLLexer.STRING_SINGLE_ANY ||
+               tokenType == SQLLexer.STRING_START_DOUBLE ||
+               tokenType == SQLLexer.STRING_END_DOUBLE ||
+               tokenType == SQLLexer.STRING_DOUBLE_ESCAPED_QUOTE ||
+               tokenType == SQLLexer.STRING_DOUBLE_BACKSLASH_ESCAPE ||
+               tokenType == SQLLexer.STRING_DOUBLE_LINE_CONTINUATION ||
+               tokenType == SQLLexer.STRING_DOUBLE_NEWLINE ||
+               tokenType == SQLLexer.STRING_DOUBLE_CHAR ||
+               tokenType == SQLLexer.STRING_DOUBLE_ANY;
+    }
+
+    /**
      * Checks if a token type is a literal
      * 
      * @param tokenType The token type to check
-     * @return true if token is a literal (identifier, integer, float, or string)
+     * @return true if token is a literal
      */
     public static boolean isLiteral(int tokenType) {
         return tokenType == SQLLexer.IDENTIFIER ||
-               tokenType == SQLLexer.INTEGER ||
-               tokenType == SQLLexer.FLOATN ||
-               tokenType == SQLLexer.STRING;
+               isNumericLiteral(tokenType) ||
+               isStringLiteralComponent(tokenType);
     }
 
     /**
@@ -705,4 +716,26 @@ public class SQLTokenTypeMapper {
                tokenType == SQLLexer.MIN ||
                tokenType == SQLLexer.MAX;
     }
-}
+
+    /**
+     * Checks if a token type is a string start marker
+     * 
+     * @param tokenType The token type to check
+     * @return true if token starts a string
+     */
+    public static boolean isStringStart(int tokenType) {
+        return tokenType == SQLLexer.STRING_START_SINGLE ||
+               tokenType == SQLLexer.STRING_START_DOUBLE;
+    }
+
+    /**
+     * Checks if a token type is a string end marker
+     * 
+     * @param tokenType The token type to check
+     * @return true if token ends a string
+     */
+    public static boolean isStringEnd(int tokenType) {
+        return tokenType == SQLLexer.STRING_END_SINGLE ||
+               tokenType == SQLLexer.STRING_END_DOUBLE;
+    }
+}             
