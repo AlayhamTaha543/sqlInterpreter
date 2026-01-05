@@ -5,6 +5,16 @@ lexer grammar SQLLexer;
 // SQL KEYWORDS - RESERVED WORDS its worked by yara
 // =============================================
 
+// Symbols and comparison operators
+STAR: '*';
+COMMA: ',';
+EQ: '=';
+LT: '<';
+GT: '>';
+LE: '<=';
+GE: '>=';
+NE: '<>';
+
 SELECT: S E L E C T;      // Used to select data from database
 FROM: F R O M;            // Specifies the table to select from
 WHERE: W H E R E;         // Filters records based on conditions
@@ -430,6 +440,25 @@ STRING_DOUBLE_CHAR: ~["\\\r\n];
 
 // Catch-all
 STRING_DOUBLE_ANY: .;
+
+/**
+ * STRING LITERALS - MySQL-style approach
+ * 
+ * Handles:
+ * - Single-quoted strings with '' and \ escaping
+ * - Double-quoted strings with "" and \ escaping
+ * - Multi-line strings (implicitly supported)
+ * - All backslash escape sequences
+ */
+
+STRING: SINGLE_QUOTED_STRING | DOUBLE_QUOTED_STRING;
+
+fragment SINGLE_QUOTED_STRING: '\'' ( '\\' . | '\'\'' | ~('\'' | '\\') )* '\'';
+fragment DOUBLE_QUOTED_STRING: '"'  ( '\\' . | '""'   | ~('"'  | '\\') )* '"';
+
+
+
+
 
 fragment A: [aA];
 fragment B: [bB];

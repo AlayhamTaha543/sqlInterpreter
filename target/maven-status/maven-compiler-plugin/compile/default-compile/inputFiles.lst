@@ -1,3 +1,8 @@
-/home/alayham/Documents/sql/sqlInterpreter/src/main/java/com/sqlcompiler/compiler/SQLLexerApp.java
-/home/alayham/Documents/sql/sqlInterpreter/src/main/java/com/sqlcompiler/parser/SQLTokenTypeMapper.java
-/home/alayham/Documents/sql/sqlInterpreter/target/generated-sources/antlr4/com/sqlcompiler/parser/SQLLexer.java
+C:\Users\YaraALhasan\Downloads\Telegram Desktop\sqlInterpreter\sqlInterpreter\src\main\java\com\sqlcompiler\compiler\SQLLexerApp.java
+C:\Users\YaraALhasan\Downloads\Telegram Desktop\sqlInterpreter\sqlInterpreter\src\main\java\com\sqlcompiler\parser\SQLTokenTypeMapper.java
+C:\Users\YaraALhasan\Downloads\Telegram Desktop\sqlInterpreter\sqlInterpreter\target\generated-sources\antlr4\com\sqlcompiler\parser\SQLLexer.java
+C:\Users\YaraALhasan\Downloads\Telegram Desktop\sqlInterpreter\sqlInterpreter\target\generated-sources\antlr4\com\sqlcompiler\parser\SQLParserListener.java
+C:\Users\YaraALhasan\Downloads\Telegram Desktop\sqlInterpreter\sqlInterpreter\target\generated-sources\antlr4\com\sqlcompiler\parser\SQLParser.java
+C:\Users\YaraALhasan\Downloads\Telegram Desktop\sqlInterpreter\sqlInterpreter\target\generated-sources\antlr4\com\sqlcompiler\parser\SQLParserVisitor.java
+C:\Users\YaraALhasan\Downloads\Telegram Desktop\sqlInterpreter\sqlInterpreter\target\generated-sources\antlr4\com\sqlcompiler\parser\SQLParserBaseListener.java
+C:\Users\YaraALhasan\Downloads\Telegram Desktop\sqlInterpreter\sqlInterpreter\target\generated-sources\antlr4\com\sqlcompiler\parser\SQLParserBaseVisitor.java
