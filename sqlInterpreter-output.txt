@@ -5,7 +5,7 @@ PROJECT EXPORT FOR LLMs
 PROJECT INFORMATION:
 --------------------------------------------------
 Project Name: sqlInterpreter
-Generated On: 2026-01-04 13:25:37 (Asia/Damascus / GMT+03:00)
+Generated On: 2026-01-05 06:15:18 (Asia/Damascus / GMT+03:00)
 Total Files Processed: 16
 Export Tool: Easy Whole Project to Single Text File for LLMs v1.1.0
 Tool Author: Jota / José Guilherme Pandolfi
@@ -64,7 +64,7 @@ PROJECT STRUCTURE
 │                   ├── 📄 createdFiles.lst (129 B)
 │                   └── 📄 inputFiles.lst (315 B)
 ├── 📄 dependency-reduced-pom.xml (4.38 KB)
-├── 📄 pom.xml (6.59 KB)
+├── 📄 pom.xml (6.81 KB)
 └── 📄 test.sql (29 B)
 
 ================================================================================
@@ -74,7 +74,7 @@ Total Files: 16
 Total Directories: 28
 Text Files: 6
 Binary Files: 10
-Total Size: 369.56 KB
+Total Size: 369.78 KB
 
 FILE TYPES DISTRIBUTION:
 ------------------------------
@@ -2790,15 +2790,15 @@ FILE: pom.xml
 
 FILE INFORMATION:
 ----------------------------------------
-Size: 6.59 KB
+Size: 6.81 KB
 Extension: .xml
 Language: xml
 Location: pom.xml
 Relative Path: root
 Created: 2026-01-04 11:42:30 (Asia/Damascus / GMT+03:00)
-Modified: 2026-01-04 11:42:30 (Asia/Damascus / GMT+03:00)
-MD5: 6c3c9f9ba26e722238fb10e27f8e38b0
-SHA256: eec7a3e82e680eae72de911a2ef353667647a253587dc2358330f158bdbc3389
+Modified: 2026-01-05 06:15:18 (Asia/Damascus / GMT+03:00)
+MD5: 977db52cb840af6efa26b77c0683534c
+SHA256: c1aaf935e464f4316c5a1bb988da772bf8239a9f30af998af6c38014aa1b3ada
 Encoding: ASCII
 
 FILE CONTENT:
@@ -2836,7 +2836,12 @@ FILE CONTENT:
             <artifactId>antlr4-runtime</artifactId>
             <version>${antlr4.version}</version>
         </dependency>
-
+        <dependency>
+        <groupId>org.projectlombok</groupId>
+        <artifactId>lombok</artifactId>
+        <version>1.18.32</version> <!-- update to latest stable -->
+        <scope>provided</scope>
+        </dependency>
         <!-- JUnit for Testing -->
         <dependency>
             <groupId>junit</groupId>
