@@ -363,73 +363,19 @@ INTEGER: [0-9]+;
 FLOATN: [0-9]+ '.' [0-9]+;
 
 /**
- * STRING LITERALS - Comprehensive support for single and double quoted strings
+ * STRING LITERALS - MySQL-style approach
  * 
  * Handles:
- * - Single-quoted strings: 'string' (standard SQL string literals)
- * - Double-quoted strings: "string" (MySQL strings, or identifiers in other dialects)
- * - All escape sequences and multi-line support for both
+ * - Single-quoted strings with '' and \ escaping
+ * - Double-quoted strings with "" and \ escaping
+ * - Multi-line strings (implicitly supported)
+ * - All backslash escape sequences
  */
 
-// In your default mode
-STRING_START_SINGLE: '\'' -> pushMode(STRING_MODE_SINGLE);
-STRING_START_DOUBLE: '"' -> pushMode(STRING_MODE_DOUBLE);
+STRING: SINGLE_QUOTED_STRING | DOUBLE_QUOTED_STRING;
 
-// SINGLE QUOTE STRING MODE
-mode STRING_MODE_SINGLE;
-
-STRING_END_SINGLE: '\'' -> popMode;
-
-// Escaped single quote (standard SQL: '')
-STRING_SINGLE_ESCAPED_QUOTE: '\'' '\'';
-
-// Backslash escapes
-STRING_SINGLE_BACKSLASH_ESCAPE
-    : '\\' ['"\\nrtbfav0]
-    | '\\' 'x' [0-9a-fA-F] [0-9a-fA-F]
-    | '\\' [0-7] [0-7]? [0-7]?
-    | '\\' .
-    ;
-
-// Line continuation
-STRING_SINGLE_LINE_CONTINUATION: '\\' [\r\n]+;
-
-// Regular newlines
-STRING_SINGLE_NEWLINE: [\r\n];
-
-// Any other character
-STRING_SINGLE_CHAR: ~['\\\r\n];
-
-// Catch-all
-STRING_SINGLE_ANY: .;
-
-// DOUBLE QUOTE STRING MODE
-mode STRING_MODE_DOUBLE;
-
-STRING_END_DOUBLE: '"' -> popMode;
-
-// Escaped double quote (standard: "")
-STRING_DOUBLE_ESCAPED_QUOTE: '"' '"';
-
-// Backslash escapes
-STRING_DOUBLE_BACKSLASH_ESCAPE
-    : '\\' ['"\\nrtbfav0]
-    | '\\' 'x' [0-9a-fA-F] [0-9a-fA-F]
-    | '\\' [0-7] [0-7]? [0-7]?
-    | '\\' .
-    ;
-
-// Line continuation
-STRING_DOUBLE_LINE_CONTINUATION: '\\' [\r\n]+;
-
-// Regular newlines
-STRING_DOUBLE_NEWLINE: [\r\n];
-
-// Any other character
-STRING_DOUBLE_CHAR: ~["\\\r\n];
-
-// Catch-all
-STRING_DOUBLE_ANY: .;
+fragment SINGLE_QUOTED_STRING: '\'' ( '\\' . | '\'\'' | ~('\'' | '\\') )* '\'';
+fragment DOUBLE_QUOTED_STRING: '"'  ( '\\' . | '""'   | ~('"'  | '\\') )* '"';
 
 fragment A: [aA];
 fragment B: [bB];
@@ -458,4 +404,4 @@ fragment X: [xX];
 fragment Y: [yY];
 fragment Z: [zZ];
 
-// ============================================= 
+// =============================================
