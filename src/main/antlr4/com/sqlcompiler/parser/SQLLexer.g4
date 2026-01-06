@@ -5,16 +5,6 @@ lexer grammar SQLLexer;
 // SQL KEYWORDS - RESERVED WORDS its worked by yara
 // =============================================
 
-// Symbols and comparison operators
-STAR: '*';
-COMMA: ',';
-EQ: '=';
-LT: '<';
-GT: '>';
-LE: '<=';
-GE: '>=';
-NE: '<>';
-
 SELECT: S E L E C T;      // Used to select data from database
 FROM: F R O M;            // Specifies the table to select from
 WHERE: W H E R E;         // Filters records based on conditions
@@ -146,7 +136,7 @@ COUNT: C O U N T;         // Counts number of rows
 SUM: S U M;               // Sums numeric values
 AVG: A V G;               // Calculates average
 MIN: M I N;               // Finds minimum value
-MAX: M A X;               // Finds maximum value
+MAXM: M A X;               // Finds maximum value
 
 // -------------------------
 // STRING FUNCTIONS
@@ -373,75 +363,6 @@ INTEGER: [0-9]+;
 FLOATN: [0-9]+ '.' [0-9]+;
 
 /**
- * STRING LITERALS - Comprehensive support for single and double quoted strings
- * 
- * Handles:
- * - Single-quoted strings: 'string' (standard SQL string literals)
- * - Double-quoted strings: "string" (MySQL strings, or identifiers in other dialects)
- * - All escape sequences and multi-line support for both
- */
-
-// In your default mode
-STRING_START_SINGLE: '\'' -> pushMode(STRING_MODE_SINGLE);
-STRING_START_DOUBLE: '"' -> pushMode(STRING_MODE_DOUBLE);
-
-// SINGLE QUOTE STRING MODE
-mode STRING_MODE_SINGLE;
-
-STRING_END_SINGLE: '\'' -> popMode;
-
-// Escaped single quote (standard SQL: '')
-STRING_SINGLE_ESCAPED_QUOTE: '\'' '\'';
-
-// Backslash escapes
-STRING_SINGLE_BACKSLASH_ESCAPE
-    : '\\' ['"\\nrtbfav0]
-    | '\\' 'x' [0-9a-fA-F] [0-9a-fA-F]
-    | '\\' [0-7] [0-7]? [0-7]?
-    | '\\' .
-    ;
-
-// Line continuation
-STRING_SINGLE_LINE_CONTINUATION: '\\' [\r\n]+;
-
-// Regular newlines
-STRING_SINGLE_NEWLINE: [\r\n];
-
-// Any other character
-STRING_SINGLE_CHAR: ~['\\\r\n];
-
-// Catch-all
-STRING_SINGLE_ANY: .;
-
-// DOUBLE QUOTE STRING MODE
-mode STRING_MODE_DOUBLE;
-
-STRING_END_DOUBLE: '"' -> popMode;
-
-// Escaped double quote (standard: "")
-STRING_DOUBLE_ESCAPED_QUOTE: '"' '"';
-
-// Backslash escapes
-STRING_DOUBLE_BACKSLASH_ESCAPE
-    : '\\' ['"\\nrtbfav0]
-    | '\\' 'x' [0-9a-fA-F] [0-9a-fA-F]
-    | '\\' [0-7] [0-7]? [0-7]?
-    | '\\' .
-    ;
-
-// Line continuation
-STRING_DOUBLE_LINE_CONTINUATION: '\\' [\r\n]+;
-
-// Regular newlines
-STRING_DOUBLE_NEWLINE: [\r\n];
-
-// Any other character
-STRING_DOUBLE_CHAR: ~["\\\r\n];
-
-// Catch-all
-STRING_DOUBLE_ANY: .;
-
-/**
  * STRING LITERALS - MySQL-style approach
  * 
  * Handles:
@@ -456,10 +377,61 @@ STRING: SINGLE_QUOTED_STRING | DOUBLE_QUOTED_STRING;
 fragment SINGLE_QUOTED_STRING: '\'' ( '\\' . | '\'\'' | ~('\'' | '\\') )* '\'';
 fragment DOUBLE_QUOTED_STRING: '"'  ( '\\' . | '""'   | ~('"'  | '\\') )* '"';
 
+// MAX keyword for VARCHAR(MAX), VARBINARY(MAX)
+MAX: M A X;
+
+// Type keyword
+TYPE: T Y P E;
+
+// Column keyword
+COLUMN: C O L U M N;
+
+// ADD keyword (for ALTER TABLE)
+ADD: A D D;
+TIES: T I E S;             
+PERCENT: P E R C E N T;   
+ESCAPE: E S C A P E;
+// -------------------------
+// WINDOW/RANKING FUNCTIONS
+// -------------------------
+
+ROW_NUMBER: R O W '_' N U M B E R;
+RANK: R A N K;
+DENSE_RANK: D E N S E '_' R A N K;
+NTILE: N T I L E;
+
+// -------------------------
+// OPERATORS (Add to your operators section)
+// -------------------------
+
+// Comparison operators (most are likely already symbols, but ensure these exist)
+// '=', '>', '<', '<=', '>=', '<>', '!=', '!<', '!>'
+// '*', '/', '%', '+', '-', '~', '||'
 
 
+EQUALS: '=';
+GREATER: '>';
+LESS: '<';
+LESS_EQUAL: '<=';
+GREATER_EQUAL: '>=';
+NOT_EQUAL1: '<>';
+NOT_EQUAL2: '!=';
+NOT_LESS: '!<';
+NOT_GREATER: '!>';
 
+STAR: '*';
+SLASH: '/';
+PERCENT_SIGN: '%';
+PLUS: '+';
+MINUS: '-';
+TILDE: '~';
+PIPE_PIPE: '||';
 
+COMMA: ',';
+DOT: '.';
+LPAREN: '(';
+RPAREN: ')';
+SEMICOLON: ';';
 fragment A: [aA];
 fragment B: [bB];
 fragment C: [cC];
@@ -487,4 +459,4 @@ fragment X: [xX];
 fragment Y: [yY];
 fragment Z: [zZ];
 
-// ============================================= 
+// =============================================
