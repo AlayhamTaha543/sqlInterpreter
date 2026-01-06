@@ -1,3 +1,9 @@
+/home/alayham/Documents/sql/sqlInterpreter/target/generated-sources/antlr4/com/sqlcompiler/parser/SQLParser.java
+/home/alayham/Documents/sql/sqlInterpreter/target/generated-sources/antlr4/com/sqlcompiler/parser/SQLParserBaseVisitor.java
 /home/alayham/Documents/sql/sqlInterpreter/src/main/java/com/sqlcompiler/compiler/SQLLexerApp.java
+/home/alayham/Documents/sql/sqlInterpreter/src/main/java/com/sqlcompiler/compiler/SQLParserApp.java
 /home/alayham/Documents/sql/sqlInterpreter/src/main/java/com/sqlcompiler/parser/SQLTokenTypeMapper.java
 /home/alayham/Documents/sql/sqlInterpreter/target/generated-sources/antlr4/com/sqlcompiler/parser/SQLLexer.java
+/home/alayham/Documents/sql/sqlInterpreter/target/generated-sources/antlr4/com/sqlcompiler/parser/SQLParserListener.java
+/home/alayham/Documents/sql/sqlInterpreter/target/generated-sources/antlr4/com/sqlcompiler/parser/SQLParserVisitor.java
+/home/alayham/Documents/sql/sqlInterpreter/target/generated-sources/antlr4/com/sqlcompiler/parser/SQLParserBaseListener.java

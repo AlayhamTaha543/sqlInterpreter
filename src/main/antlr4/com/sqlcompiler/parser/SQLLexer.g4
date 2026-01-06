@@ -136,7 +136,7 @@ COUNT: C O U N T;         // Counts number of rows
 SUM: S U M;               // Sums numeric values
 AVG: A V G;               // Calculates average
 MIN: M I N;               // Finds minimum value
-MAX: M A X;               // Finds maximum value
+MAXM: M A X;               // Finds maximum value
 
 // -------------------------
 // STRING FUNCTIONS
@@ -377,6 +377,61 @@ STRING: SINGLE_QUOTED_STRING | DOUBLE_QUOTED_STRING;
 fragment SINGLE_QUOTED_STRING: '\'' ( '\\' . | '\'\'' | ~('\'' | '\\') )* '\'';
 fragment DOUBLE_QUOTED_STRING: '"'  ( '\\' . | '""'   | ~('"'  | '\\') )* '"';
 
+// MAX keyword for VARCHAR(MAX), VARBINARY(MAX)
+MAX: M A X;
+
+// Type keyword
+TYPE: T Y P E;
+
+// Column keyword
+COLUMN: C O L U M N;
+
+// ADD keyword (for ALTER TABLE)
+ADD: A D D;
+TIES: T I E S;             
+PERCENT: P E R C E N T;   
+ESCAPE: E S C A P E;
+// -------------------------
+// WINDOW/RANKING FUNCTIONS
+// -------------------------
+
+ROW_NUMBER: R O W '_' N U M B E R;
+RANK: R A N K;
+DENSE_RANK: D E N S E '_' R A N K;
+NTILE: N T I L E;
+
+// -------------------------
+// OPERATORS (Add to your operators section)
+// -------------------------
+
+// Comparison operators (most are likely already symbols, but ensure these exist)
+// '=', '>', '<', '<=', '>=', '<>', '!=', '!<', '!>'
+// '*', '/', '%', '+', '-', '~', '||'
+
+
+EQUALS: '=';
+GREATER: '>';
+LESS: '<';
+LESS_EQUAL: '<=';
+GREATER_EQUAL: '>=';
+NOT_EQUAL1: '<>';
+NOT_EQUAL2: '!=';
+NOT_LESS: '!<';
+NOT_GREATER: '!>';
+
+STAR: '*';
+SLASH: '/';
+PERCENT_SIGN: '%';
+PLUS: '+';
+MINUS: '-';
+TILDE: '~';
+PIPE_PIPE: '||';
+
+COMMA: ',';
+DOT: '.';
+LPAREN: '(';
+RPAREN: ')';
+SEMICOLON: ';';
 fragment A: [aA];
 fragment B: [bB];
 fragment C: [cC];
