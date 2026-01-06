@@ -1,4 +1,4 @@
-parser grammar SQlParser;
+parser grammar SQLParser;
 
 options {
     tokenVocab = SQLLexer;
