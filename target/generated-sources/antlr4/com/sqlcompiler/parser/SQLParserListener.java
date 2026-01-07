@@ -598,6 +598,36 @@ public interface SQLParserListener extends ParseTreeListener {
 	 */
 	void exitDeleteStatement(SQLParser.DeleteStatementContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link SQLParser#deleteTarget}.
+	 * @param ctx the parse tree
+	 */
+	void enterDeleteTarget(SQLParser.DeleteTargetContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SQLParser#deleteTarget}.
+	 * @param ctx the parse tree
+	 */
+	void exitDeleteTarget(SQLParser.DeleteTargetContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link SQLParser#tableSources}.
+	 * @param ctx the parse tree
+	 */
+	void enterTableSources(SQLParser.TableSourcesContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SQLParser#tableSources}.
+	 * @param ctx the parse tree
+	 */
+	void exitTableSources(SQLParser.TableSourcesContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link SQLParser#joinClause}.
+	 * @param ctx the parse tree
+	 */
+	void enterJoinClause(SQLParser.JoinClauseContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SQLParser#joinClause}.
+	 * @param ctx the parse tree
+	 */
+	void exitJoinClause(SQLParser.JoinClauseContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link SQLParser#createStatement}.
 	 * @param ctx the parse tree
 	 */

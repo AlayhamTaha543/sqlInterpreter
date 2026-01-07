@@ -365,6 +365,24 @@ public interface SQLParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitDeleteStatement(SQLParser.DeleteStatementContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link SQLParser#deleteTarget}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDeleteTarget(SQLParser.DeleteTargetContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link SQLParser#tableSources}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTableSources(SQLParser.TableSourcesContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link SQLParser#joinClause}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitJoinClause(SQLParser.JoinClauseContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link SQLParser#createStatement}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
