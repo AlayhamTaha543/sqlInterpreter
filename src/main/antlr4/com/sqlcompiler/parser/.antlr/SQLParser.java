@@ -233,6 +233,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_sqlStatement; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterSqlStatement(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitSqlStatement(this);
+		}
 	}
 
 	public final SqlStatementContext sqlStatement() throws RecognitionException {
@@ -320,6 +328,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_sqlStatements; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterSqlStatements(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitSqlStatements(this);
+		}
 	}
 
 	public final SqlStatementsContext sqlStatements() throws RecognitionException {
@@ -373,6 +389,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_selectStatement; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterSelectStatement(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitSelectStatement(this);
+		}
 	}
 
 	public final SelectStatementContext selectStatement() throws RecognitionException {
@@ -437,6 +461,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_queryExpression; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterQueryExpression(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitQueryExpression(this);
+		}
 	}
 
 	public final QueryExpressionContext queryExpression() throws RecognitionException {
@@ -542,6 +574,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_querySpecification; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterQuerySpecification(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitQuerySpecification(this);
+		}
 	}
 
 	public final QuerySpecificationContext querySpecification() throws RecognitionException {
@@ -644,6 +684,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_topClause; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterTopClause(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitTopClause(this);
+		}
 	}
 
 	public final TopClauseContext topClause() throws RecognitionException {
@@ -720,6 +768,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_distinctClause; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterDistinctClause(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitDistinctClause(this);
+		}
 	}
 
 	public final DistinctClauseContext distinctClause() throws RecognitionException {
@@ -769,6 +825,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_selectList; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterSelectList(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitSelectList(this);
+		}
 	}
 
 	public final SelectListContext selectList() throws RecognitionException {
@@ -842,6 +906,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_selectListElement; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterSelectListElement(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitSelectListElement(this);
+		}
 	}
 
 	public final SelectListElementContext selectListElement() throws RecognitionException {
@@ -927,6 +999,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_fromClause; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterFromClause(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitFromClause(this);
+		}
 	}
 
 	public final FromClauseContext fromClause() throws RecognitionException {
@@ -986,6 +1066,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_tableSource; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterTableSource(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitTableSource(this);
+		}
 	}
 
 	public final TableSourceContext tableSource() throws RecognitionException {
@@ -1047,6 +1135,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_tableSourceItem; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterTableSourceItem(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitTableSourceItem(this);
+		}
 	}
 
 	public final TableSourceItemContext tableSourceItem() throws RecognitionException {
@@ -1155,6 +1251,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_joinPart; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterJoinPart(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitJoinPart(this);
+		}
 	}
 
 	public final JoinPartContext joinPart() throws RecognitionException {
@@ -1213,6 +1317,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_joinType; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterJoinType(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitJoinType(this);
+		}
 	}
 
 	public final JoinTypeContext joinType() throws RecognitionException {
@@ -1326,6 +1438,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_joinCondition; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterJoinCondition(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitJoinCondition(this);
+		}
 	}
 
 	public final JoinConditionContext joinCondition() throws RecognitionException {
@@ -1399,6 +1519,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_whereClause; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterWhereClause(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitWhereClause(this);
+		}
 	}
 
 	public final WhereClauseContext whereClause() throws RecognitionException {
@@ -1444,6 +1572,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_searchCondition; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterSearchCondition(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitSearchCondition(this);
+		}
 	}
 
 	public final SearchConditionContext searchCondition() throws RecognitionException {
@@ -1579,6 +1715,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_predicate; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterPredicate(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitPredicate(this);
+		}
 	}
 
 	public final PredicateContext predicate() throws RecognitionException {
@@ -1813,6 +1957,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_groupByClause; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterGroupByClause(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitGroupByClause(this);
+		}
 	}
 
 	public final GroupByClauseContext groupByClause() throws RecognitionException {
@@ -1868,6 +2020,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_groupByItem; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterGroupByItem(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitGroupByItem(this);
+		}
 	}
 
 	public final GroupByItemContext groupByItem() throws RecognitionException {
@@ -1901,6 +2061,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_havingClause; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterHavingClause(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitHavingClause(this);
+		}
 	}
 
 	public final HavingClauseContext havingClause() throws RecognitionException {
@@ -1944,6 +2112,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_orderByClause; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterOrderByClause(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitOrderByClause(this);
+		}
 	}
 
 	public final OrderByClauseContext orderByClause() throws RecognitionException {
@@ -1999,6 +2175,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_orderByExpression; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterOrderByExpression(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitOrderByExpression(this);
+		}
 	}
 
 	public final OrderByExpressionContext orderByExpression() throws RecognitionException {
@@ -2066,6 +2250,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_offsetFetchClause; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterOffsetFetchClause(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitOffsetFetchClause(this);
+		}
 	}
 
 	public final OffsetFetchClauseContext offsetFetchClause() throws RecognitionException {
@@ -2185,6 +2377,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_expression; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterExpression(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitExpression(this);
+		}
 	}
 
 	public final ExpressionContext expression() throws RecognitionException {
@@ -2399,6 +2599,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_expressionList; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterExpressionList(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitExpressionList(this);
+		}
 	}
 
 	public final ExpressionListContext expressionList() throws RecognitionException {
@@ -2450,6 +2658,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_subquery; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterSubquery(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitSubquery(this);
+		}
 	}
 
 	public final SubqueryContext subquery() throws RecognitionException {
@@ -2498,6 +2714,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_caseExpression; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterCaseExpression(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitCaseExpression(this);
+		}
 	}
 
 	public final CaseExpressionContext caseExpression() throws RecognitionException {
@@ -2574,6 +2798,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_whenClause; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterWhenClause(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitWhenClause(this);
+		}
 	}
 
 	public final WhenClauseContext whenClause() throws RecognitionException {
@@ -2627,6 +2859,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_castExpression; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterCastExpression(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitCastExpression(this);
+		}
 	}
 
 	public final CastExpressionContext castExpression() throws RecognitionException {
@@ -2765,6 +3005,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_windowFunction; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterWindowFunction(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitWindowFunction(this);
+		}
 	}
 
 	public final WindowFunctionContext windowFunction() throws RecognitionException {
@@ -2856,6 +3104,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_windowSpecification; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterWindowSpecification(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitWindowSpecification(this);
+		}
 	}
 
 	public final WindowSpecificationContext windowSpecification() throws RecognitionException {
@@ -2948,6 +3204,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_windowFrame; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterWindowFrame(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitWindowFrame(this);
+		}
 	}
 
 	public final WindowFrameContext windowFrame() throws RecognitionException {
@@ -3022,6 +3286,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_windowFrameBound; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterWindowFrameBound(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitWindowFrameBound(this);
+		}
 	}
 
 	public final WindowFrameBoundContext windowFrameBound() throws RecognitionException {
@@ -3100,6 +3372,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_rankingFunction; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterRankingFunction(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitRankingFunction(this);
+		}
 	}
 
 	public final RankingFunctionContext rankingFunction() throws RecognitionException {
@@ -3193,6 +3473,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_analyticFunction; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterAnalyticFunction(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitAnalyticFunction(this);
+		}
 	}
 
 	public final AnalyticFunctionContext analyticFunction() throws RecognitionException {
@@ -3339,6 +3627,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_functionCall; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterFunctionCall(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitFunctionCall(this);
+		}
 	}
 
 	public final FunctionCallContext functionCall() throws RecognitionException {
@@ -3452,6 +3748,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_aggregateFunction; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterAggregateFunction(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitAggregateFunction(this);
+		}
 	}
 
 	public final AggregateFunctionContext aggregateFunction() throws RecognitionException {
@@ -3606,6 +3910,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_scalarFunction; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterScalarFunction(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitScalarFunction(this);
+		}
 	}
 
 	public final ScalarFunctionContext scalarFunction() throws RecognitionException {
@@ -3688,6 +4000,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_stringFunction; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterStringFunction(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitStringFunction(this);
+		}
 	}
 
 	public final StringFunctionContext stringFunction() throws RecognitionException {
@@ -3922,6 +4242,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_dateFunction; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterDateFunction(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitDateFunction(this);
+		}
 	}
 
 	public final DateFunctionContext dateFunction() throws RecognitionException {
@@ -4075,6 +4403,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_conversionFunction; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterConversionFunction(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitConversionFunction(this);
+		}
 	}
 
 	public final ConversionFunctionContext conversionFunction() throws RecognitionException {
@@ -4117,6 +4453,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_columnReference; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterColumnReference(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitColumnReference(this);
+		}
 	}
 
 	public final ColumnReferenceContext columnReference() throws RecognitionException {
@@ -4194,6 +4538,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_tableName; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterTableName(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitTableName(this);
+		}
 	}
 
 	public final TableNameContext tableName() throws RecognitionException {
@@ -4238,6 +4590,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_columnName; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterColumnName(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitColumnName(this);
+		}
 	}
 
 	public final ColumnNameContext columnName() throws RecognitionException {
@@ -4271,6 +4631,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_columnAlias; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterColumnAlias(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitColumnAlias(this);
+		}
 	}
 
 	public final ColumnAliasContext columnAlias() throws RecognitionException {
@@ -4330,6 +4698,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_tableAlias; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterTableAlias(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitTableAlias(this);
+		}
 	}
 
 	public final TableAliasContext tableAlias() throws RecognitionException {
@@ -4362,6 +4738,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_schemaName; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterSchemaName(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitSchemaName(this);
+		}
 	}
 
 	public final SchemaNameContext schemaName() throws RecognitionException {
@@ -4394,6 +4778,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_functionName; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterFunctionName(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitFunctionName(this);
+		}
 	}
 
 	public final FunctionNameContext functionName() throws RecognitionException {
@@ -4430,6 +4822,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_identifier; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterIdentifier(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitIdentifier(this);
+		}
 	}
 
 	public final IdentifierContext identifier() throws RecognitionException {
@@ -4512,6 +4912,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_nonReservedKeyword; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterNonReservedKeyword(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitNonReservedKeyword(this);
+		}
 	}
 
 	public final NonReservedKeywordContext nonReservedKeyword() throws RecognitionException {
@@ -4585,6 +4993,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_dataType; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterDataType(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitDataType(this);
+		}
 	}
 
 	public final DataTypeContext dataType() throws RecognitionException {
@@ -4973,6 +5389,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_literal; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterLiteral(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitLiteral(this);
+		}
 	}
 
 	public final LiteralContext literal() throws RecognitionException {
@@ -5020,6 +5444,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_comparisonOperator; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterComparisonOperator(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitComparisonOperator(this);
+		}
 	}
 
 	public final ComparisonOperatorContext comparisonOperator() throws RecognitionException {
@@ -5062,6 +5494,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_unaryOperator; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterUnaryOperator(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitUnaryOperator(this);
+		}
 	}
 
 	public final UnaryOperatorContext unaryOperator() throws RecognitionException {
@@ -5104,6 +5544,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_setOperator; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterSetOperator(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitSetOperator(this);
+		}
 	}
 
 	public final SetOperatorContext setOperator() throws RecognitionException {
@@ -5199,6 +5647,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_insertStatement; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterInsertStatement(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitInsertStatement(this);
+		}
 	}
 
 	public final InsertStatementContext insertStatement() throws RecognitionException {
@@ -5336,6 +5792,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_updateStatement; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterUpdateStatement(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitUpdateStatement(this);
+		}
 	}
 
 	public final UpdateStatementContext updateStatement() throws RecognitionException {
@@ -5414,6 +5878,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_deleteStatement; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterDeleteStatement(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitDeleteStatement(this);
+		}
 	}
 
 	public final DeleteStatementContext deleteStatement() throws RecognitionException {
@@ -5519,6 +5991,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_createStatement; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterCreateStatement(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitCreateStatement(this);
+		}
 	}
 
 	public final CreateStatementContext createStatement() throws RecognitionException {
@@ -5761,6 +6241,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_statementList; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterStatementList(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitStatementList(this);
+		}
 	}
 
 	public final StatementListContext statementList() throws RecognitionException {
@@ -5875,6 +6363,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_declareStatement; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterDeclareStatement(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitDeclareStatement(this);
+		}
 	}
 
 	public final DeclareStatementContext declareStatement() throws RecognitionException {
@@ -5927,6 +6423,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_setStatement; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterSetStatement(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitSetStatement(this);
+		}
 	}
 
 	public final SetStatementContext setStatement() throws RecognitionException {
@@ -5981,6 +6485,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_ifStatement; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterIfStatement(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitIfStatement(this);
+		}
 	}
 
 	public final IfStatementContext ifStatement() throws RecognitionException {
@@ -6044,6 +6556,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_whileStatement; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterWhileStatement(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitWhileStatement(this);
+		}
 	}
 
 	public final WhileStatementContext whileStatement() throws RecognitionException {
@@ -6085,6 +6605,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_returnStatement; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterReturnStatement(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitReturnStatement(this);
+		}
 	}
 
 	public final ReturnStatementContext returnStatement() throws RecognitionException {
@@ -6136,6 +6664,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_columnDefinition; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterColumnDefinition(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitColumnDefinition(this);
+		}
 	}
 
 	public final ColumnDefinitionContext columnDefinition() throws RecognitionException {
@@ -6211,6 +6747,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_columnConstraint; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterColumnConstraint(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitColumnConstraint(this);
+		}
 	}
 
 	public final ColumnConstraintContext columnConstraint() throws RecognitionException {
@@ -6360,6 +6904,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_parameterList; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterParameterList(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitParameterList(this);
+		}
 	}
 
 	public final ParameterListContext parameterList() throws RecognitionException {
@@ -6410,6 +6962,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_parameter; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterParameter(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitParameter(this);
+		}
 	}
 
 	public final ParameterContext parameter() throws RecognitionException {
@@ -6455,6 +7015,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_alterStatement; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterAlterStatement(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitAlterStatement(this);
+		}
 	}
 
 	public final AlterStatementContext alterStatement() throws RecognitionException {
@@ -6521,6 +7089,14 @@ public class SQLParser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_dropStatement; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).enterDropStatement(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof SQLParserListener ) ((SQLParserListener)listener).exitDropStatement(this);
+		}
 	}
 
 	public final DropStatementContext dropStatement() throws RecognitionException {

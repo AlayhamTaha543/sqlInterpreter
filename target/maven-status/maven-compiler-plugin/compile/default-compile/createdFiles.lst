@@ -78,5 +78,6 @@ com/sqlcompiler/parser/SQLParser$SelectStatementContext.class
 com/sqlcompiler/parser/SQLParserVisitor.class
 com/sqlcompiler/parser/SQLParser$DateFunctionContext.class
 com/sqlcompiler/parser/SQLParser$DataTypeContext.class
+com/sqlcompiler/compiler/TreeVisualizer.class
 com/sqlcompiler/parser/SQLParser$ParameterContext.class
 com/sqlcompiler/parser/SQLParser$SqlStatementsContext.class

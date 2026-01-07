@@ -25,6 +25,7 @@ public class SQLParserApp {
         System.out.println("╔════════════════════════════════════════════════════════════════╗");
         System.out.println("║          SQL PARSER TESTING APPLICATION                        ║");
         System.out.println("║          Using ANTLR4 Version 4.13.2                          ║");
+        System.out.println("║          TREE VISUALIZATION ENABLED                            ║");
         System.out.println("╚════════════════════════════════════════════════════════════════╝\n");
 
         // Options for input mode
@@ -208,6 +209,9 @@ public class SQLParserApp {
             System.out.println("-".repeat(70));
             printTree(tree, parser, 0);
 
+            // Generate Parse Tree Image
+            generateTreeImage(tree, parser);
+
         } catch (Exception e) {
             System.err.println("\n❌ Error parsing query: " + e.getMessage());
             e.printStackTrace();
@@ -237,6 +241,35 @@ public class SQLParserApp {
             for (int i = 0; i < tree.getChildCount(); i++) {
                 printTree(tree.getChild(i), parser, indent + 1);
             }
+        }
+    }
+
+    /**
+     * Generates a visual image of the parse tree using Graphviz
+     */
+    private static void generateTreeImage(ParseTree tree, SQLParser parser) {
+        String dotFile = "parse_tree.dot";
+        String pngFile = "parse_tree.png";
+
+        try {
+            System.out.println("\n" + "-".repeat(70));
+            System.out.println("Generating Parse Tree Visualization...");
+            
+            TreeVisualizer visualizer = new TreeVisualizer();
+            visualizer.generateDotFile(tree, parser, dotFile);
+            
+            boolean success = TreeVisualizer.generatePng(dotFile, pngFile);
+            
+            if (success) {
+                System.out.println("✅ Parse tree image generated successfully: " + pngFile);
+            } else {
+                System.out.println("⚠️ Could not generate PNG image. Please ensure 'graphviz' is installed.");
+                System.out.println("   You can still use the generated DOT file: " + dotFile);
+            }
+            System.out.println("-".repeat(70));
+            
+        } catch (Exception e) {
+            System.err.println("❌ Error generating visualization: " + e.getMessage());
         }
     }
 
