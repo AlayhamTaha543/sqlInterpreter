@@ -1,0 +1,18 @@
+# Maven build output
+/target/
+
+# ANTLR generated temporary files
+*.tokens
+*.interp
+
+# Logs
+*.log
+
+# IDE settings
+/.idea/
+/.vscode/
+/*.iml
+
+# OS-specific files
+.DS_Store
+Thumbs.db
