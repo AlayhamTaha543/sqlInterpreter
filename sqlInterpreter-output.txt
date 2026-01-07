@@ -5,8 +5,8 @@ PROJECT EXPORT FOR LLMs
 PROJECT INFORMATION:
 --------------------------------------------------
 Project Name: sqlInterpreter
-Generated On: 2026-01-07 04:23:58 (Asia/Damascus / GMT+03:00)
-Total Files Processed: 106
+Generated On: 2026-01-07 13:31:42 (Asia/Damascus / GMT+03:00)
+Total Files Processed: 112
 Export Tool: Easy Whole Project to Single Text File for LLMs v1.1.0
 Tool Author: Jota / José Guilherme Pandolfi
 
@@ -41,93 +41,97 @@ PROJECT STRUCTURE
 │                       └── 📄 SQLTokenTypeMapper.java (32.37 KB)
 ├── 📁 target/
 │   ├── 📁 classes/
-│   │   └── 📁 com/
-│   │       └── 📁 sqlcompiler/
-│   │           ├── 📁 compiler/
-│   │           │   ├── 📄 SQLLexerApp.class (7.24 KB)
-│   │           │   ├── 📄 SQLParserApp.class (9.99 KB)
-│   │           │   ├── 📄 SQLParserApp$CustomErrorListener.class (2.02 KB)
-│   │           │   └── 📄 TreeVisualizer.class (4.32 KB)
-│   │           └── 📁 parser/
-│   │               ├── 📄 SQLLexer.class (42.02 KB)
-│   │               ├── 📄 SQLParser.class (104.8 KB)
-│   │               ├── 📄 SQLParser$AggregateFunctionContext.class (3.02 KB)
-│   │               ├── 📄 SQLParser$AlterStatementContext.class (3.1 KB)
-│   │               ├── 📄 SQLParser$AnalyticFunctionContext.class (3.37 KB)
-│   │               ├── 📄 SQLParser$CaseExpressionContext.class (3.12 KB)
-│   │               ├── 📄 SQLParser$CastExpressionContext.class (3.41 KB)
-│   │               ├── 📄 SQLParser$ColumnAliasContext.class (2.35 KB)
-│   │               ├── 📄 SQLParser$ColumnConstraintContext.class (4.24 KB)
-│   │               ├── 📄 SQLParser$ColumnDefinitionContext.class (2.9 KB)
-│   │               ├── 📄 SQLParser$ColumnNameContext.class (2.16 KB)
-│   │               ├── 📄 SQLParser$ColumnReferenceContext.class (3.02 KB)
-│   │               ├── 📄 SQLParser$ComparisonOperatorContext.class (2.7 KB)
-│   │               ├── 📄 SQLParser$ConversionFunctionContext.class (2.24 KB)
-│   │               ├── 📄 SQLParser$CreateStatementContext.class (5.79 KB)
-│   │               ├── 📄 SQLParser$DataTypeContext.class (4.5 KB)
-│   │               ├── 📄 SQLParser$DateFunctionContext.class (3.62 KB)
-│   │               ├── 📄 SQLParser$DeclareStatementContext.class (2.75 KB)
-│   │               ├── 📄 SQLParser$DeleteStatementContext.class (2.66 KB)
-│   │               ├── 📄 SQLParser$DistinctClauseContext.class (2.14 KB)
-│   │               ├── 📄 SQLParser$DropStatementContext.class (2.72 KB)
-│   │               ├── 📄 SQLParser$ExpressionContext.class (5.21 KB)
-│   │               ├── 📄 SQLParser$ExpressionListContext.class (2.8 KB)
-│   │               ├── 📄 SQLParser$FromClauseContext.class (2.89 KB)
-│   │               ├── 📄 SQLParser$FunctionCallContext.class (3.14 KB)
-│   │               ├── 📄 SQLParser$FunctionNameContext.class (2.17 KB)
-│   │               ├── 📄 SQLParser$GroupByClauseContext.class (2.98 KB)
-│   │               ├── 📄 SQLParser$GroupByItemContext.class (2.17 KB)
-│   │               ├── 📄 SQLParser$HavingClauseContext.class (2.38 KB)
-│   │               ├── 📄 SQLParser$IdentifierContext.class (2.66 KB)
-│   │               ├── 📄 SQLParser$IfStatementContext.class (3.36 KB)
-│   │               ├── 📄 SQLParser$InsertStatementContext.class (4.2 KB)
-│   │               ├── 📄 SQLParser$JoinConditionContext.class (3.35 KB)
-│   │               ├── 📄 SQLParser$JoinPartContext.class (2.78 KB)
-│   │               ├── 📄 SQLParser$JoinTypeContext.class (2.37 KB)
-│   │               ├── 📄 SQLParser$LiteralContext.class (2.37 KB)
-│   │               ├── 📄 SQLParser$NonReservedKeywordContext.class (2.66 KB)
-│   │               ├── 📄 SQLParser$OffsetFetchClauseContext.class (3.36 KB)
-│   │               ├── 📄 SQLParser$OrderByClauseContext.class (3.01 KB)
-│   │               ├── 📄 SQLParser$OrderByExpressionContext.class (2.46 KB)
-│   │               ├── 📄 SQLParser$ParameterContext.class (2.33 KB)
-│   │               ├── 📄 SQLParser$ParameterListContext.class (2.79 KB)
-│   │               ├── 📄 SQLParser$PredicateContext.class (4.14 KB)
-│   │               ├── 📄 SQLParser$QueryExpressionContext.class (3.09 KB)
-│   │               ├── 📄 SQLParser$QuerySpecificationContext.class (3.73 KB)
-│   │               ├── 📄 SQLParser$RankingFunctionContext.class (2.75 KB)
-│   │               ├── 📄 SQLParser$ReturnStatementContext.class (2.38 KB)
-│   │               ├── 📄 SQLParser$ScalarFunctionContext.class (3.21 KB)
-│   │               ├── 📄 SQLParser$SchemaNameContext.class (2.16 KB)
-│   │               ├── 📄 SQLParser$SearchConditionContext.class (3.04 KB)
-│   │               ├── 📄 SQLParser$SelectListContext.class (2.92 KB)
-│   │               ├── 📄 SQLParser$SelectListElementContext.class (2.96 KB)
-│   │               ├── 📄 SQLParser$SelectStatementContext.class (2.69 KB)
-│   │               ├── 📄 SQLParser$SetOperatorContext.class (2.26 KB)
-│   │               ├── 📄 SQLParser$SetStatementContext.class (2.51 KB)
-│   │               ├── 📄 SQLParser$SqlStatementContext.class (3.59 KB)
-│   │               ├── 📄 SQLParser$SqlStatementsContext.class (2.61 KB)
-│   │               ├── 📄 SQLParser$StatementListContext.class (5.56 KB)
-│   │               ├── 📄 SQLParser$StringFunctionContext.class (3.7 KB)
-│   │               ├── 📄 SQLParser$SubqueryContext.class (2.42 KB)
-│   │               ├── 📄 SQLParser$TableAliasContext.class (2.16 KB)
-│   │               ├── 📄 SQLParser$TableNameContext.class (2.55 KB)
-│   │               ├── 📄 SQLParser$TableSourceContext.class (2.63 KB)
-│   │               ├── 📄 SQLParser$TableSourceItemContext.class (3.19 KB)
-│   │               ├── 📄 SQLParser$TopClauseContext.class (2.76 KB)
-│   │               ├── 📄 SQLParser$UnaryOperatorContext.class (2.27 KB)
-│   │               ├── 📄 SQLParser$UpdateStatementContext.class (3.95 KB)
-│   │               ├── 📄 SQLParser$WhenClauseContext.class (2.65 KB)
-│   │               ├── 📄 SQLParser$WhereClauseContext.class (2.37 KB)
-│   │               ├── 📄 SQLParser$WhileStatementContext.class (2.76 KB)
-│   │               ├── 📄 SQLParser$WindowFrameBoundContext.class (2.38 KB)
-│   │               ├── 📄 SQLParser$WindowFrameContext.class (2.83 KB)
-│   │               ├── 📄 SQLParser$WindowFunctionContext.class (3.27 KB)
-│   │               ├── 📄 SQLParser$WindowSpecificationContext.class (3.66 KB)
-│   │               ├── 📄 SQLParserBaseListener.class (28.04 KB)
-│   │               ├── 📄 SQLParserBaseVisitor.class (29.49 KB)
-│   │               ├── 📄 SQLParserListener.class (14.88 KB)
-│   │               ├── 📄 SQLParserVisitor.class (19.2 KB)
-│   │               └── 📄 SQLTokenTypeMapper.class (6.82 KB)
+│   │   ├── 📁 com/
+│   │   │   └── 📁 sqlcompiler/
+│   │   │       ├── 📁 compiler/
+│   │   │       │   ├── 📄 SQLLexerApp.class (7.24 KB)
+│   │   │       │   ├── 📄 SQLParserApp.class (9.99 KB)
+│   │   │       │   ├── 📄 SQLParserApp$CustomErrorListener.class (2.02 KB)
+│   │   │       │   └── 📄 TreeVisualizer.class (4.32 KB)
+│   │   │       └── 📁 parser/
+│   │   │           ├── 📄 SQLLexer.class (41.53 KB)
+│   │   │           ├── 📄 SQLLexer.interp (69.81 KB)
+│   │   │           ├── 📄 SQLParser.class (103.15 KB)
+│   │   │           ├── 📄 SQLParser.interp (44.72 KB)
+│   │   │           ├── 📄 SQLParser$AggregateFunctionContext.class (3.02 KB)
+│   │   │           ├── 📄 SQLParser$AlterStatementContext.class (3.1 KB)
+│   │   │           ├── 📄 SQLParser$AnalyticFunctionContext.class (3.37 KB)
+│   │   │           ├── 📄 SQLParser$CaseExpressionContext.class (3.12 KB)
+│   │   │           ├── 📄 SQLParser$CastExpressionContext.class (3.41 KB)
+│   │   │           ├── 📄 SQLParser$ColumnAliasContext.class (2.35 KB)
+│   │   │           ├── 📄 SQLParser$ColumnConstraintContext.class (4.24 KB)
+│   │   │           ├── 📄 SQLParser$ColumnDefinitionContext.class (2.9 KB)
+│   │   │           ├── 📄 SQLParser$ColumnNameContext.class (2.16 KB)
+│   │   │           ├── 📄 SQLParser$ColumnReferenceContext.class (3.02 KB)
+│   │   │           ├── 📄 SQLParser$ComparisonOperatorContext.class (2.7 KB)
+│   │   │           ├── 📄 SQLParser$ConversionFunctionContext.class (2.24 KB)
+│   │   │           ├── 📄 SQLParser$CreateStatementContext.class (5.79 KB)
+│   │   │           ├── 📄 SQLParser$DataTypeContext.class (4.5 KB)
+│   │   │           ├── 📄 SQLParser$DateFunctionContext.class (3.62 KB)
+│   │   │           ├── 📄 SQLParser$DeclareStatementContext.class (2.75 KB)
+│   │   │           ├── 📄 SQLParser$DeleteStatementContext.class (2.66 KB)
+│   │   │           ├── 📄 SQLParser$DistinctClauseContext.class (2.14 KB)
+│   │   │           ├── 📄 SQLParser$DropStatementContext.class (2.72 KB)
+│   │   │           ├── 📄 SQLParser$ExpressionContext.class (5.21 KB)
+│   │   │           ├── 📄 SQLParser$ExpressionListContext.class (2.8 KB)
+│   │   │           ├── 📄 SQLParser$FromClauseContext.class (2.89 KB)
+│   │   │           ├── 📄 SQLParser$FunctionCallContext.class (3.14 KB)
+│   │   │           ├── 📄 SQLParser$FunctionNameContext.class (2.17 KB)
+│   │   │           ├── 📄 SQLParser$GroupByClauseContext.class (2.98 KB)
+│   │   │           ├── 📄 SQLParser$GroupByItemContext.class (2.17 KB)
+│   │   │           ├── 📄 SQLParser$HavingClauseContext.class (2.38 KB)
+│   │   │           ├── 📄 SQLParser$IdentifierContext.class (2.66 KB)
+│   │   │           ├── 📄 SQLParser$IfStatementContext.class (3.36 KB)
+│   │   │           ├── 📄 SQLParser$InsertStatementContext.class (4.2 KB)
+│   │   │           ├── 📄 SQLParser$JoinConditionContext.class (3.35 KB)
+│   │   │           ├── 📄 SQLParser$JoinPartContext.class (2.78 KB)
+│   │   │           ├── 📄 SQLParser$JoinTypeContext.class (2.37 KB)
+│   │   │           ├── 📄 SQLParser$LiteralContext.class (2.37 KB)
+│   │   │           ├── 📄 SQLParser$NonReservedKeywordContext.class (2.66 KB)
+│   │   │           ├── 📄 SQLParser$OffsetFetchClauseContext.class (3.36 KB)
+│   │   │           ├── 📄 SQLParser$OrderByClauseContext.class (3.01 KB)
+│   │   │           ├── 📄 SQLParser$OrderByExpressionContext.class (2.46 KB)
+│   │   │           ├── 📄 SQLParser$ParameterContext.class (2.33 KB)
+│   │   │           ├── 📄 SQLParser$ParameterListContext.class (2.79 KB)
+│   │   │           ├── 📄 SQLParser$PredicateContext.class (4.14 KB)
+│   │   │           ├── 📄 SQLParser$QueryExpressionContext.class (3.09 KB)
+│   │   │           ├── 📄 SQLParser$QuerySpecificationContext.class (3.73 KB)
+│   │   │           ├── 📄 SQLParser$RankingFunctionContext.class (2.75 KB)
+│   │   │           ├── 📄 SQLParser$ReturnStatementContext.class (2.38 KB)
+│   │   │           ├── 📄 SQLParser$ScalarFunctionContext.class (3.21 KB)
+│   │   │           ├── 📄 SQLParser$SchemaNameContext.class (2.16 KB)
+│   │   │           ├── 📄 SQLParser$SearchConditionContext.class (3.04 KB)
+│   │   │           ├── 📄 SQLParser$SelectListContext.class (2.92 KB)
+│   │   │           ├── 📄 SQLParser$SelectListElementContext.class (2.96 KB)
+│   │   │           ├── 📄 SQLParser$SelectStatementContext.class (2.69 KB)
+│   │   │           ├── 📄 SQLParser$SetOperatorContext.class (2.26 KB)
+│   │   │           ├── 📄 SQLParser$SetStatementContext.class (2.51 KB)
+│   │   │           ├── 📄 SQLParser$SqlStatementContext.class (3.59 KB)
+│   │   │           ├── 📄 SQLParser$SqlStatementsContext.class (2.65 KB)
+│   │   │           ├── 📄 SQLParser$StatementListContext.class (5.56 KB)
+│   │   │           ├── 📄 SQLParser$StringFunctionContext.class (3.7 KB)
+│   │   │           ├── 📄 SQLParser$SubqueryContext.class (2.42 KB)
+│   │   │           ├── 📄 SQLParser$TableAliasContext.class (2.16 KB)
+│   │   │           ├── 📄 SQLParser$TableNameContext.class (2.55 KB)
+│   │   │           ├── 📄 SQLParser$TableSourceContext.class (2.63 KB)
+│   │   │           ├── 📄 SQLParser$TableSourceItemContext.class (3.19 KB)
+│   │   │           ├── 📄 SQLParser$TopClauseContext.class (2.76 KB)
+│   │   │           ├── 📄 SQLParser$UnaryOperatorContext.class (2.27 KB)
+│   │   │           ├── 📄 SQLParser$UpdateStatementContext.class (3.95 KB)
+│   │   │           ├── 📄 SQLParser$WhenClauseContext.class (2.65 KB)
+│   │   │           ├── 📄 SQLParser$WhereClauseContext.class (2.37 KB)
+│   │   │           ├── 📄 SQLParser$WhileStatementContext.class (2.76 KB)
+│   │   │           ├── 📄 SQLParser$WindowFrameBoundContext.class (2.38 KB)
+│   │   │           ├── 📄 SQLParser$WindowFrameContext.class (2.83 KB)
+│   │   │           ├── 📄 SQLParser$WindowFunctionContext.class (3.27 KB)
+│   │   │           ├── 📄 SQLParser$WindowSpecificationContext.class (3.66 KB)
+│   │   │           ├── 📄 SQLParserBaseListener.class (28.04 KB)
+│   │   │           ├── 📄 SQLParserBaseVisitor.class (29.49 KB)
+│   │   │           ├── 📄 SQLParserListener.class (14.88 KB)
+│   │   │           ├── 📄 SQLParserVisitor.class (19.2 KB)
+│   │   │           └── 📄 SQLTokenTypeMapper.class (6.82 KB)
+│   │   ├── 📄 SQLLexer.tokens (2.48 KB)
+│   │   └── 📄 SQLParser.tokens (2.48 KB)
 │   ├── 📁 generated-sources/
 │   │   ├── 📁 annotations/
 │   │   └── 📁 antlr4/
@@ -146,15 +150,18 @@ PROJECT STRUCTURE
 │   │       └── 📄 SQLParser.tokens (2.48 KB)
 │   ├── 📁 generated-test-sources/
 │   │   └── 📁 test-annotations/
-│   └── 📁 maven-status/
-│       ├── 📁 antlr4/
-│       │   └── 📄 dependencies.ser (470 B)
-│       └── 📁 maven-compiler-plugin/
-│           └── 📁 compile/
-│               └── 📁 default-compile/
-│                   ├── 📄 createdFiles.lst (4.72 KB)
-│                   └── 📄 inputFiles.lst (1.09 KB)
+│   ├── 📁 maven-status/
+│   │   ├── 📁 antlr4/
+│   │   │   └── 📄 dependencies.ser (470 B)
+│   │   └── 📁 maven-compiler-plugin/
+│   │       └── 📁 compile/
+│   │           └── 📁 default-compile/
+│   │               ├── 📄 createdFiles.lst (4.72 KB)
+│   │               └── 📄 inputFiles.lst (1.09 KB)
+│   └── 📁 test-classes/
 ├── 📄 dependency-reduced-pom.xml (4.38 KB)
+├── 📄 parse_tree.dot (4.52 KB)
+├── 📄 parse_tree.png (183.07 KB)
 ├── 📄 pom.xml (5.25 KB)
 ├── 📄 test.sql (2.3 KB)
 └── 📄 testing.sql (2.39 KB)
@@ -162,23 +169,25 @@ PROJECT STRUCTURE
 ================================================================================
 PROJECT STATISTICS
 ================================================================================
-Total Files: 106
-Total Directories: 30
+Total Files: 112
+Total Directories: 31
 Text Files: 14
-Binary Files: 92
-Total Size: 1.15 MB
+Binary Files: 98
+Total Size: 1.45 MB
 
 FILE TYPES DISTRIBUTION:
 ------------------------------
 .class          : 83
 .java           : 10
+.interp         : 4
+.tokens         : 4
 .g4             : 2
-.interp         : 2
-.tokens         : 2
 .lst            : 2
 .xml            : 2
 .sql            : 2
 .ser            : 1
+.dot            : 1
+.png            : 1
 
 ================================================================================
 FILE CODE CONTENTS
@@ -1652,7 +1661,9 @@ BINARY/EXCLUDED FILES (not included in text content)
 BINARY/EXCLUDED FILES (not included in text content)
 ================================================================================
 - target/classes/com/sqlcompiler/parser/SQLLexer.class
+- target/classes/com/sqlcompiler/parser/SQLLexer.interp
 - target/classes/com/sqlcompiler/parser/SQLParser.class
+- target/classes/com/sqlcompiler/parser/SQLParser.interp
 - target/classes/com/sqlcompiler/parser/SQLParser$AggregateFunctionContext.class
 - target/classes/com/sqlcompiler/parser/SQLParser$AlterStatementContext.class
 - target/classes/com/sqlcompiler/parser/SQLParser$AnalyticFunctionContext.class
@@ -1730,6 +1741,13 @@ BINARY/EXCLUDED FILES (not included in text content)
 - target/classes/com/sqlcompiler/parser/SQLParserListener.class
 - target/classes/com/sqlcompiler/parser/SQLParserVisitor.class
 - target/classes/com/sqlcompiler/parser/SQLTokenTypeMapper.class
+
+
+================================================================================
+BINARY/EXCLUDED FILES (not included in text content)
+================================================================================
+- target/classes/SQLLexer.tokens
+- target/classes/SQLParser.tokens
 
 
 ================================================================================
@@ -14928,3 +14946,10 @@ END CATCH
 
 
 ================================================================================
+
+
+================================================================================
+BINARY/EXCLUDED FILES (not included in text content)
+================================================================================
+- parse_tree.dot
+- parse_tree.png
