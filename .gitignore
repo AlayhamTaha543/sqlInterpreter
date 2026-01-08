@@ -1,3 +1,23 @@
+<<<<<<< HEAD
+# Maven build output
+/target/
+
+# ANTLR generated temporary files
+*.tokens
+*.interp
+
+# Logs
+*.log
+
+# IDE settings
+/.idea/
+/.vscode/
+/*.iml
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+=======
 # Build outputs
 target/
 build/
@@ -41,3 +61,4 @@ Thumbs.db
 
 # Logs
 *.log
+>>>>>>> f2686e86c380d9b571fa5089a7b177e22743d368

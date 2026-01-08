@@ -1,6 +1,12 @@
 // Define a grammar called SqlLexer
 lexer grammar SQLLexer;
 
+
+
+
+//omar adding whitespace
+WS: [ \t\r\n]+ -> skip;
+DOT: '.';
 // =============================================
 // SQL KEYWORDS - RESERVED WORDS its worked by yara
 // =============================================
@@ -19,6 +25,7 @@ FETCH: F E T C H;         // Fetches specified number of rows
 NEXT: N E X T;            // Used with FETCH
 FIRST: F I R S T;         // Used with FETCH
 ONLY: O N L Y;            // Used with FETCH
+
 
 // -------------------------
 // DATA MANIPULATION LANGUAGE 
@@ -428,7 +435,7 @@ TILDE: '~';
 PIPE_PIPE: '||';
 
 COMMA: ',';
-DOT: '.';
+
 LPAREN: '(';
 RPAREN: ')';
 SEMICOLON: ';';

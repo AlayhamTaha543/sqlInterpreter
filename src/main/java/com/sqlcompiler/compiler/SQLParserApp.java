@@ -33,7 +33,9 @@ public class SQLParserApp {
         System.out.println("1. Interactive mode (type SQL queries)");
         System.out.println("2. Test predefined SQL queries");
         System.out.println("3. Read SQL script from test.sql");
-        System.out.print("\nEnter choice (1, 2, or 3): ");
+        System.out.println("4. Test DELETE predefined SQL queries");
+
+        System.out.print("\nEnter choice (1-4): ");
 
         Scanner scanner = new Scanner(System.in);
         String choice = scanner.nextLine().trim();
@@ -44,7 +46,11 @@ public class SQLParserApp {
             testPredefinedQueries();
         } else if (choice.equals("3")) {
             readFromTestSql();
-        } else {
+        }
+        else if (choice.equals("4")){
+            testDeleteStatements();
+        }
+        else {
             System.out.println("Invalid choice. Running test mode by default...\n");
             testPredefinedQueries();
         }
@@ -158,7 +164,50 @@ public class SQLParserApp {
             parseSQLQuery(testQueries[i]);
         }
     }
+    /*method to  test the delete statements*/
+    /**
+ * Test DELETE statements specifically
+ */
+    private static void testDeleteStatements() {
+    String[] deleteQueries = {
+        // Most Common DELETE Patterns 
+"DELETE FROM Customers WHERE CustomerID = 1001",
+"DELETE FROM Orders WHERE Status = 'CANCELLED'",
+"DELETE FROM TempTable",
+"DELETE FROM Users WHERE IsActive = 0 AND LastLoginDate < '2023-01-01'",
 
+// JOIN Patterns 
+"DELETE t1 FROM Table1 t1 INNER JOIN Table2 t2 ON t1.ID = t2.RefID WHERE t2.Status = 'INACTIVE'",
+
+// IN Patterns 
+"DELETE FROM Table1 WHERE ID IN (SELECT ID FROM Table2 WHERE Condition = 1)",
+
+// EXISTS Patterns 
+"DELETE FROM Products WHERE NOT EXISTS (SELECT 1 FROM Inventory i WHERE i.ProductID = Products.ID)",
+"DELETE FROM Employees e WHERE EXISTS (SELECT 1 FROM Terminations t WHERE t.EmployeeID = e.EmployeeID AND t.Reason = 'VOLUNTARY')",
+
+// Complex WHERE
+"DELETE FROM Transactions WHERE (Amount > 1000 AND Status = 'PENDING') OR (CreatedDate < '2022-01-01' AND IsProcessed = 0)",
+"DELETE FROM UserSessions WHERE UserID IS NULL OR SessionExpiry < GETUTCDATE()",
+
+// Batch Deletes 
+"DELETE TOP (1000) FROM AuditLog WHERE LogDate < '2023-01-01'",
+"DELETE FROM LargeTable WHERE ID % 10 = 0",
+
+// Self-Referential 
+"DELETE FROM EmployeeHierarchy WHERE EmployeeID IN (SELECT ManagerID FROM EmployeeHierarchy WHERE Department = 'CLOSED')",};
+
+    System.out.println("\n" + "=".repeat(60));
+    System.out.println("DELETE STATEMENTS TEST");
+    System.out.println("=".repeat(60) + "\n");
+
+    for (int i = 0; i < deleteQueries.length; i++) {
+        System.out.println("\n" + "-".repeat(60));
+        System.out.println("DELETE Test " + (i + 1) + ":");
+        System.out.println("-".repeat(60));
+        parseSQLQuery(deleteQueries[i]);
+    }
+    }
     /**
      * Parses a SQL query and displays the parse tree
      */
