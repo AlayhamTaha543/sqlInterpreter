@@ -578,6 +578,226 @@ public interface SQLParserListener extends ParseTreeListener {
 	 */
 	void exitInsertStatement(SQLParser.InsertStatementContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link SQLParser#withClause}.
+	 * @param ctx the parse tree
+	 */
+	void enterWithClause(SQLParser.WithClauseContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SQLParser#withClause}.
+	 * @param ctx the parse tree
+	 */
+	void exitWithClause(SQLParser.WithClauseContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link SQLParser#cteExpression}.
+	 * @param ctx the parse tree
+	 */
+	void enterCteExpression(SQLParser.CteExpressionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SQLParser#cteExpression}.
+	 * @param ctx the parse tree
+	 */
+	void exitCteExpression(SQLParser.CteExpressionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link SQLParser#columnAliases}.
+	 * @param ctx the parse tree
+	 */
+	void enterColumnAliases(SQLParser.ColumnAliasesContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SQLParser#columnAliases}.
+	 * @param ctx the parse tree
+	 */
+	void exitColumnAliases(SQLParser.ColumnAliasesContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link SQLParser#targetSpecification}.
+	 * @param ctx the parse tree
+	 */
+	void enterTargetSpecification(SQLParser.TargetSpecificationContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SQLParser#targetSpecification}.
+	 * @param ctx the parse tree
+	 */
+	void exitTargetSpecification(SQLParser.TargetSpecificationContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link SQLParser#rowsetFunction}.
+	 * @param ctx the parse tree
+	 */
+	void enterRowsetFunction(SQLParser.RowsetFunctionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SQLParser#rowsetFunction}.
+	 * @param ctx the parse tree
+	 */
+	void exitRowsetFunction(SQLParser.RowsetFunctionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link SQLParser#columnList}.
+	 * @param ctx the parse tree
+	 */
+	void enterColumnList(SQLParser.ColumnListContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SQLParser#columnList}.
+	 * @param ctx the parse tree
+	 */
+	void exitColumnList(SQLParser.ColumnListContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link SQLParser#outputClause}.
+	 * @param ctx the parse tree
+	 */
+	void enterOutputClause(SQLParser.OutputClauseContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SQLParser#outputClause}.
+	 * @param ctx the parse tree
+	 */
+	void exitOutputClause(SQLParser.OutputClauseContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link SQLParser#outputExpressionList}.
+	 * @param ctx the parse tree
+	 */
+	void enterOutputExpressionList(SQLParser.OutputExpressionListContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SQLParser#outputExpressionList}.
+	 * @param ctx the parse tree
+	 */
+	void exitOutputExpressionList(SQLParser.OutputExpressionListContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link SQLParser#outputExpression}.
+	 * @param ctx the parse tree
+	 */
+	void enterOutputExpression(SQLParser.OutputExpressionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SQLParser#outputExpression}.
+	 * @param ctx the parse tree
+	 */
+	void exitOutputExpression(SQLParser.OutputExpressionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link SQLParser#outputTarget}.
+	 * @param ctx the parse tree
+	 */
+	void enterOutputTarget(SQLParser.OutputTargetContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SQLParser#outputTarget}.
+	 * @param ctx the parse tree
+	 */
+	void exitOutputTarget(SQLParser.OutputTargetContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link SQLParser#tableHint}.
+	 * @param ctx the parse tree
+	 */
+	void enterTableHint(SQLParser.TableHintContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SQLParser#tableHint}.
+	 * @param ctx the parse tree
+	 */
+	void exitTableHint(SQLParser.TableHintContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link SQLParser#hintList}.
+	 * @param ctx the parse tree
+	 */
+	void enterHintList(SQLParser.HintListContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SQLParser#hintList}.
+	 * @param ctx the parse tree
+	 */
+	void exitHintList(SQLParser.HintListContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link SQLParser#insertSource}.
+	 * @param ctx the parse tree
+	 */
+	void enterInsertSource(SQLParser.InsertSourceContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SQLParser#insertSource}.
+	 * @param ctx the parse tree
+	 */
+	void exitInsertSource(SQLParser.InsertSourceContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link SQLParser#valuesClause}.
+	 * @param ctx the parse tree
+	 */
+	void enterValuesClause(SQLParser.ValuesClauseContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SQLParser#valuesClause}.
+	 * @param ctx the parse tree
+	 */
+	void exitValuesClause(SQLParser.ValuesClauseContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link SQLParser#valueRow}.
+	 * @param ctx the parse tree
+	 */
+	void enterValueRow(SQLParser.ValueRowContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SQLParser#valueRow}.
+	 * @param ctx the parse tree
+	 */
+	void exitValueRow(SQLParser.ValueRowContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link SQLParser#executeStatement}.
+	 * @param ctx the parse tree
+	 */
+	void enterExecuteStatement(SQLParser.ExecuteStatementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SQLParser#executeStatement}.
+	 * @param ctx the parse tree
+	 */
+	void exitExecuteStatement(SQLParser.ExecuteStatementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link SQLParser#procedureCall}.
+	 * @param ctx the parse tree
+	 */
+	void enterProcedureCall(SQLParser.ProcedureCallContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SQLParser#procedureCall}.
+	 * @param ctx the parse tree
+	 */
+	void exitProcedureCall(SQLParser.ProcedureCallContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link SQLParser#dmlTableSource}.
+	 * @param ctx the parse tree
+	 */
+	void enterDmlTableSource(SQLParser.DmlTableSourceContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SQLParser#dmlTableSource}.
+	 * @param ctx the parse tree
+	 */
+	void exitDmlTableSource(SQLParser.DmlTableSourceContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link SQLParser#optionClause}.
+	 * @param ctx the parse tree
+	 */
+	void enterOptionClause(SQLParser.OptionClauseContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SQLParser#optionClause}.
+	 * @param ctx the parse tree
+	 */
+	void exitOptionClause(SQLParser.OptionClauseContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link SQLParser#queryHint}.
+	 * @param ctx the parse tree
+	 */
+	void enterQueryHint(SQLParser.QueryHintContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SQLParser#queryHint}.
+	 * @param ctx the parse tree
+	 */
+	void exitQueryHint(SQLParser.QueryHintContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link SQLParser#bulkInsertStatement}.
+	 * @param ctx the parse tree
+	 */
+	void enterBulkInsertStatement(SQLParser.BulkInsertStatementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SQLParser#bulkInsertStatement}.
+	 * @param ctx the parse tree
+	 */
+	void exitBulkInsertStatement(SQLParser.BulkInsertStatementContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link SQLParser#bulkOption}.
+	 * @param ctx the parse tree
+	 */
+	void enterBulkOption(SQLParser.BulkOptionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SQLParser#bulkOption}.
+	 * @param ctx the parse tree
+	 */
+	void exitBulkOption(SQLParser.BulkOptionContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link SQLParser#updateStatement}.
 	 * @param ctx the parse tree
 	 */

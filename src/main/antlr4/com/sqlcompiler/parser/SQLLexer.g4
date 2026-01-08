@@ -19,7 +19,11 @@ FETCH: F E T C H;         // Fetches specified number of rows
 NEXT: N E X T;            // Used with FETCH
 FIRST: F I R S T;         // Used with FETCH
 ONLY: O N L Y;            // Used with FETCH
-
+BULK: B U L K; //kaled
+OPENROWSET: O P E N R O W S E T; //kaled
+OPENQUERY: O P E N Q U E R Y; //kaled
+INSERTED: I N S E R T E D; //kaled
+DELETED: D E L E T E D; //kaled
 // -------------------------
 // DATA MANIPULATION LANGUAGE 
 // -------------------------

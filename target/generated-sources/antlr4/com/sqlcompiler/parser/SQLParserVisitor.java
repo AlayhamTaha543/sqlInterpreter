@@ -353,6 +353,138 @@ public interface SQLParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitInsertStatement(SQLParser.InsertStatementContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link SQLParser#withClause}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitWithClause(SQLParser.WithClauseContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link SQLParser#cteExpression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCteExpression(SQLParser.CteExpressionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link SQLParser#columnAliases}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitColumnAliases(SQLParser.ColumnAliasesContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link SQLParser#targetSpecification}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTargetSpecification(SQLParser.TargetSpecificationContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link SQLParser#rowsetFunction}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitRowsetFunction(SQLParser.RowsetFunctionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link SQLParser#columnList}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitColumnList(SQLParser.ColumnListContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link SQLParser#outputClause}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitOutputClause(SQLParser.OutputClauseContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link SQLParser#outputExpressionList}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitOutputExpressionList(SQLParser.OutputExpressionListContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link SQLParser#outputExpression}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitOutputExpression(SQLParser.OutputExpressionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link SQLParser#outputTarget}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitOutputTarget(SQLParser.OutputTargetContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link SQLParser#tableHint}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTableHint(SQLParser.TableHintContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link SQLParser#hintList}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitHintList(SQLParser.HintListContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link SQLParser#insertSource}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInsertSource(SQLParser.InsertSourceContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link SQLParser#valuesClause}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitValuesClause(SQLParser.ValuesClauseContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link SQLParser#valueRow}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitValueRow(SQLParser.ValueRowContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link SQLParser#executeStatement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitExecuteStatement(SQLParser.ExecuteStatementContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link SQLParser#procedureCall}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitProcedureCall(SQLParser.ProcedureCallContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link SQLParser#dmlTableSource}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDmlTableSource(SQLParser.DmlTableSourceContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link SQLParser#optionClause}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitOptionClause(SQLParser.OptionClauseContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link SQLParser#queryHint}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitQueryHint(SQLParser.QueryHintContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link SQLParser#bulkInsertStatement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitBulkInsertStatement(SQLParser.BulkInsertStatementContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link SQLParser#bulkOption}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitBulkOption(SQLParser.BulkOptionContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link SQLParser#updateStatement}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
