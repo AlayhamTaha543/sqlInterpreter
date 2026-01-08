@@ -25,7 +25,7 @@ sqlStatement
 /* =========================================================
  * SELECT STATEMENT
  * ========================================================= */
-
+//yara
 selectStatement
     : queryExpression orderByClause? offsetFetchClause?
     ;
