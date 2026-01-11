@@ -9,14 +9,15 @@ options {
  * Entry point for SQL statements
  */
 sqlStatement
-    : selectStatement
-    | insertStatement
-    | bulkInsertStatement          // Added for BULK INSERT (example 20)
-    | updateStatement
-    | deleteStatement
-    | createStatement
-    | alterStatement
-    | dropStatement
+    : ( selectStatement
+      | insertStatement
+      | bulkInsertStatement          
+      | updateStatement
+      | deleteStatement
+      | createStatement
+      | alterStatement
+      | dropStatement
+      ) SEMICOLON?
     ;
 // Root rule for parsing - includes EOF
 sqlStatements
@@ -30,7 +31,7 @@ selectStatement
     ;
 queryExpression
     : querySpecification
-    | '(' queryExpression ')'
+    | LPAREN queryExpression RPAREN
     | queryExpression setOperator queryExpression
     ;
 querySpecification
@@ -44,7 +45,7 @@ querySpecification
 // TOP CLAUSE
 // -------------------------
 topClause
-    : TOP (INTEGER | '(' expression ')') (PERCENT)? (WITH TIES)?
+    : TOP (INTEGER | LPAREN expression RPAREN) (PERCENT)? (WITH TIES)?
     ;
 // -------------------------
 // DISTINCT CLAUSE
@@ -57,27 +58,27 @@ distinctClause
 // SELECT LIST
 // -------------------------
 selectList
-    : selectListElement (',' selectListElement)*
-    | '*'
+    : selectListElement (COMMA selectListElement)*
+    | STAR
     ;
 selectListElement
     : expression (AS? columnAlias)?
-    | tableName '.' '*'
-    | '*'
+    | tableName DOT STAR
+    | STAR
     ;
 // =============================================
 // FROM CLAUSE WITH JOIN OPERATIONS
 // =============================================
 fromClause
-    : FROM tableSource (',' tableSource)*
+    : FROM tableSource (COMMA tableSource)*
     ;
 tableSource
     : tableSourceItem joinPart*
     ;
 tableSourceItem
     : tableName (AS? tableAlias)?
-    | '(' queryExpression ')' (AS? tableAlias)?
-    | '(' tableSource ')'
+    | LPAREN queryExpression RPAREN (AS? tableAlias)?
+    | LPAREN tableSource RPAREN
     ;
 // -------------------------
 // JOIN OPERATIONS (INNER, LEFT, RIGHT, FULL, CROSS)
@@ -94,7 +95,7 @@ joinType
     ;
 joinCondition
     : ON searchCondition
-    | USING '(' columnName (',' columnName)* ')'
+    | USING LPAREN columnName (COMMA columnName)* RPAREN
     ;
 // =============================================
 // WHERE CLAUSE - WITH AND/OR/NOT LOGIC
@@ -109,7 +110,7 @@ searchCondition
     : searchCondition AND searchCondition
     | searchCondition OR searchCondition
     | NOT searchCondition
-    | '(' searchCondition ')'
+    | LPAREN searchCondition RPAREN
     | predicate
     ;
 // =============================================
@@ -119,10 +120,10 @@ predicate
     : expression comparisonOperator expression
     | expression IS NOT? NULL
     | expression NOT? BETWEEN expression AND expression
-    | expression NOT? IN '(' (queryExpression | expressionList) ')'
-    | expression NOT? IN '(' ')'
+    | expression NOT? IN LPAREN (queryExpression | expressionList) RPAREN
+    | expression NOT? IN LPAREN RPAREN
     | expression NOT? LIKE expression (ESCAPE STRING)?
-    | EXISTS '(' queryExpression ')'
+    | EXISTS LPAREN queryExpression RPAREN
     | expression NOT? IN IDENTIFIER
     | expression
     ;
@@ -130,7 +131,7 @@ predicate
 // GROUP BY / HAVING / ORDER BY / OFFSET FETCH
 // =============================================
 groupByClause
-    : GROUP BY groupByItem (',' groupByItem)*
+    : GROUP BY groupByItem (COMMA groupByItem)*
     ;
 groupByItem
     : expression
@@ -139,7 +140,7 @@ havingClause
     : HAVING searchCondition
     ;
 orderByClause
-    : ORDER BY orderByExpression (',' orderByExpression)*
+    : ORDER BY orderByExpression (COMMA orderByExpression)*
     ;
 orderByExpression
     : expression (ASC | DESC)?
@@ -160,20 +161,20 @@ expression
     | subquery
     | USER_VARIABLE
     | SYSTEM_VARIABLE
-    | '(' expression ')'
+    | LPAREN expression RPAREN
     | unaryOperator expression
-    | expression ('*' | '/' | '%') expression
-    | expression ('+' | '-') expression
-    | expression ('||' | '+') expression
+    | expression (STAR | SLASH | PERCENT_SIGN) expression
+    | expression (PLUS | MINUS) expression
+    | expression (PIPE_PIPE | PLUS) expression
     | expression comparisonOperator expression
     | castExpression
     | windowFunction
     ;
 expressionList
-    : expression (',' expression)*
+    : expression (COMMA expression)*
     ;
 subquery
-    : '(' queryExpression ')'
+    : LPAREN queryExpression RPAREN
     ;
 // =============================================
 // CASE / CAST / WINDOW / FUNCTIONS
@@ -185,17 +186,17 @@ whenClause
     : WHEN searchCondition THEN expression
     ;
 castExpression
-    : CAST '(' expression AS dataType ')'
-    | CONVERT '(' dataType ',' expression (',' INTEGER)? ')'
-    | TRY_CAST '(' expression AS dataType ')'
-    | TRY_CONVERT '(' dataType ',' expression (',' INTEGER)? ')'
+    : CAST LPAREN expression AS dataType RPAREN
+    | CONVERT LPAREN dataType COMMA expression (COMMA INTEGER)? RPAREN
+    | TRY_CAST LPAREN expression AS dataType RPAREN
+    | TRY_CONVERT LPAREN dataType COMMA expression (COMMA INTEGER)? RPAREN
     ;
 windowFunction
-    : (aggregateFunction | rankingFunction | analyticFunction) OVER '(' windowSpecification ')'
+    : (aggregateFunction | rankingFunction | analyticFunction) OVER LPAREN windowSpecification RPAREN
     ;
 windowSpecification
     : (PARTITION BY expressionList)?
-      (ORDER BY orderByExpression (',' orderByExpression)*)?
+      (ORDER BY orderByExpression (COMMA orderByExpression)*)?
       windowFrame?
     ;
 windowFrame
@@ -210,16 +211,16 @@ windowFrameBound
     | INTEGER FOLLOWING
     ;
 rankingFunction
-    : ROW_NUMBER '(' ')'
-    | RANK '(' ')'
-    | DENSE_RANK '(' ')'
-    | NTILE '(' expression ')'
+    : ROW_NUMBER LPAREN RPAREN
+    | RANK LPAREN RPAREN
+    | DENSE_RANK LPAREN RPAREN
+    | NTILE LPAREN expression RPAREN
     ;
 analyticFunction
-    : LAG '(' expression (',' INTEGER (',' expression)?)? ')'
-    | LEAD '(' expression (',' INTEGER (',' expression)?)? ')'
-    | FIRST_VALUE '(' expression ')'
-    | LAST_VALUE '(' expression ')'
+    : LAG LPAREN expression (COMMA INTEGER (COMMA expression)?)? RPAREN
+    | LEAD LPAREN expression (COMMA INTEGER (COMMA expression)?)? RPAREN
+    | FIRST_VALUE LPAREN expression RPAREN
+    | LAST_VALUE LPAREN expression RPAREN
     ;
 functionCall
     : aggregateFunction
@@ -229,32 +230,32 @@ functionCall
     | conversionFunction
     ;
 aggregateFunction
-    : (COUNT | SUM | AVG | MIN | MAX) '(' (DISTINCT | ALL)? (expression | '*') ')'
+    : (COUNT | SUM | AVG | MIN | MAX) LPAREN (DISTINCT | ALL)? (expression | STAR) RPAREN
     ;
 scalarFunction
-    : functionName '(' (expression (',' expression)*)? ')'
+    : functionName LPAREN (expression (COMMA expression)*)? RPAREN
     ;
 stringFunction
-    : LEN '(' expression ')'
-    | SUBSTRING '(' expression ',' expression ',' expression ')'
-    | LTRIM '(' expression ')'
-    | RTRIM '(' expression ')'
-    | UPPER '(' expression ')'
-    | LOWER '(' expression ')'
-    | REPLACE '(' expression ',' expression ',' expression ')'
-    | CONCAT '(' expression (',' expression)+ ')'
-    | CHARINDEX '(' expression ',' expression (',' expression)? ')'
-    | PATINDEX '(' expression ',' expression ')'
+    : LEN LPAREN expression RPAREN
+    | SUBSTRING LPAREN expression COMMA expression COMMA expression RPAREN
+    | LTRIM LPAREN expression RPAREN
+    | RTRIM LPAREN expression RPAREN
+    | UPPER LPAREN expression RPAREN
+    | LOWER LPAREN expression RPAREN
+    | REPLACE LPAREN expression COMMA expression COMMA expression RPAREN
+    | CONCAT LPAREN expression (COMMA expression)+ RPAREN
+    | CHARINDEX LPAREN expression COMMA expression (COMMA expression)? RPAREN
+    | PATINDEX LPAREN expression COMMA expression RPAREN
     ;
 dateFunction
-    : GETDATE '(' ')'
-    | GETUTCDATE '(' ')'
-    | DATEADD '(' IDENTIFIER ',' expression ',' expression ')'
-    | DATEDIFF '(' IDENTIFIER ',' expression ',' expression ')'
-    | DATEPART '(' IDENTIFIER ',' expression ')'
-    | YEAR '(' expression ')'
-    | MONTH '(' expression ')'
-    | DAY '(' expression ')'
+    : GETDATE LPAREN RPAREN
+    | GETUTCDATE LPAREN RPAREN
+    | DATEADD LPAREN IDENTIFIER COMMA expression COMMA expression RPAREN
+    | DATEDIFF LPAREN IDENTIFIER COMMA expression COMMA expression RPAREN
+    | DATEPART LPAREN IDENTIFIER COMMA expression RPAREN
+    | YEAR LPAREN expression RPAREN
+    | MONTH LPAREN expression RPAREN
+    | DAY LPAREN expression RPAREN
     ;
 conversionFunction
     : castExpression
@@ -263,11 +264,11 @@ conversionFunction
 // COLUMN AND TABLE REFERENCES
 // =============================================
 columnReference
-    : (tableName '.')? columnName
-    | (schemaName '.' tableName '.')? columnName
+    : (tableName DOT)? columnName
+    | (schemaName DOT tableName DOT)? columnName
     ;
 tableName
-    : (schemaName '.')? identifier
+    : (schemaName DOT)? identifier
     ;
 columnName
     : identifier
@@ -296,26 +297,26 @@ identifier
     | nonReservedKeyword
     ;
 nonReservedKeyword
-    : KEY | ROLE | USER | TYPE | OPTION | PARTITION | RANGE | ROWS | ROW
+    : KEY | ROLE | USER | TYPE | OPTION | PARTITION | RANGE | ROWS | ROW | WRITE
     ;
 dataType
     : INT | BIGINT | SMALLINT | TINYINT
-    | VARCHAR ('(' INTEGER ')')? | NVARCHAR ('(' INTEGER | MAX ')')?
-    | CHAR ('(' INTEGER ')')? | NCHAR ('(' INTEGER ')')?
+    | VARCHAR (LPAREN INTEGER RPAREN)? | NVARCHAR (LPAREN INTEGER | MAX RPAREN)?
+    | CHAR (LPAREN INTEGER RPAREN)? | NCHAR (LPAREN INTEGER RPAREN)?
     | TEXT | NTEXT | DATETIME | DATE | TIME | TIMESTAMP | BIT
-    | DECIMAL ('(' INTEGER (',' INTEGER)? ')')? | NUMERIC ('(' INTEGER (',' INTEGER)? ')')?
-    | FLOAT ('(' INTEGER ')')? | REAL | MONEY | SMALLMONEY
-    | BINARY ('(' INTEGER ')')? | VARBINARY ('(' INTEGER | MAX ')')?
+    | DECIMAL (LPAREN INTEGER (COMMA INTEGER)? RPAREN)? | NUMERIC (LPAREN INTEGER (COMMA INTEGER)? RPAREN)?
+    | FLOAT (LPAREN INTEGER RPAREN)? | REAL | MONEY | SMALLMONEY
+    | BINARY (LPAREN INTEGER RPAREN)? | VARBINARY (LPAREN INTEGER | MAX RPAREN)?
     | IMAGE | UNIQUEIDENTIFIER | XML | SQL_VARIANT
     ;
 literal
     : STRING | INTEGER | FLOATN | NULL | TRUE | FALSE
     ;
 comparisonOperator
-    : '=' | '>' | '<' | '<=' | '>=' | '<>' | '!=' | '!<' | '!>'
+    : EQUALS | GREATER | LESS | LESS_EQUAL | GREATER_EQUAL | NOT_EQUAL1 | NOT_EQUAL2 | NOT_LESS | NOT_GREATER
     ;
 unaryOperator
-    : '+' | '-' | '~' | NOT
+    : PLUS | MINUS | MINUS | NOT
     ;
 setOperator
     : UNION ALL? | EXCEPT | INTERSECT
@@ -334,39 +335,39 @@ insertStatement
       insertSource                                // VALUES / SELECT / EXEC / DEFAULT VALUES
       tableHint?                                  // 19. WITH (TABLOCK)
       optionClause?                               // 21. OPTION (...)
-      ';'?                                        // 22. Semicolon
+      SEMICOLON?                                        // 22. Semicolon
     ;
 
 // Supporting rules for INSERT
 withClause
-    : WITH cteExpression (',' cteExpression)*
+    : WITH cteExpression (COMMA cteExpression)*
     ;
 cteExpression
-    : identifier columnAliases? AS '(' queryExpression ')'
+    : identifier columnAliases? AS LPAREN queryExpression RPAREN
     ;
 columnAliases
-    : '(' identifier (',' identifier)* ')'
+    : LPAREN identifier (COMMA identifier)* RPAREN
     ;
 targetSpecification
-    : (server=identifier '.')? (db=identifier '.')? (schema=identifier '.')? table=identifier   // Remote + normal
+    : (server=identifier DOT)? (db=identifier DOT)? (schema=identifier DOT)? table=identifier   // Remote + normal
     | rowsetFunction
     | USER_VARIABLE                                          // Table variable (example 17)
     ;
 rowsetFunction
-    : OPENROWSET '(' STRING ',' STRING ',' STRING ')'
-    | OPENQUERY '(' identifier ',' STRING ')'
+    : OPENROWSET LPAREN STRING COMMA STRING COMMA STRING RPAREN
+    | OPENQUERY LPAREN identifier COMMA STRING RPAREN
     ;
 columnList
-    : '(' columnName (',' columnName)* ')'
+    : LPAREN columnName (COMMA columnName)* RPAREN
     ;
 outputClause
     : OUTPUT outputExpressionList (INTO outputTarget columnAliases? )?
     ;
 outputExpressionList
-    : outputExpression (',' outputExpression)*
+    : outputExpression (COMMA outputExpression)*
     ;
 outputExpression
-    : (INSERTED | DELETED) '.' (identifier | '*')
+    : (INSERTED | DELETED) DOT (identifier | STAR)
     | expression (AS? identifier)?
     ;
 outputTarget
@@ -374,10 +375,10 @@ outputTarget
     | tableName
     ;
 tableHint
-    : WITH '(' hintList ')'
+    : WITH LPAREN hintList RPAREN
     ;
 hintList
-    : identifier (',' identifier)*
+    : identifier (COMMA identifier)*
     ;
 insertSource
     : valuesClause
@@ -387,26 +388,26 @@ insertSource
     | DEFAULT VALUES                                 // Example 7
     ;
 valuesClause
-    : VALUES valueRow (',' valueRow)*
+    : VALUES valueRow (COMMA valueRow)*
     ;
 valueRow
-    : '(' expressionList ')'
-    | '(' ')'
+    : LPAREN expressionList RPAREN
+    | LPAREN RPAREN
     ;
 executeStatement
     : (EXEC | EXECUTE)? (procedureCall | STRING)
     ;
 procedureCall
-    : (schemaName '.')? identifier
+    : (schemaName DOT)? identifier
     ;
 dmlTableSource
-    : '(' (deleteStatement | updateStatement) outputClause ')' (AS? identifier)?
+    : LPAREN (deleteStatement | updateStatement) outputClause RPAREN (AS? identifier)?
     ;
 optionClause
-    : OPTION '(' queryHint (',' queryHint)* ')'
+    : OPTION LPAREN queryHint (COMMA queryHint)* RPAREN
     ;
 queryHint
-    : identifier ('=' STRING)?
+    : identifier (EQUALS STRING)?
     | RECOMPILE
     ;
 
@@ -416,32 +417,62 @@ queryHint
 bulkInsertStatement
     : BULK INSERT targetSpecification
       FROM STRING
-      (WITH '(' bulkOption (',' bulkOption)* ')')?
+      (WITH LPAREN bulkOption (COMMA bulkOption)* RPAREN)?
     ;
 bulkOption
-    : identifier ('=' (INTEGER | STRING))?
+    : identifier (EQUALS (INTEGER | STRING))?
     ;
 
 // =============================================
-// UPDATE / DELETE / CREATE / ALTER / DROP (unchanged)
+// UPDATE STATEMENT
 // =============================================
 updateStatement
-    : UPDATE tableName SET columnName '=' expression (',' columnName '=' expression)*
+    : withClause?
+      UPDATE topClause?
+      updateTarget
+      SET updateSetClause (COMMA updateSetClause)*
+      outputClause?
+      fromClause?
       whereClause?
+      optionClause?
+      SEMICOLON?
     ;
-<<<<<<< HEAD
-=======
 
+updateTarget
+    : (server=identifier DOT)? (db=identifier DOT)? (schema=identifier DOT)? table=identifier
+    | USER_VARIABLE
+    ;
+updateSetClause
+    : updateWriteExpression
+    | updateAssignmentExpression
+    ;
+
+updateWriteExpression
+    : fullColumnName DOT WRITE LPAREN expression COMMA expression COMMA expression RPAREN
+    ;
+
+updateAssignmentExpression
+    : fullColumnName assignmentOperator expression
+    ;
+
+fullColumnName
+    : (identifier DOT)? identifier
+    | USER_VARIABLE
+    ;
+
+assignmentOperator
+    : EQUALS | PLUS_EQUAL | MINUS_EQUAL | STAR_EQUAL | SLASH_EQUAL 
+    | PERCENT_EQUAL | AMPERSAND_EQUAL | CARET_EQUAL | PIPE_EQUAL
+    ;
 // =============================================
 // DELETE STATEMENT -Version 1
 // =============================================
 
->>>>>>> main
 deleteStatement
     : DELETE  deleteTarget?
       (topClause)?
       (FROM)? 
-      tableSource (',' tableSource)*  
+      tableSource (COMMA tableSource)*  
       whereClause?
       (SEMICOLON)?
     ;
@@ -451,7 +482,7 @@ deleteTarget
     ;
 
 tableSources
-    : tableSource (',' tableSource)*
+    : tableSource (COMMA tableSource)*
     ;
 
 
@@ -462,20 +493,20 @@ joinClause
       ON searchCondition
     ;
 createStatement
-    : CREATE TABLE tableName '(' columnDefinition (',' columnDefinition)* ')'
+    : CREATE TABLE tableName LPAREN columnDefinition (COMMA columnDefinition)* RPAREN
     | CREATE VIEW tableName AS queryExpression
-    | CREATE PROCEDURE identifier ('(' parameterList ')')? AS BEGIN statementList END
-    | CREATE FUNCTION identifier '(' parameterList? ')' RETURN dataType AS BEGIN statementList RETURN expression END
-    | CREATE INDEX identifier ON tableName '(' columnName (',' columnName)* ')'
+    | CREATE PROCEDURE identifier (LPAREN parameterList RPAREN)? AS BEGIN statementList END
+    | CREATE FUNCTION identifier LPAREN parameterList? RPAREN RETURN dataType AS BEGIN statementList RETURN expression END
+    | CREATE INDEX identifier ON tableName LPAREN columnName (COMMA columnName)* RPAREN
     ;
 statementList
     : (selectStatement | insertStatement | updateStatement | deleteStatement | declareStatement | setStatement | ifStatement | whileStatement | returnStatement)+
     ;
 declareStatement
-    : DECLARE USER_VARIABLE dataType ('=' expression)?
+    : DECLARE USER_VARIABLE dataType (EQUALS expression)?
     ;
 setStatement
-    : SET USER_VARIABLE '=' expression
+    : SET USER_VARIABLE EQUALS expression
     ;
 ifStatement
     : IF searchCondition BEGIN statementList END (ELSE BEGIN statementList END)?
@@ -491,15 +522,15 @@ columnDefinition
     ;
 columnConstraint
     : PRIMARY KEY
-    | FOREIGN KEY REFERENCES tableName ('(' columnName ')')?
+    | FOREIGN KEY REFERENCES tableName (LPAREN columnName RPAREN)?
     | UNIQUE
     | NOT? NULL
-    | CHECK '(' searchCondition ')'
+    | CHECK LPAREN searchCondition RPAREN
     | DEFAULT expression
-    | IDENTITY ('(' INTEGER ',' INTEGER ')')?
+    | IDENTITY (LPAREN INTEGER COMMA INTEGER RPAREN)?
     ;
 parameterList
-    : parameter (',' parameter)*
+    : parameter (COMMA parameter)*
     ;
 parameter
     : USER_VARIABLE dataType
