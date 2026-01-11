@@ -25,16 +25,13 @@ FETCH: F E T C H;         // Fetches specified number of rows
 NEXT: N E X T;            // Used with FETCH
 FIRST: F I R S T;         // Used with FETCH
 ONLY: O N L Y;            // Used with FETCH
-<<<<<<< HEAD
 BULK: B U L K; //kaled
 OPENROWSET: O P E N R O W S E T; //kaled
 OPENQUERY: O P E N Q U E R Y; //kaled
 INSERTED: I N S E R T E D; //kaled
 DELETED: D E L E T E D; //kaled
-=======
 
 
->>>>>>> main
 // -------------------------
 // DATA MANIPULATION LANGUAGE 
 // -------------------------
@@ -395,6 +392,8 @@ fragment DOUBLE_QUOTED_STRING: '"'  ( '\\' . | '""'   | ~('"'  | '\\') )* '"';
 // MAX keyword for VARCHAR(MAX), VARBINARY(MAX)
 MAX: M A X;
 
+WRITE: W R I T E;
+
 // Type keyword
 TYPE: T Y P E;
 
@@ -441,12 +440,30 @@ PLUS: '+';
 MINUS: '-';
 TILDE: '~';
 PIPE_PIPE: '||';
-
+//update addtions
+PLUS_EQUAL: '+=';
+MINUS_EQUAL: '-=';
+STAR_EQUAL: '*=';
+SLASH_EQUAL: '/=';
+PERCENT_EQUAL: '%=';
+AMPERSAND_EQUAL: '&=';
+CARET_EQUAL: '^=';
+PIPE_EQUAL: '|=';
+EQUAL_EQUAL: '=='; 
 COMMA: ',';
 
 LPAREN: '(';
 RPAREN: ')';
 SEMICOLON: ';';
+
+
+// Single-line comments (SQL style)
+LINE_COMMENT: '--' ~[\r\n]* -> skip;
+
+// Multi-line comments (C style)
+BLOCK_COMMENT: '/*' .*? '*/' -> skip;
+
+
 fragment A: [aA];
 fragment B: [bB];
 fragment C: [cC];
