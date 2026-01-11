@@ -1,98 +1,32 @@
+INSERT INTO Employees (Name, Salary) VALUES ('Alice', 60000)
+INSERT Employees (Name) VALUES ('Bob')
+INSERT INTO Employees VALUES ('Ivy', 95000)
+INSERT INTO Employees (Name, Salary, Dept) VALUES ('Frank', NULL, DEFAULT)
+INSERT INTO Employees (Name, Salary) VALUES ('Charlie', 70000), ('Dana', 75000), ('Eve', 80000)
+INSERT INTO Employees (Name, Salary) VALUES ('Henry', 90000 + 12345)
+INSERT INTO Employees DEFAULT VALUES
+INSERT INTO Employees (Name, Salary) SELECT Name, Salary FROM OldEmployees WHERE Salary > 80000
+INSERT TOP (5) INTO Employees (Name, Salary) SELECT Name, Salary FROM SourceTable
 
-CREATE TABLE [dbo].[DIAGNOSIS](
-	[DIAGNOSIS_KEY'1] [int] NOT NULL,
-	[DIAGNOSIS_NAME] [nvarchar](300) NOT NULL,
-	[DIAGNOSIS_CATEGORY_KEY] [int] NULL
-	)
+WITH NewHires AS (SELECT 'Kelly' AS Name, 110000 AS Salary UNION ALL SELECT 'Liam', 115000) INSERT INTO Employees (Name, Salary) SELECT Name, Salary FROM NewHires
+INSERT INTO Employees (Name, Salary) OUTPUT INSERTED.ID, INSERTED.Name, INSERTED.Salary VALUES ('Noah', 125000)
 
-IF NOT EXISTS (
-    SELECT 1 FROM sys.columns
-    WHERE Name = 'KEY1''S'
-      AND Object_ID = Object_ID('FACT1')
-)
-BEGIN
-		ALTER TABLE FACT1 
-        ADD [KEY1'S] INT NULL;
-END
-GO
+INSERT INTO Employees (Name, Salary) EXEC GetNewEmployees
 
-UPDATE FACT1
-SET [KEY1'S] =
-    CASE 
-        WHEN KEY2 = 4 OR KEY3 IN (1,7) THEN 1
-        WHEN KEY5 = 2 THEN 2
-        ELSE 0
-    END
-WHERE [KEY1'S] IS NULL;
-GO
-
-IF NOT EXISTS (
-    SELECT 1 FROM sys.columns 
-    WHERE Name = 'HASH2' 
-      AND Object_ID = Object_ID('FACT_2')
-)
-BEGIN
-    ALTER TABLE FACT_2 
-    ADD HASH2 BIGINT NULL;
-END
-GO
-
-IF NOT EXISTS (
-    SELECT 1 FROM sys.columns 
-    WHERE Name = 'DIAGNOSIS_KEY''1' 
-      AND Object_ID = Object_ID('FACT_2')
-)
-BEGIN
-    ALTER TABLE FACT_2 
-    ADD [DIAGNOSIS_KEY'1] INT NULL;
-END
-GO
+INSERT INTO vActiveEmployees (Name, Salary) VALUES ('Quinn', 140000)
 
 
-DECLARE @ErrorMessage         NVARCHAR(4000)          
-DECLARE @ErrorState           INT          
-DECLARE @ErrorSeverity        INT 
+INSERT INTO RemoteServer.RemoteDB.dbo.Employees (Name, Salary) VALUES ('Sophia', 150000)
 
-/* DROP CONSTARINTS */
-declare @sql_drop_constarints nvarchar(max)
-set @sql_drop_constarints = ''
+INSERT INTO Employees (Name, Salary) SELECT Name, Salary FROM StagingTable OPTION (LABEL = 'SynapseInsertJob')
 
-SELECT @sql_drop_constarints += N'
-ALTER TABLE ' + QUOTENAME(OBJECT_SCHEMA_NAME(parent_object_id))
-    + '.' + QUOTENAME(OBJECT_NAME(parent_object_id)) + 
-    ' DROP CONSTRAINT ' + QUOTENAME(name) + ';' 
-FROM sys.foreign_keys;
+BULK INSERT Employees FROM 'C:\Users\kaled\Desktop\plan.csv' WITH (FIELDTERMINATOR = ',', ROWTERMINATOR = '\n', ROWS_PER_BATCH = 10000, TABLOCK)
 
-BEGIN TRY
-EXEC sp_executesql @sql_drop_constarints;
-END TRY
-BEGIN CATCH
+INSERT INTO Employees (Name) VALUES ('Uma')
 
-    --Obtain the error message, severity and state      
-    SELECT @ErrorMessage = ERROR_MESSAGE(), @ErrorSeverity = ERROR_SEVERITY(), @ErrorState = ERROR_STATE()      
-    --RAISERROR (@ErrorMessage, @ErrorSeverity, @ErrorState)         
-END CATCH
+INSERT INTO Employees VALUES ()
 
+INSERT TOP (5) PERCENT Employees SELECT * FROM Source
+INSERT INTO [Table    With     Spaces] (Column1) VALUES (42)
 
-/* DROP ALL TABLES EXECPT 
-/* DROP ALL TABLES EXECPT 
-*/
-*/
-DECLARE @sql_drop_tables NVARCHAR(max)=''
-
-SELECT @sql_drop_tables += ' Drop table ' + QUOTENAME(TABLE_SCHEMA) + '.'+ QUOTENAME(TABLE_NAME) + '; '
-FROM   INFORMATION_SCHEMA.TABLES
-WHERE  TABLE_TYPE = 'BASE TABLE'
-AND TABLE_NAME NOT IN ('FACT1', 'fact2', 'Fact3' )
-
-Exec Sp_executesql @sql_drop_tables
-
-BEGIN TRY
-EXEC sp_executesql @sql_drop_tables;
-END TRY
-BEGIN CATCH
-    --Obtain the error message, severity and state      
-    SELECT @ErrorMessage = ERROR_MESSAGE(), @ErrorSeverity = ERROR_SEVERITY(), @ErrorState = ERROR_STATE()      
-    --RAISERROR (@ErrorMessage, @ErrorSeverity, @ErrorState)         
-END CATCH
 
