@@ -1,1 +1,1 @@
-SELECT 'with \'backslash\''  
+RENAME TABLE employees TO hr.staff;

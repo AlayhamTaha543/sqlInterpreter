@@ -1,345 +1,253 @@
 parser grammar SQLParser;
 
 options {
-    tokenVocab = SQLLexer;
+	tokenVocab = SQLLexer;
 }
 
 /* =========================================================
- * ENTRY POINT
- * ========================================================= */
+ ENTRY POINT
+ * =========================================================
+ */
 
-sqlStatements
-    : sqlStatement* EOF
-    ;
+sqlStatements: sqlStatement* EOF;
 
-sqlStatement
-    : selectStatement
-    | insertStatement
-    | updateStatement
-    | deleteStatement
-    | createStatement
-    | alterStatement
-    | dropStatement
-    ;
+sqlStatement:
+	selectStatement
+	| insertStatement
+	| updateStatement
+	| deleteStatement
+	| createStatement
+	| alterStatement
+	| dropStatement
+	| renameStatement;
+
+/* =====================================================
+ RENAME STATEMENT (ONLY WHAT YOU ASKED)
+ * =====================================================
+ */
+
+renameStatement:
+	RENAME TABLE renameTableItem (',' renameTableItem)*;
+
+renameTableItem: tableName TO tableName;
 
 /* =========================================================
- * SELECT STATEMENT
- * ========================================================= */
+ SELECT STATEMENT
+ * =========================================================
+ */
 //yara
-selectStatement
-    : queryExpression orderByClause? offsetFetchClause?
-    ;
+selectStatement:
+	queryExpression orderByClause? offsetFetchClause?;
 
 /* ---------- QUERY EXPRESSION (UNION / INTERSECT / EXCEPT) ---------- */
 
-queryExpression
-    : queryTerm (setOperator queryTerm)*
-    ;
+queryExpression: queryTerm (setOperator queryTerm)*;
 
-queryTerm
-    : queryPrimary
-    ;
+queryTerm: queryPrimary;
 
-queryPrimary
-    : querySpecification
-    | '(' queryExpression ')'
-    ;
+queryPrimary: querySpecification | '(' queryExpression ')';
 
 /* ---------- QUERY SPECIFICATION ---------- */
 
-querySpecification
-    : SELECT topClause? distinctClause? selectList
-      fromClause?
-      whereClause?
-      groupByClause?
-      havingClause?
-    ;
+querySpecification:
+	SELECT topClause? distinctClause? selectList fromClause? whereClause? groupByClause?
+		havingClause?;
 
 /* ---------- TOP / DISTINCT ---------- */
 
-topClause
-    : TOP INTEGER (PERCENT)? (WITH TIES)?
-    ;
+topClause: TOP INTEGER (PERCENT)? (WITH TIES)?;
 
-distinctClause
-    : DISTINCT
-    | ALL
-    ;
+distinctClause: DISTINCT | ALL;
 
 /* ---------- SELECT LIST ---------- */
 
-selectList
-    : '*'
-    | selectListElement (',' selectListElement)*
-    ;
+selectList: '*' | selectListElement (',' selectListElement)*;
 
-selectListElement
-    : expression (AS? columnAlias)?
-    | tableName '.' '*'
-    ;
+selectListElement:
+	expression (AS? columnAlias)?
+	| tableName '.' '*';
 
 /* =========================================================
- * FROM + JOIN
- * ========================================================= */
+ FROM + JOIN
+ * =========================================================
+ */
 
-fromClause
-    : FROM tableSource (',' tableSource)*
-    ;
+fromClause: FROM tableSource (',' tableSource)*;
 
-tableSource
-    : tableSourceItem joinPart*
-    ;
+tableSource: tableSourceItem joinPart*;
 
-tableSourceItem
-    : tableName (AS? tableAlias)?
-    | '(' queryExpression ')' (AS? tableAlias)?
-    ;
+tableSourceItem:
+	tableName (AS? tableAlias)?
+	| '(' queryExpression ')' (AS? tableAlias)?;
 
-joinPart
-    : joinType? JOIN tableSourceItem joinCondition?
-    ;
+joinPart: joinType? JOIN tableSourceItem joinCondition?;
 
-joinType
-    : INNER
-    | LEFT OUTER?
-    | RIGHT OUTER?
-    | FULL OUTER?
-    | CROSS
-    ;
+joinType:
+	INNER
+	| LEFT OUTER?
+	| RIGHT OUTER?
+	| FULL OUTER?
+	| CROSS;
 
-joinCondition
-    : ON searchCondition
-    ;
+joinCondition: ON searchCondition;
 
 /* =========================================================
- * GROUP BY
- * ========================================================= */
+ GROUP BY
+ * =========================================================
+ */
 
-groupByClause
-    : GROUP BY groupByItem (',' groupByItem)*
-    ;
+groupByClause: GROUP BY groupByItem (',' groupByItem)*;
 
-groupByItem
-    : expression
-    ;
+groupByItem: expression;
 
 /* =========================================================
- * WHERE / HAVING
- * ========================================================= */
+ WHERE / HAVING
+ * =========================================================
+ */
 
-whereClause
-    : WHERE searchCondition
-    ;
+whereClause: WHERE searchCondition;
 
-havingClause
-    : HAVING searchCondition
-    ;
+havingClause: HAVING searchCondition;
 
 /* ---------- SEARCH CONDITION (AND / OR / NOT) ---------- */
 
-searchCondition
-    : orCondition
-    ;
+searchCondition: orCondition;
 
-orCondition
-    : andCondition (OR andCondition)*
-    ;
+orCondition: andCondition (OR andCondition)*;
 
-andCondition
-    : notCondition (AND notCondition)*
-    ;
+andCondition: notCondition (AND notCondition)*;
 
-notCondition
-    : NOT? predicate
-    ;
+notCondition: NOT? predicate;
 
 /* ---------- PREDICATES ---------- */
 
-predicate
-    : '(' searchCondition ')'
-    | expression comparisonOperator expression
-    | expression IS NOT? NULL
-    | expression NOT? BETWEEN expression AND expression
-    | expression NOT? IN '(' expressionList ')'
-    | expression NOT? IN '(' queryExpression ')'
-    | expression NOT? LIKE expression
-    | EXISTS '(' queryExpression ')'
-    ;
+predicate:
+	'(' searchCondition ')'
+	| expression comparisonOperator expression
+	| expression IS NOT? NULL
+	| expression NOT? BETWEEN expression AND expression
+	| expression NOT? IN '(' expressionList ')'
+	| expression NOT? IN '(' queryExpression ')'
+	| expression NOT? LIKE expression
+	| EXISTS '(' queryExpression ')';
 
 /* =========================================================
- * EXPRESSIONS (WITH PRECEDENCE)
- * ========================================================= */
+ EXPRESSIONS (WITH PRECEDENCE)
+ * =========================================================
+ */
 
-expression
-    : additiveExpression
-    ;
+expression: additiveExpression;
 
-additiveExpression
-    : multiplicativeExpression (('+' | '-') multiplicativeExpression)*
-    ;
+additiveExpression:
+	multiplicativeExpression (
+		('+' | '-') multiplicativeExpression
+	)*;
 
-multiplicativeExpression
-    : unaryExpression (('*' | '/' | '%') unaryExpression)*
-    ;
+multiplicativeExpression:
+	unaryExpression (('*' | '/' | '%') unaryExpression)*;
 
-unaryExpression
-    : unaryOperator unaryExpression
-    | primaryExpression
-    ;
+unaryExpression:
+	unaryOperator unaryExpression
+	| primaryExpression;
 
-primaryExpression
-    : literal
-    | columnReference
-    | functionCall
-    | caseExpression
-    | '(' expression ')'
-    ;
+primaryExpression:
+	literal
+	| columnReference
+	| functionCall
+	| caseExpression
+	| '(' expression ')';
 
-expressionList
-    : expression (',' expression)*
-    ;
+expressionList: expression (',' expression)*;
 
 /* =========================================================
- * CASE
- * ========================================================= */
+ CASE
+ * =========================================================
+ */
 
-caseExpression
-    : CASE whenClause+ (ELSE expression)? END
-    ;
+caseExpression: CASE whenClause+ (ELSE expression)? END;
 
-whenClause
-    : WHEN searchCondition THEN expression
-    ;
+whenClause: WHEN searchCondition THEN expression;
 
 /* =========================================================
- * FUNCTIONS
- * ========================================================= */
+ FUNCTIONS
+ * =========================================================
+ */
 
-functionCall
-    : functionName '(' (expressionList)? ')'
-    ;
-
-/* =========================================================
- * ORDER BY / OFFSET
- * ========================================================= */
-
-orderByClause
-    : ORDER BY orderByExpression (',' orderByExpression)*
-    ;
-
-orderByExpression
-    : expression (ASC | DESC)?
-    ;
-
-offsetFetchClause
-    : OFFSET expression (ROW | ROWS)
-      (FETCH (FIRST | NEXT) expression (ROW | ROWS) ONLY)?
-    ;
+functionCall: functionName '(' (expressionList)? ')';
 
 /* =========================================================
- * SET OPERATORS
- * ========================================================= */
+ ORDER BY / OFFSET
+ * =========================================================
+ */
 
-setOperator
-    : UNION ALL?
-    | INTERSECT
-    | EXCEPT
-    ;
+orderByClause:
+	ORDER BY orderByExpression (',' orderByExpression)*;
 
-/* =========================================================
- * REFERENCES & IDENTIFIERS
- * ========================================================= */
+orderByExpression: expression (ASC | DESC)?;
 
-columnReference
-    : (tableName '.')? columnName
-    ;
-
-tableName
-    : IDENTIFIER
-    ;
-
-columnName
-    : IDENTIFIER
-    ;
-
-columnAlias
-    : IDENTIFIER
-    | STRING
-    ;
-
-tableAlias
-    : IDENTIFIER
-    ;
-
-functionName
-    : IDENTIFIER
-    ;
+offsetFetchClause:
+	OFFSET expression (ROW | ROWS) (
+		FETCH (FIRST | NEXT) expression (ROW | ROWS) ONLY
+	)?;
 
 /* =========================================================
- * LITERALS & OPERATORS
- * ========================================================= */
+ SET OPERATORS
+ * =========================================================
+ */
 
-literal
-    : STRING
-    | INTEGER
-    | FLOATN
-    | NULL
-    | TRUE
-    | FALSE
-    ;
-
-comparisonOperator
-    : '='
-    | '<'
-    | '>'
-    | '<='
-    | '>='
-    | '<>'
-    | '!='
-    ;
-
-unaryOperator
-    : '+'
-    | '-'
-    | NOT
-    ;
+setOperator: UNION ALL? | INTERSECT | EXCEPT;
 
 /* =========================================================
- * OTHER STATEMENTS (BASIC)
- * ========================================================= */
+ REFERENCES & IDENTIFIERS
+ * =========================================================
+ */
 
-insertStatement
-    : INSERT INTO tableName '(' columnName (',' columnName)* ')'
-      VALUES '(' expressionList ')'
-    ;
+columnReference: (tableName '.')? columnName;
 
-updateStatement
-    : UPDATE tableName SET columnName '=' expression
-      whereClause?
-    ;
+tableName: IDENTIFIER;
 
-deleteStatement
-    : DELETE FROM tableName whereClause?
-    ;
+columnName: IDENTIFIER;
 
-createStatement
-    : CREATE TABLE tableName '(' columnName dataType ')'
-    ;
+columnAlias: IDENTIFIER | STRING;
 
-alterStatement
-    : ALTER TABLE tableName
-    ;
+tableAlias: IDENTIFIER;
 
-dropStatement
-    : DROP TABLE tableName
-    ;
+functionName: IDENTIFIER;
 
 /* =========================================================
- * DATA TYPES (BASIC)
- * ========================================================= */
+ LITERALS & OPERATORS
+ * =========================================================
+ */
 
-dataType
-    : INT
-    | VARCHAR
-    | DATE
-    ;
+literal: STRING | INTEGER | FLOATN | NULL | TRUE | FALSE;
+
+comparisonOperator: '=' | '<' | '>' | '<=' | '>=' | '<>' | '!=';
+
+unaryOperator: '+' | '-' | NOT;
+
+/* =========================================================
+ OTHER STATEMENTS (BASIC)
+ * =========================================================
+ */
+
+insertStatement:
+	INSERT INTO tableName '(' columnName (',' columnName)* ')' VALUES '(' expressionList ')';
+
+updateStatement:
+	UPDATE tableName SET columnName '=' expression whereClause?;
+
+deleteStatement: DELETE FROM tableName whereClause?;
+
+createStatement:
+	CREATE TABLE tableName '(' columnName dataType ')';
+
+alterStatement: ALTER TABLE tableName;
+
+dropStatement: DROP TABLE tableName;
+
+/* =========================================================
+ DATA TYPES (BASIC)
+ * =========================================================
+ */
+
+dataType: INT | VARCHAR | DATE;
