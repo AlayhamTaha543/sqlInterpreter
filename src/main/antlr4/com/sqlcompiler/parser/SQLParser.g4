@@ -422,10 +422,10 @@ bulkInsertStatement
 bulkOption
     : identifier (EQUALS (INTEGER | STRING))?
     ;
+// =============================================
+// UPDATE STATEMENT -  VERSION 2
+// =============================================
 
-// =============================================
-// UPDATE STATEMENT
-// =============================================
 updateStatement
     : withClause?
       UPDATE topClause?
@@ -439,31 +439,34 @@ updateStatement
     ;
 
 updateTarget
-    : (server=identifier DOT)? (db=identifier DOT)? (schema=identifier DOT)? table=identifier
+    : tableName
     | USER_VARIABLE
     ;
+
 updateSetClause
-    : updateWriteExpression
-    | updateAssignmentExpression
-    ;
-
-updateWriteExpression
-    : fullColumnName DOT WRITE LPAREN expression COMMA expression COMMA expression RPAREN
-    ;
-
-updateAssignmentExpression
     : fullColumnName assignmentOperator expression
     ;
 
 fullColumnName
-    : (identifier DOT)? identifier
-    | USER_VARIABLE
+    : tableName DOT columnName    // T1.Price
+    | columnName                   // Salary
+    | USER_VARIABLE                // @variable
     ;
 
 assignmentOperator
-    : EQUALS | PLUS_EQUAL | MINUS_EQUAL | STAR_EQUAL | SLASH_EQUAL 
-    | PERCENT_EQUAL | AMPERSAND_EQUAL | CARET_EQUAL | PIPE_EQUAL
+    : EQUALS 
+    | PLUS_EQUAL 
+    | MINUS_EQUAL 
+    | STAR_EQUAL 
+    | SLASH_EQUAL 
+    | PERCENT_EQUAL 
+    | AMPERSAND_EQUAL 
+    | CARET_EQUAL 
+    | PIPE_EQUAL
     ;
+
+
+
 // =============================================
 // DELETE STATEMENT -Version 1
 // =============================================
