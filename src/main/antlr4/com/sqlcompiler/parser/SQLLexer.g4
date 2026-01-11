@@ -399,6 +399,13 @@ ROW_NUMBER: R O W '_' N U M B E R;
 RANK: R A N K;
 DENSE_RANK: D E N S E '_' R A N K;
 NTILE: N T I L E;
+RENAME
+    : R E N A M E
+    ;
+
+TO
+    : T O
+    ;
 
 // -------------------------
 // OPERATORS (Add to your operators section)
