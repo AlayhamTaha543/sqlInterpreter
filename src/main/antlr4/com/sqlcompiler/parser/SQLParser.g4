@@ -429,8 +429,37 @@ updateStatement
     : UPDATE tableName SET columnName '=' expression (',' columnName '=' expression)*
       whereClause?
     ;
+<<<<<<< HEAD
+=======
+
+// =============================================
+// DELETE STATEMENT -Version 1
+// =============================================
+
+>>>>>>> main
 deleteStatement
-    : DELETE FROM? tableName whereClause?
+    : DELETE  deleteTarget?
+      (topClause)?
+      (FROM)? 
+      tableSource (',' tableSource)*  
+      whereClause?
+      (SEMICOLON)?
+    ;
+
+deleteTarget
+    : tableAlias
+    ;
+
+tableSources
+    : tableSource (',' tableSource)*
+    ;
+
+
+
+joinClause
+    : (INNER? JOIN | LEFT (OUTER)? JOIN | RIGHT (OUTER)? JOIN | FULL (OUTER)? JOIN | CROSS JOIN)
+      tableSource 
+      ON searchCondition
     ;
 createStatement
     : CREATE TABLE tableName '(' columnDefinition (',' columnDefinition)* ')'
