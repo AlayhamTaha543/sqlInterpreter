@@ -17,9 +17,23 @@ sqlStatement
       | createStatement
       | alterStatement
       | dropStatement
+      | renameStatement
       ) SEMICOLON?
     ;
+    
+
+/* =====================================================
+ RENAME STATEMENT (ONLY WHAT YOU ASKED)
+ * =====================================================
+ */
+
+renameStatement:
+	RENAME TABLE renameTableItem (',' renameTableItem)*;
+
+renameTableItem: tableName TO tableName;
 // Root rule for parsing - includes EOF
+
+
 sqlStatements
     : sqlStatement* EOF
     ;
