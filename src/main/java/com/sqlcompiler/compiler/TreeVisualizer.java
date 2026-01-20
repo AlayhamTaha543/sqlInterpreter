@@ -8,8 +8,6 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 /**
  * Utility to visualize ANTLR ParseTree using Graphviz DOT format.

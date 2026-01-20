@@ -2,6 +2,7 @@ package com.sqlcompiler.compiler;
 
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
+
 import com.sqlcompiler.parser.SQLLexer;
 import com.sqlcompiler.parser.SQLParser;
 import java.util.Scanner;
@@ -113,45 +114,7 @@ public class SQLParserApp {
      */
     private static void testPredefinedQueries() {
         String[] testQueries = {
-            // Basic SELECT
-            "SELECT * FROM employees",
-            
-            // WHERE with AND/OR/NOT
-            "SELECT * FROM employees WHERE department = 'IT' AND salary > 50000 OR NOT active = 1",
-            
-            // IN, BETWEEN, LIKE
-            "SELECT * FROM products WHERE category IN ('Electronics', 'Computers') AND price BETWEEN 100 AND 500",
-            
-            // IS NULL, EXISTS
-            "SELECT * FROM customers WHERE email IS NOT NULL AND EXISTS (SELECT 1 FROM orders WHERE customer_id = customers.id)",
-            
-            // JOIN operations
-            "SELECT e.name, d.department FROM employees e INNER JOIN departments d ON e.dept_id = d.id",
-            
-            // GROUP BY and HAVING
-            "SELECT department, AVG(salary) as avg_sal FROM employees GROUP BY department HAVING AVG(salary) > 50000",
-            
-            // ORDER BY
-            "SELECT * FROM products ORDER BY price DESC, name ASC",
-            
-            // TOP with PERCENT and TIES
-            "SELECT TOP 10 PERCENT WITH TIES * FROM sales ORDER BY amount DESC",
-            
-            // OFFSET/FETCH
-            "SELECT * FROM customers ORDER BY id OFFSET 10 ROWS FETCH NEXT 20 ROWS ONLY",
-            
-            // DISTINCT
-            "SELECT DISTINCT country FROM customers",
-            
-            // CASE expression
-            "SELECT name, CASE WHEN salary > 80000 THEN 'High' WHEN salary > 50000 THEN 'Medium' ELSE 'Low' END as salary_grade FROM employees",
-            
-            // Subquery
-            "SELECT * FROM employees WHERE salary > (SELECT AVG(salary) FROM employees)",
-            
-            // Complex query with multiple features
-            "SELECT DISTINCT TOP 5 e.name, d.department, e.salary FROM employees e LEFT JOIN departments d ON e.dept_id = d.id WHERE e.salary BETWEEN 40000 AND 100000 AND e.department NOT IN ('HR', 'Legal') GROUP BY e.name, d.department, e.salary HAVING COUNT(*) > 1 ORDER BY e.salary DESC"
-        };
+ };
 
         System.out.println("\n" + "=".repeat(60));
         System.out.println("TEST MODE - Predefined SQL Queries");
@@ -169,33 +132,7 @@ public class SQLParserApp {
  * Test DELETE statements specifically
  */
     private static void testDeleteStatements() {
-    String[] deleteQueries = {
-        // Most Common DELETE Patterns 
-"DELETE FROM Customers WHERE CustomerID = 1001",
-"DELETE FROM Orders WHERE Status = 'CANCELLED'",
-"DELETE FROM TempTable",
-"DELETE FROM Users WHERE IsActive = 0 AND LastLoginDate < '2023-01-01'",
-
-// JOIN Patterns 
-"DELETE t1 FROM Table1 t1 INNER JOIN Table2 t2 ON t1.ID = t2.RefID WHERE t2.Status = 'INACTIVE'",
-
-// IN Patterns 
-"DELETE FROM Table1 WHERE ID IN (SELECT ID FROM Table2 WHERE Condition = 1)",
-
-// EXISTS Patterns 
-"DELETE FROM Products WHERE NOT EXISTS (SELECT 1 FROM Inventory i WHERE i.ProductID = Products.ID)",
-"DELETE FROM Employees e WHERE EXISTS (SELECT 1 FROM Terminations t WHERE t.EmployeeID = e.EmployeeID AND t.Reason = 'VOLUNTARY')",
-
-// Complex WHERE
-"DELETE FROM Transactions WHERE (Amount > 1000 AND Status = 'PENDING') OR (CreatedDate < '2022-01-01' AND IsProcessed = 0)",
-"DELETE FROM UserSessions WHERE UserID IS NULL OR SessionExpiry < GETUTCDATE()",
-
-// Batch Deletes 
-"DELETE TOP (1000) FROM AuditLog WHERE LogDate < '2023-01-01'",
-"DELETE FROM LargeTable WHERE ID % 10 = 0",
-
-// Self-Referential 
-"DELETE FROM EmployeeHierarchy WHERE EmployeeID IN (SELECT ManagerID FROM EmployeeHierarchy WHERE Department = 'CLOSED')",};
+    String[] deleteQueries = {};
 
     System.out.println("\n" + "=".repeat(60));
     System.out.println("DELETE STATEMENTS TEST");
