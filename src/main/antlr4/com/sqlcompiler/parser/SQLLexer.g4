@@ -58,12 +58,14 @@ ALL: A L L;
 ALLOW_PAGE_LOCKS: A L L O W '_' P A G E '_' L O C K S;
 ALLOW_ROW_LOCKS: A L L O W '_' R O W '_' L O C K S;
 ALTER: A L T E R;
+ALWAYS: A L W A Y S;
 AND: A N D;
 ANY: A N Y;
 AS: A S;
 ASC: A S C;
 AUTO_CLOSE: A U T O '_' C L O S E;
 AUTO_CREATE_STATISTICS: A U T O '_' C R E A T E '_' S T A T I S T I C S;
+AUTO_INCREMENT: A U T O '_' I N C R E M E N T;
 AUTO_SHRINK: A U T O '_' S H R I N K;
 AUTO_UPDATE_STATISTICS: A U T O '_' U P D A T E '_' S T A T I S T I C S;
 AVG: A V G;
@@ -74,6 +76,7 @@ BETWEEN: B E T W E E N;
 BIGINT: B I G I N T;
 BINARY: B I N A R Y;
 BIT: B I T;
+BOOLEAN: B O O L E A N;
 BREAK: B R E A K;
 BULK: B U L K;
 BULK_LOGGED: B U L K '_' L O G G E D;
@@ -102,6 +105,7 @@ COUNT: C O U N T;
 CREATE: C R E A T E;
 CROSS: C R O S S;
 CURRENT: C U R R E N T;
+CURRENT_TIMESTAMP: C U R R E N T '_' T I M E S T A M P;
 
 // D
 DATA_COMPRESSION: D A T A '_' C O M P R E S S I O N;
@@ -130,6 +134,7 @@ ELSE: E L S E;
 ENABLE: E N A B L E;
 ENCRYPTION: E N C R Y P T I O N;
 END: E N D;
+ENUM: E N U M;
 ESCAPE: E S C A P E;
 EXCEPT: E X C E P T;
 EXEC: E X E C;
@@ -157,6 +162,7 @@ FUNCTION: F U N C T I O N;
 
 // G
 GB: G B;
+GENERATED: G E N E R A T E D;
 GETDATE: G E T D A T E;
 GETUTCDATE: G E T U T C D A T E;
 GO: G O;
@@ -255,6 +261,7 @@ PATINDEX: P A T I N D E X;
 PERCENT: P E R C E N T;
 PERMISSION: P E R M I S S I O N;
 PERSISTED: P E R S I S T E D;
+POINT: P O I N T;
 PRECEDING: P R E C E D I N G;
 PRIMARY: P R I M A R Y;
 PRINT: P R I N T;
@@ -298,6 +305,7 @@ SCHEMABINDING: S C H E M A B I N D I N G;
 SELECT: S E L E C T;
 SELF: S E L F;
 SET: S E T;
+SIGNED: S I G N E D;
 SIMPLE: S I M P L E;
 SINGLE_USER: S I N G L E '_' U S E R;
 SIZE: S I Z E;
@@ -305,8 +313,11 @@ SMALLINT: S M A L L I N T;
 SMALLMONEY: S M A L L M O N E Y;
 SOME: S O M E;
 SORT_IN_TEMPDB: S O R T '_' I N '_' T E M P D B;
+SPATIAL: S P A T I A L;
 SQL_VARIANT: S Q L '_' V A R I A N T;
+SRID: S R I D;
 STATISTICS_NORECOMPUTE: S T A T I S T I C S '_' N O R E C O M P U T E;
+STORED: S T O R E D;
 SUBSTRING: S U B S T R I N G;
 SUM: S U M;
 SWITCH: S W I T C H;
@@ -338,6 +349,7 @@ UNION: U N I O N;
 UNIQUE: U N I Q U E;
 UNIQUEIDENTIFIER: U N I Q U E I D E N T I F I E R;
 UNLIMITED: U N L I M I T E D;
+UNSIGNED: U N S I G N E D;
 UPDATE: U P D A T E;
 UPPER: U P P E R;
 USE: U S E;
@@ -350,6 +362,7 @@ VARBINARY: V A R B I N A R Y;
 VARCHAR: V A R C H A R;
 VIEW: V I E W;
 VIEW_METADATA: V I E W '_' M E T A D A T A;
+VIRTUAL: V I R T U A L;
 
 // W
 WHEN: W H E N;
@@ -368,31 +381,106 @@ YEAR: Y E A R;
 // SECTION 5: IDENTIFIERS AND VARIABLES
 // =============================================
 
-// System variables (@@var) - must come before user variables
+/**
+ * SYSTEM VARIABLES (Priority: Highest)
+ * 
+ * System variables are global variables maintained by the SQL Server/Database.
+ * Examples: @@VERSION, @@ERROR, @@ROWCOUNT, @@IDENTITY, @@server_name
+ * 
+ * Pattern: @@ followed by identifier characters
+ * These must be recognized BEFORE regular variables to avoid conflicts
+ */
 SYSTEM_VARIABLE: '@@' [A-Za-z_][A-Za-z0-9_]*;
 
-// User variables (@var) - must come before identifiers
+/**
+ * USER VARIABLES (Priority: High)
+ * 
+ * User variables are session-specific variables that can be set by users.
+ * Examples: @comment, @variable_name, @email, @user_id
+ * 
+ * Pattern: @ followed by identifier characters
+ * These must be recognized BEFORE delimited identifiers starting with brackets
+ */
 USER_VARIABLE: '@' [A-Za-z_][A-Za-z0-9_]*;
 
-// Delimited identifiers - must come before regular identifier
+/**
+ * DELIMITED IDENTIFIERS - Square Brackets
+ * 
+ * Square bracket delimiters allow special characters in identifiers.
+ * Commonly used in SQL Server.
+ * Examples: [ColumnName], [User ID], [2024 Data], [Order #1]
+ * 
+ * Pattern: [ any characters except ] ] or ]]
+ * This allows spaces, special characters, and even reserved keywords
+ */
 DELIMITED_IDENTIFIER_BRACKET: '[' (~[\]\r\n] | ']'']')* ']';
+
+/**
+ * DELIMITED IDENTIFIERS - Double Quotes
+ * 
+ * Double quote delimiters allow special characters in identifiers.
+ * Compliant with ANSI SQL standard.
+ * Examples: "ColumnName", "User ID", "2024 Data"
+ * 
+ * Pattern: " any characters except " or ""
+ */
 DELIMITED_IDENTIFIER_QUOTE: '"' (~["\r\n] | '""')* '"';
+
+/**
+ * DELIMITED IDENTIFIERS - Backticks
+ * 
+ * Backtick delimiters allow special characters in identifiers.
+ * Commonly used in MySQL.
+ * Examples: `table_name`, `column_name`, `user ID`
+ * 
+ * Pattern: ` any characters except ` or ``
+ */
 DELIMITED_IDENTIFIER_BACKTICK: '`' (~[`\r\n] | '``')* '`';
 
 // =============================================
 // SECTION 6: LITERALS
 // =============================================
 
-// Float must come before INTEGER (to match longer pattern first)
+/**
+ * NUMERIC LITERALS - Float/Decimal
+ * 
+ * Pattern: digits, dot, digits
+ * Must come BEFORE INTEGER to match longer pattern first
+ */
 FLOATN: [0-9]+ '.' [0-9]+;
 
-// Integer
+/**
+ * NUMERIC LITERALS - Integer
+ * 
+ * Pattern: one or more digits
+ */
 INTEGER: [0-9]+;
 
-// String literals
+/**
+ * STRING LITERALS
+ * 
+ * Handles:
+ * - Single-quoted strings with '' escaping (ANSI SQL standard)
+ * - Optional N prefix for Unicode strings (NVARCHAR literals)
+ * - Multi-line strings (implicitly supported)
+ */
 STRING: 'N'? '\'' (~'\'' | '\'\'')* '\'';
 
-// Regular identifier - MUST BE LAST
+/**
+ * REGULAR IDENTIFIERS (Priority: Lowest)
+ * 
+ * Standard identifiers without delimiters.
+ * Alphanumeric characters and underscores only.
+ * Cannot start with a digit (to avoid conflicts with numbers).
+ * Examples: users, employee_name, table1, Column, ORDER_ID
+ * 
+ * Pattern:
+ * - First character: letter or underscore
+ * - Remaining characters: letters, digits, or underscores
+ * 
+ * This rule MUST come LAST to avoid matching partial identifiers
+ * before system variables and user variables are recognized
+ */
 IDENTIFIER: [A-Za-z_][A-Za-z0-9_]*;
 
 // =============================================
