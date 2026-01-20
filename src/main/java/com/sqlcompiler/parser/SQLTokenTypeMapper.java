@@ -1,6 +1,5 @@
 package com.sqlcompiler.parser;
 
-import com.sqlcompiler.parser.SQLLexer;
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════════
