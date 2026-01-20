@@ -20,6 +20,8 @@ sqlStatement
       | createStatement
       | alterStatement
       | dropStatement
+      | renameStatement
+      | truncateStatement
       ) SEMICOLON?
     ;
 
@@ -754,6 +756,84 @@ alterStatement
     : ALTER TABLE tableName (ADD columnDefinition | DROP COLUMN columnName)
     ;
 
+// =============================================
+// DROP STATEMENT - Enhanced Version
+// =============================================
+
 dropStatement
-    : DROP (TABLE | VIEW | PROCEDURE | FUNCTION | INDEX) identifier
+    : dropDatabase
+    | dropSchema
+    | dropTable
+    | dropView
+    | dropProcedure
+    | dropFunction
+    | dropIndex
+    | dropTrigger
     ;
+
+dropDatabase
+    : DROP DATABASE ifExists? databaseName
+    ;
+
+dropSchema
+    : DROP SCHEMA ifExists? schemaName
+    ;
+
+dropTable: 
+    DROP TEMPORARY? TABLE ifExists?  tableName (COMMA tableName)* dropBehavior?
+    ;
+dropBehavior:
+    CASCADE | RESTRICT
+    ;
+
+dropView
+    : DROP VIEW ifExists? tableName (COMMA tableName)*
+    ;
+
+dropProcedure
+    : DROP PROCEDURE ifExists? procedureName (COMMA procedureName)*
+    ;
+
+dropFunction
+    : DROP FUNCTION ifExists? functionName (COMMA functionName)*
+    ;
+
+dropIndex
+    : DROP INDEX ifExists? indexName ON tableName
+    | DROP INDEX tableName DOT indexName
+    ;
+
+dropTrigger
+    : DROP TRIGGER ifExists? triggerName (COMMA triggerName)*
+    ;
+
+ifExists
+    : IF EXISTS
+    ;
+
+databaseName
+    : identifier
+    ;
+
+
+
+procedureName
+    : (schemaName DOT)? identifier
+    ;
+
+
+
+indexName
+    : (schemaName DOT)? identifier
+    | (tableName DOT)? identifier
+    ;
+
+triggerName
+    : (schemaName DOT)? identifier
+    ;
+//-----------------------------------------
+//truncateStatement
+truncateStatement
+    : TRUNCATE TABLE tableName (SEMICOLON)?
+    ;
+
