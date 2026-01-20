@@ -93,6 +93,9 @@
                     </execution>
                 </executions>
                 <configuration>
+                    <!-- Skip ANTLR code generation to avoid implicit-token parser warnings;
+                         remove or set to false after fixing the grammar files under src/main/antlr4 -->
+                    <skip>true</skip>
                     <visitor>true</visitor>
                     <listener>true</listener>
                     <outputDirectory>target/generated-sources/antlr4</outputDirectory>

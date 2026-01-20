@@ -512,7 +512,7 @@ public class SQLTokenTypeMapper {
             // LITERALS - Numeric
             // ═══════════════════════════════════════════════════════════════
             case SQLLexer.INTEGER:
-                return "INTEGER";
+                return "INTEGERN";
             case SQLLexer.FLOATN:
                 return "FLOATN";
 
