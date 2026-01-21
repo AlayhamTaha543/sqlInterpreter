@@ -741,16 +741,20 @@ mergeNotMatchedAction
 // =============================================
 
 createStatement
-    : CREATE TABLE tableName 
-        LPAREN 
-            (tableElement (COMMA tableElement)*)?     // Optional: allows empty tables
+    : CREATE TABLE tableName
+        LPAREN
+            (tableElement (COMMA tableElement)*)?
         RPAREN
     | CREATE VIEW tableName AS queryExpression
-    | CREATE PROCEDURE identifier (LPAREN parameterList RPAREN)? AS BEGIN statementList END
+    | CREATE (OR ALTER)? (PROCEDURE | PROC) procedureName
+        parameterList?
+        (WITH procedureOption (COMMA procedureOption)*)?
+        (FOR REPLICATION)?
+        AS
+        (BEGIN statementList END? | statement | EXTERNAL NAME STRING)
     | CREATE FUNCTION identifier LPAREN parameterList? RPAREN RETURN dataType AS BEGIN statementList RETURN expression END
     | CREATE INDEX identifier ON tableName LPAREN columnName (COMMA columnName)* RPAREN
     ;
-
 // =============================================
 // TABLE ELEMENTS AND CONSTRAINTS
 // =============================================
@@ -844,6 +848,9 @@ statementList
       | closeCursorStatement
       | fetchStatement
       | deallocateCursorStatement
+      | PRINT expression
+      | EXECUTE (procedureCall | STRING)
+      | expression
       )+
     ;
 
@@ -1019,8 +1026,10 @@ parameterList
     ;
 
 parameter
-    : USER_VARIABLE dataType (EQUALS expression)?             
-    | USER_VARIABLE dataType OUTPUT                          
+    : (direction=(IN | OUT | OUTPUT | READONLY))?
+      USER_VARIABLE
+      dataType
+      (EQUALS expression)? // default value
     ;
 
 // =============================================
@@ -1085,8 +1094,15 @@ dropTrigger
 ifExists
     : IF EXISTS
     ;
+
 procedureName
     : (schemaName DOT)? identifier
+    ;
+procedureOption
+    : ENCRYPTION
+    | RECOMPILE
+    | EXECUTE AS (CALLER | SELF | OWNER | STRING)
+    | SCHEMABINDING
     ;
 
 
