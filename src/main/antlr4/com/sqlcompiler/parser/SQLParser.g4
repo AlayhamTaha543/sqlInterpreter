@@ -733,8 +733,7 @@ mergeSetClause
 mergeNotMatchedAction
     : INSERT (LPAREN columnName (COMMA columnName)* RPAREN)?
       VALUES LPAREN expressionList RPAREN
-    ;    
-
+    ; 
 
 
 // =============================================
@@ -1100,10 +1099,22 @@ indexName
 triggerName
     : (schemaName DOT)? identifier
     ;
-//-----------------------------------------
-//truncateStatement
+   
+// =============================================
+// TRUNCATE STATEMENT
+// =============================================
+
 truncateStatement
-    : TRUNCATE TABLE tableName (SEMICOLON)?
+    : TRUNCATE truncateTarget
+    ;
+
+truncateTarget
+    : TABLE tableName truncateOption?
+    ;
+
+truncateOption
+    : CONTINUE IDENTITY
+    | RESTART IDENTITY
     ;
 ///////////////////////////////use statement///////////////////////////////
 useStatement
