@@ -1,22 +1,6 @@
-# Maven build output
-/target/
-
-# ANTLR generated temporary files
-*.tokens
-*.interp
-
-# Logs
-*.log
-
-# IDE settings
-/.idea/
-/.vscode/
-/*.iml
-
-# OS-specific files
-.DS_Store
-Thumbs.db
+# ========================================
 # Build outputs
+# ========================================
 target/
 build/
 out/
@@ -26,36 +10,58 @@ dist/
 *.war
 *.ear
 
-# ANTLR generated files
-*.tokens
-*.interp
-*.java
-SqlLexer.java
-SqlParser.java
-SqlBaseListener.java
-SqlBaseVisitor.java
-SqlListener.java
-SqlVisitor.java
+# ========================================
+# Logs
+# ========================================
+*.log
 
-# Output files
-sqlInterpreter-output.md
-sqlInterpreter-output.txt
+# ========================================
+# OS files
+# ========================================
+.DS_Store
+Thumbs.db
 
-# Parse tree files
-parse_tree.dot
-parse_tree.png
-parse_tree.svg
-
+# ========================================
 # IDE
-.vscode/
+# ========================================
 .idea/
+.vscode/
 *.iml
 *.swp
 *.swo
 
-# OS
-.DS_Store
-Thumbs.db
+# ========================================
+# ANTLR generated files
+# ========================================
+*.tokens
+*.interp
 
-# Logs
-*.log
+# Ignore generated parser/lexer ONLY
+src/main/java/**/SQLLexer*.java
+src/main/java/**/SQLParser*.java
+src/main/java/**/SQLBaseListener.java
+src/main/java/**/SQLBaseVisitor.java
+src/main/java/**/SQLListener.java
+src/main/java/**/SQLVisitor.java
+
+# ========================================
+# Java files (ignore all EXCEPT AST)
+# ========================================
+*.java
+
+# ✅ ALLOW AST FILES
+!src/main/java/com/sqlcompiler/parser/ast/**
+!src/main/java/com/sqlcompiler/parser/ast/**/*.java
+
+# ========================================
+# Output files
+# ========================================
+sqlInterpreter-output.md
+sqlInterpreter-output.txt
+
+# ========================================
+# Parse tree files
+# ========================================
+parse_tree.dot
+parse_tree.png
+parse_tree.svg

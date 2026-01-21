@@ -13,7 +13,6 @@ options {
 sqlStatement
     : ( selectStatement
       | insertStatement
-      |renameStatement
       | bulkInsertStatement
       | updateStatement
       | deleteStatement
@@ -22,6 +21,7 @@ sqlStatement
       | dropStatement
       | renameStatement
       | truncateStatement
+      | mergeStatement
       ) SEMICOLON?
     ;
 
@@ -359,7 +359,7 @@ columnReference
     ;
 
 tableName
-    : (schemaName DOT)? identifier
+    : (databaseName DOT)? (schemaName DOT)? identifier
     ;
 
 columnName
@@ -886,9 +886,75 @@ indexName
 triggerName
     : (schemaName DOT)? identifier
     ;
-//-----------------------------------------
-//truncateStatement
+// =============================================
+// MERGE STATEMENT 
+// =============================================
+
+mergeStatement
+    : withClause?                        // Optional CTE
+      MERGE
+      INTO mergeTarget
+      USING mergeSource
+      ON searchCondition
+      mergeWhenClause+                  // One or more WHEN clauses
+      optionClause?
+      SEMICOLON?
+    ;
+
+// Target and Source definitions
+mergeTarget
+    : tableName (AS? tableAlias)?
+    ;
+
+mergeSource
+    : tableName (AS? tableAlias)?
+    | LPAREN queryExpression RPAREN (AS? tableAlias)?
+    ;
+
+// WHEN Clauses
+mergeWhenClause
+    : mergeWhenMatched
+    | mergeWhenNotMatched
+    ;
+
+// WHEN MATCHED
+mergeWhenMatched
+    : WHEN MATCHED (AND searchCondition)? THEN mergeMatchedAction
+    ;
+
+// WHEN NOT MATCHED
+mergeWhenNotMatched
+    : WHEN NOT MATCHED (AND searchCondition)? THEN mergeNotMatchedAction
+    ;
+
+// Actions
+mergeMatchedAction
+    : UPDATE SET mergeSetClause (COMMA mergeSetClause)*
+    | DELETE
+    ;
+
+mergeSetClause
+    : fullColumnName EQUALS expression
+    ;
+
+mergeNotMatchedAction
+    : INSERT (LPAREN columnName (COMMA columnName)* RPAREN)?
+      VALUES LPAREN expressionList RPAREN
+    ;    
+// =============================================
+// TRUNCATE STATEMENT
+// =============================================
+
 truncateStatement
-    : TRUNCATE TABLE tableName (SEMICOLON)?
+    : TRUNCATE truncateTarget
+    ;
+
+truncateTarget
+    : TABLE tableName truncateOption?
+    ;
+
+truncateOption
+    : CONTINUE IDENTITY
+    | RESTART IDENTITY
     ;
 

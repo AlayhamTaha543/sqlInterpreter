@@ -10,139 +10,63 @@
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>SQL Compiler with ANTLR4</name>
-    <description>A SQL compiler implementation using ANTLR4</description>
 
-    <!-- Properties -->
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <antlr4.version>4.13.2</antlr4.version>
-        <antlr4.maven.plugin.version>4.13.2</antlr4.maven.plugin.version>
-        <antlr4.visitor>true</antlr4.visitor>
-        <antlr4.listener>true</antlr4.listener>
     </properties>
 
-    <!-- Dependencies -->
     <dependencies>
-        <!-- ANTLR4 Runtime -->
         <dependency>
             <groupId>org.antlr</groupId>
             <artifactId>antlr4-runtime</artifactId>
             <version>${antlr4.version}</version>
         </dependency>
         <dependency>
-        <groupId>org.projectlombok</groupId>
-        <artifactId>lombok</artifactId>
-        <version>1.18.32</version> <!-- update to latest stable -->
-        <scope>provided</scope>
-        </dependency>
-        <!-- JUnit for Testing -->
-        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.13.2</version>
             <scope>test</scope>
         </dependency>
-
-        <!-- Optional: Logging Framework (SLF4J + Logback) -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>2.0.9</version>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>1.4.11</version>
-        </dependency>
+        <!-- <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.32</version>
+            <scope>provided</scope>
+        </dependency> -->
     </dependencies>
 
-    <!-- Build Configuration -->
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>3.1.0</version>
-                <configuration>
-                    <mainClass>com.sqlcompiler.compiler.SQLLexerApp</mainClass>
-                </configuration>
-            </plugin>
-            <!-- Java Compiler Plugin -->
+            <!-- Java Compiler -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.11.0</version>
-                <configuration>
-                    <source>11</source>
-                    <target>11</target>
-                </configuration>
             </plugin>
 
-            <!-- ANTLR4 Maven Plugin -->
+            <!-- ANTLR4 Plugin -->
             <plugin>
                 <groupId>org.antlr</groupId>
                 <artifactId>antlr4-maven-plugin</artifactId>
-                <version>${antlr4.maven.plugin.version}</version>
+                <version>${antlr4.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>antlr4</goal>
+                        </goals>
+                    </execution>
+                </executions>
                 <configuration>
-                    <!-- Disable automatic ANTLR execution during the build to avoid failures
-                         caused by invalid/unfinished grammars in src/main/antlr4.
-                         Remove this <skip>true</skip> (or re-add executions) after fixing grammars. -->
-                    <skip>true</skip>
                     <visitor>true</visitor>
                     <listener>true</listener>
                     <outputDirectory>target/generated-sources/antlr4</outputDirectory>
                 </configuration>
-                <!-- Executions intentionally removed to prevent the plugin from being invoked automatically -->
             </plugin>
 
-            <!-- Maven Assembly Plugin (Optional: for creating JAR with dependencies) -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.6.0</version>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <mainClass>com.sqlcompiler.compiler.SQLCompiler</mainClass>
-                        </manifest>
-                    </archive>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
-                </configuration>
-            </plugin>
-
-            <!-- Maven Shade Plugin (Alternative for creating fat JAR) -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>3.5.0</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <transformers>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>com.sqlcompiler.compiler.SQLCompiler</mainClass>
-                                </transformer>
-                            </transformers>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <!-- Surefire Plugin for Running Tests -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.0.0</version>
-            </plugin>
-            <!-- Build Helper Maven Plugin -->
+            <!-- Build Helper: add ANTLR generated sources -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
@@ -162,13 +86,13 @@
                 </executions>
             </plugin>
 
-            <!-- Also add the Exec Maven Plugin for easy running -->
+            <!-- Exec Plugin: لتشغيل SQLAstApp -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.1.0</version>
                 <configuration>
-                    <mainClass>com.sqlcompiler.compiler.SQLLexerApp</mainClass>
+                    <mainClass>com.sqlcompiler.compiler.SQLAstApp</mainClass>
                 </configuration>
             </plugin>
         </plugins>
