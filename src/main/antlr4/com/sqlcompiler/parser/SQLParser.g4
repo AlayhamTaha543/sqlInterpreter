@@ -820,9 +820,11 @@ referenceAction
 // =============================================
 // STATEMENT LIST
 // =============================================
-
 statementList
-    : (selectStatement 
+    : statement (SEMICOLON statement)*
+    ;
+statement
+    : selectStatement 
       | insertStatement 
       | bulkInsertStatement
       | updateStatement 
@@ -851,7 +853,6 @@ statementList
       | PRINT expression
       | EXECUTE (procedureCall | STRING)
       | expression
-      )+
     ;
 
 declareStatement
