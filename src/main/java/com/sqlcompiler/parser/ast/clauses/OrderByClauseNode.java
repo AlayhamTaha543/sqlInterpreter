@@ -92,7 +92,7 @@ public class OrderByClauseNode extends ASTNode {
     @Override
     public <T> T accept(ASTVisitor<T> visitor) {
         // Typically visited through SelectStatementNode
-        return null;
+        return visitor.visit(this);
     }
     
     @Override

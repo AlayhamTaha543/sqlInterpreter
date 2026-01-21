@@ -107,9 +107,7 @@ public class SelectClauseNode extends ASTNode {
     
     @Override
     public <T> T accept(ASTVisitor<T> visitor) {
-        // Note: Typically SELECT clause is visited through SelectStatementNode
-        // but if you need direct visitation:
-        return null; // أو يمكنك إضافة visit method في الـ visitor
+    return visitor.visit(this);
     }
     
     @Override

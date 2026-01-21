@@ -6,14 +6,11 @@ import com.sqlcompiler.parser.ast.clauses.*;
 import com.sqlcompiler.parser.ast.expressions.*;
 import com.sqlcompiler.parser.ast.statements.SelectStatementNode;
 
-
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class ASTBuilder extends SQLParserBaseVisitor<ASTNode> {
 
-    
     // =================================================
     // SELECT STATEMENT
     // =================================================
@@ -46,13 +43,10 @@ public class ASTBuilder extends SQLParserBaseVisitor<ASTNode> {
     private SQLParser.QuerySpecificationContext extractQuerySpecification(
             SQLParser.QueryExpressionContext ctx) {
 
-        // If this queryExpression contains one or more QuerySpecification children,
-        // return the first one (handles set operators like UNION/EXCEPT/INTERSECT).
         if (ctx.querySpecification() != null && ctx.querySpecification().size() > 0) {
             return ctx.querySpecification(0);
         }
 
-        // Otherwise this is a parenthesized queryExpression: recurse into it.
         if (ctx.queryExpression() != null) {
             return extractQuerySpecification(ctx.queryExpression());
         }
@@ -171,7 +165,7 @@ public class ASTBuilder extends SQLParserBaseVisitor<ASTNode> {
     }
 
     // =================================================
-    // FROM CLAUSE
+    // FROM CLAUSE - ENHANCED WITH JOIN SUPPORT
     // =================================================
 
     private FromClauseNode buildFromClause(SQLParser.FromClauseContext ctx) {
@@ -180,22 +174,176 @@ public class ASTBuilder extends SQLParserBaseVisitor<ASTNode> {
         List<FromClauseNode.TableSource> tables = new ArrayList<>();
 
         for (SQLParser.TableSourceContext ts : ctx.tableSource()) {
-            String name =
-                    ts.tableSourceItem().tableName().getText();
-            String alias =
-                    ts.tableSourceItem().tableAlias() != null
-                            ? ts.tableSourceItem().tableAlias().getText()
-                            : null;
-
-            tables.add(
-                new FromClauseNode.TableSource(
-                    new TableNode(name),
-                    alias
-                )
-            );
+            tables.add(buildTableSource(ts));
         }
 
         return new FromClauseNode(tables);
+    }
+
+    /**
+     * Builds a single TableSource with its joins
+     */
+    private FromClauseNode.TableSource buildTableSource(SQLParser.TableSourceContext ctx) {
+        
+        // Build the base table/subquery
+        SQLParser.TableSourceItemContext item = ctx.tableSourceItem();
+        ExpressionNode source;
+        String alias;
+
+        // Handle tableName
+        if (item.tableName() != null) {
+            String name = item.tableName().getText();
+            source = new TableNode(name);
+            alias = item.tableAlias() != null ? item.tableAlias().getText() : null;
+        }
+        // Handle subquery: (SELECT ...)
+        else if (item.queryExpression() != null) {
+            source = buildSubquery(item.queryExpression());
+            alias = item.tableAlias() != null ? item.tableAlias().getText() : null;
+        }
+        // Handle parenthesized tableSource: (t1 JOIN t2)
+        else if (item.tableSource() != null) {
+            // Recursive case
+            FromClauseNode.TableSource nested = buildTableSource(item.tableSource());
+            source = nested.source;
+            alias = nested.alias;
+        }
+        else {
+            throw new RuntimeException("Unsupported table source type");
+        }
+
+        // Build joins for this table
+        List<JoinClauseNode> joins = new ArrayList<>();
+        for (SQLParser.JoinPartContext jp : ctx.joinPart()) {
+            joins.add(buildJoinClause(jp));
+        }
+
+        return new FromClauseNode.TableSource(source, alias, joins);
+    }
+
+    /**
+     * Builds a JoinClauseNode from a joinPart using your JoinType enum
+     */
+    private JoinClauseNode buildJoinClause(SQLParser.JoinPartContext ctx) {
+        
+        // Determine join type using your enum
+        JoinClauseNode.JoinType joinType = JoinClauseNode.JoinType.INNER; // default
+        boolean isOuter = false;
+        
+        if (ctx.joinType() != null) {
+            if (ctx.joinType().LEFT() != null) {
+                isOuter = ctx.joinType().OUTER() != null;
+                joinType = isOuter ? JoinClauseNode.JoinType.LEFT_OUTER : JoinClauseNode.JoinType.LEFT;
+            } else if (ctx.joinType().RIGHT() != null) {
+                isOuter = ctx.joinType().OUTER() != null;
+                joinType = isOuter ? JoinClauseNode.JoinType.RIGHT_OUTER : JoinClauseNode.JoinType.RIGHT;
+            } else if (ctx.joinType().FULL() != null) {
+                isOuter = ctx.joinType().OUTER() != null;
+                joinType = isOuter ? JoinClauseNode.JoinType.FULL_OUTER : JoinClauseNode.JoinType.FULL;
+            } else if (ctx.joinType().CROSS() != null) {
+                joinType = JoinClauseNode.JoinType.CROSS;
+            } else if (ctx.joinType().INNER() != null) {
+                joinType = JoinClauseNode.JoinType.INNER;
+            }
+        }
+
+        // Build the joined table
+        SQLParser.TableSourceItemContext item = ctx.tableSourceItem();
+        ExpressionNode rightTable;
+        String rightAlias;
+
+        if (item.tableName() != null) {
+            rightTable = new TableNode(item.tableName().getText());
+            rightAlias = item.tableAlias() != null ? item.tableAlias().getText() : null;
+        } else if (item.queryExpression() != null) {
+            rightTable = buildSubquery(item.queryExpression());
+            rightAlias = item.tableAlias() != null ? item.tableAlias().getText() : null;
+        } else if (item.tableSource() != null) {
+            // Handle nested table sources
+            FromClauseNode.TableSource nested = buildTableSource(item.tableSource());
+            rightTable = nested.source;
+            rightAlias = nested.alias;
+        } else {
+            throw new RuntimeException("Unsupported join table source");
+        }
+
+        // Build join condition
+        ExpressionNode condition = null;
+        if (ctx.joinCondition() != null) {
+            if (ctx.joinCondition().searchCondition() != null) {
+                condition = (ExpressionNode) visit(ctx.joinCondition().searchCondition());
+            } 
+            // Handle USING clause if needed
+            else if (ctx.joinCondition().USING() != null) {
+                // Build a condition from USING columns
+                // For simplicity, you might want to create a special node or convert to ON
+                List<SQLParser.ColumnNameContext> columns = ctx.joinCondition().columnName();
+                if (columns.size() > 0) {
+                    // Create equality conditions for USING columns
+                    // Example: USING(id, name) -> t1.id = t2.id AND t1.name = t2.name
+                    // This is a simplified approach - you may want to handle this differently
+                    condition = buildUsingCondition(columns);
+                }
+            }
+        }
+
+        // Use your JoinClauseNode constructor
+        return new JoinClauseNode(joinType, rightTable, rightAlias, condition, false, isOuter);
+    }
+
+    /**
+     * Builds a condition from USING clause columns
+     * USING(col1, col2) becomes col1 = col1 AND col2 = col2
+     */
+    private ExpressionNode buildUsingCondition(List<SQLParser.ColumnNameContext> columns) {
+        if (columns.isEmpty()) {
+            return null;
+        }
+        
+        ExpressionNode condition = null;
+        for (SQLParser.ColumnNameContext col : columns) {
+            String colName = col.getText();
+            ColumnNode left = new ColumnNode(colName);
+            ColumnNode right = new ColumnNode(colName);
+            BinaryExpressionNode equality = new BinaryExpressionNode(left, "=", right);
+            
+            if (condition == null) {
+                condition = equality;
+            } else {
+                condition = new BinaryExpressionNode(condition, "AND", equality);
+            }
+        }
+        
+        return condition;
+    }
+
+    /**
+     * Helper to build a subquery expression node
+     */
+    private ExpressionNode buildSubquery(SQLParser.QueryExpressionContext ctx) {
+        // Extract the query specification from the query expression
+        SQLParser.QuerySpecificationContext qs = extractQuerySpecification(ctx);
+        
+        if (qs == null) {
+            throw new RuntimeException("Invalid subquery structure");
+        }
+        
+        // Build the subquery components
+        SelectClauseNode selectClause = buildSelectClause(qs.selectList());
+        FromClauseNode fromClause = buildFromClause(qs.fromClause());
+        WhereClauseNode whereClause = 
+                qs.whereClause() != null ? buildWhereClause(qs.whereClause()) : null;
+        
+        // Create the select statement
+        SelectStatementNode subSelect = new SelectStatementNode(
+                selectClause,
+                fromClause,
+                whereClause,
+                null, null, null, null, null, null
+        );
+        
+        // Wrap in SubqueryNode
+        return new SubqueryNode(subSelect);
     }
 
     // =================================================

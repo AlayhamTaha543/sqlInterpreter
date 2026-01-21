@@ -67,7 +67,7 @@ public class JoinClauseNode extends ASTNode {
     @Override
     public <T> T accept(ASTVisitor<T> visitor) {
         // Typically visited through FromClauseNode or SelectStatementNode
-        return null;
+        return visitor.visit(this);
     }
     
     @Override

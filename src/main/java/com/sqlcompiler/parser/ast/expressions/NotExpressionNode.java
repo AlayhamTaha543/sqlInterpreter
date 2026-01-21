@@ -15,13 +15,15 @@ public class NotExpressionNode extends ExpressionNode {
 
     @Override
     public <T> T accept(ASTVisitor<T> visitor) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'accept'");
+        // You can implement this when you add support in ASTVisitor
+        // For now, throw a descriptive exception
+        throw new UnsupportedOperationException(
+            "NotExpressionNode visitor not implemented. Add visit(NotExpressionNode) to ASTVisitor interface."
+        );
     }
 
     @Override
     public String toString() {
-        return "NOT";
+        return "NOT (" + expression.toString() + ")";
     }
-
 }

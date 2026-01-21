@@ -33,6 +33,9 @@ public class FromClauseNode extends ASTNode {
             if (alias != null && !alias.isEmpty()) {
                 sb.append(" AS ").append(alias);
             }
+            for (JoinClauseNode join : joins) {
+                sb.append(" ").append(join.toString());
+            }
             return sb.toString();
         }
     }
@@ -70,8 +73,7 @@ public class FromClauseNode extends ASTNode {
     
     @Override
     public <T> T accept(ASTVisitor<T> visitor) {
-        // Typically visited through SelectStatementNode
-        return null;
+        return visitor.visit(this);
     }
     
     @Override

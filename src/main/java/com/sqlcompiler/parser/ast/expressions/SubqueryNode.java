@@ -1,19 +1,39 @@
 package com.sqlcompiler.parser.ast.expressions;
 
-import com.sqlcompiler.parser.ast.ASTNode;
 import com.sqlcompiler.parser.ast.ASTVisitor;
+import com.sqlcompiler.parser.ast.statements.SelectStatementNode;
 
+/**
+ * Represents a subquery that can be used in various contexts:
+ * - FROM clause: FROM (SELECT ...) AS alias
+ * - WHERE clause: WHERE id IN (SELECT ...)
+ * - SELECT clause: SELECT (SELECT ...) AS col
+ * - JOIN: JOIN (SELECT ...) ON ...
+ */
 public class SubqueryNode extends ExpressionNode {
-    public final ASTNode query; // يمكن أن يكون SELECT, INSERT, UPDATE, DELETE
-    public final String alias;
     
-    public SubqueryNode(ASTNode query, String alias) {
+    private final SelectStatementNode query;
+    private final String alias;
+    
+    public SubqueryNode(SelectStatementNode query, String alias) {
         this.query = query;
         this.alias = alias;
     }
     
-    public SubqueryNode(ASTNode query) {
+    public SubqueryNode(SelectStatementNode query) {
         this(query, null);
+    }
+    
+    public SelectStatementNode getQuery() {
+        return query;
+    }
+    
+    public String getAlias() {
+        return alias;
+    }
+    
+    public boolean hasAlias() {
+        return alias != null && !alias.isEmpty();
     }
     
     @Override
@@ -23,10 +43,14 @@ public class SubqueryNode extends ExpressionNode {
     
     @Override
     public String toString() {
-        String result = "(" + query.toString() + ")";
-        if (alias != null && !alias.isEmpty()) {
-            result += " AS " + alias;
+        StringBuilder sb = new StringBuilder("(");
+        sb.append(query.toString());
+        sb.append(")");
+        
+        if (hasAlias()) {
+            sb.append(" AS ").append(alias);
         }
-        return result;
+        
+        return sb.toString();
     }
 }

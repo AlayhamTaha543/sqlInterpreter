@@ -19,7 +19,6 @@ import com.sqlcompiler.parser.ast.expressions.SubqueryNode;
 import com.sqlcompiler.parser.ast.expressions.TableNode;
 import com.sqlcompiler.parser.ast.statements.SelectStatementNode;
 
-
 public class TreePrinter implements ASTVisitor<Void> {
     private int level = 0;
     private final StringBuilder output = new StringBuilder();
@@ -35,13 +34,13 @@ public class TreePrinter implements ASTVisitor<Void> {
     private String getIndent() {
         StringBuilder indent = new StringBuilder();
         for (int i = 0; i < level; i++) {
-            indent.append("│   ");
+            indent.append("|   ");
         }
         return indent.toString();
     }
     
     private void addLine(String text) {
-        output.append(getIndent()).append("├── ").append(text).append("\n");
+        output.append(getIndent()).append("+-- ").append(text).append("\n");
     }
     
     // ========== Statements ==========
@@ -80,12 +79,12 @@ public class TreePrinter implements ASTVisitor<Void> {
             node.orderByClause.accept(this);
         }
         
-        // LIMIT (تأكد أن لديك هذه الخاصية في SelectStatementNode)
+        // LIMIT (make sure you have this property in SelectStatementNode)
         if (node.limit != null) {
             addLine("LIMIT: " + node.limit);
         }
         
-        // OFFSET (تأكد أن لديك هذه الخاصية في SelectStatementNode)
+        // OFFSET (make sure you have this property in SelectStatementNode)
         if (node.offset != null) {
             addLine("OFFSET: " + node.offset);
         }
@@ -93,24 +92,6 @@ public class TreePrinter implements ASTVisitor<Void> {
         level--;
         return null;
     }
-    
-    // @Override
-    // public Void visit(InsertStatementNode node) {
-    //     addLine("InsertStatement");
-    //     return null;
-    // }
-    
-    // @Override
-    // public Void visit(UpdateStatementNode node) {
-    //     addLine("UpdateStatement");
-    //     return null;
-    // }
-    
-    // @Override
-    // public Void visit(DeleteStatementNode node) {
-    //     addLine("DeleteStatement");
-    //     return null;
-    // }
     
     // ========== Clauses ==========
     @Override
@@ -122,16 +103,20 @@ public class TreePrinter implements ASTVisitor<Void> {
             String aliasText = (item.alias != null && !item.alias.isEmpty()) ? 
                              " AS " + item.alias : "";
             
-            if (item.allColumns) {
-                addLine("Wildcard (*)");
-            } else {
-                addLine("SelectItem" + aliasText);
-                
-                if (item.expression != null) {
-                    level++;
-                    item.expression.accept(this);
-                    level--;
+            if (item.expression != null) {
+                // Check if it's a wildcard column
+                if (item.expression instanceof ColumnNode) {
+                    ColumnNode col = (ColumnNode) item.expression;
+                    if ("*".equals(col.columnName)) {
+                        addLine("Wildcard (*)");
+                        continue;
+                    }
                 }
+                
+                addLine("SelectItem" + aliasText);
+                level++;
+                item.expression.accept(this);
+                level--;
             }
         }
         
@@ -149,11 +134,21 @@ public class TreePrinter implements ASTVisitor<Void> {
                              " AS " + table.alias : "";
             addLine("TableSource" + aliasText);
             
+            level++;
+            
+            // Print the table/subquery source
             if (table.source != null) {
-                level++;
                 table.source.accept(this);
-                level--;
             }
+            
+            // Print all joins for this table source
+            if (table.joins != null && !table.joins.isEmpty()) {
+                for (JoinClauseNode join : table.joins) {
+                    join.accept(this);
+                }
+            }
+            
+            level--;
         }
         
         level--;
@@ -175,13 +170,34 @@ public class TreePrinter implements ASTVisitor<Void> {
     public Void visit(JoinClauseNode node) {
         if (node != null) {
             addLine("JOIN: " + node.joinType);
+            level++;
+            
+            // Print the joined table
+            if (node.table != null) {
+                String aliasText = (node.alias != null && !node.alias.isEmpty()) ? 
+                                 " AS " + node.alias : "";
+                addLine("JoinedTable" + aliasText);
+                level++;
+                node.table.accept(this);
+                level--;
+            }
+            
+            // Print the join condition
+            if (node.condition != null) {
+                addLine("ON");
+                level++;
+                node.condition.accept(this);
+                level--;
+            }
+            
+            level--;
         }
         return null;
     }
     
     @Override
     public Void visit(GroupByClauseNode node) {
-        if (node != null && !node.groupingElements.isEmpty()) {
+        if (node != null && node.groupingElements != null && !node.groupingElements.isEmpty()) {
             addLine("GROUP BY");
             level++;
             for (GroupByClauseNode.GroupingElement elem : node.groupingElements) {
@@ -207,12 +223,15 @@ public class TreePrinter implements ASTVisitor<Void> {
     
     @Override
     public Void visit(OrderByClauseNode node) {
-        if (node != null && !node.sortItems.isEmpty()) {
+        if (node != null && node.sortItems != null && !node.sortItems.isEmpty()) {
             addLine("ORDER BY");
             level++;
             for (OrderByClauseNode.SortItem item : node.sortItems) {
                 if (item.expression != null) {
+                    addLine("SortItem");
+                    level++;
                     item.expression.accept(this);
+                    level--;
                 }
             }
             level--;
@@ -255,8 +274,23 @@ public class TreePrinter implements ASTVisitor<Void> {
         if (node != null) {
             addLine("BinaryExpr: " + node.operator);
             level++;
-            if (node.left != null) node.left.accept(this);
-            if (node.right != null) node.right.accept(this);
+            
+            // Left operand
+            if (node.left != null) {
+                addLine("Left:");
+                level++;
+                node.left.accept(this);
+                level--;
+            }
+            
+            // Right operand
+            if (node.right != null) {
+                addLine("Right:");
+                level++;
+                node.right.accept(this);
+                level--;
+            }
+            
             level--;
         }
         return null;
@@ -266,6 +300,18 @@ public class TreePrinter implements ASTVisitor<Void> {
     public Void visit(FunctionCallNode node) {
         if (node != null) {
             addLine("Function: " + node.functionName);
+            
+            // If the function has arguments, print them
+            if (node.arguments != null && !node.arguments.isEmpty()) {
+                level++;
+                for (int i = 0; i < node.arguments.size(); i++) {
+                    addLine("Arg[" + i + "]:");
+                    level++;
+                    node.arguments.get(i).accept(this);
+                    level--;
+                }
+                level--;
+            }
         }
         return null;
     }
@@ -273,7 +319,15 @@ public class TreePrinter implements ASTVisitor<Void> {
     @Override
     public Void visit(AggregateFunctionNode node) {
         if (node != null) {
-            addLine("Aggregate: " + node.type);
+            String distinctText = node.distinct ? " DISTINCT" : "";
+            addLine("Aggregate: " + node.type + distinctText);
+            
+            // Print the argument
+            if (node.argument != null) {
+                level++;
+                node.argument.accept(this);
+                level--;
+            }
         }
         return null;
     }
@@ -281,31 +335,28 @@ public class TreePrinter implements ASTVisitor<Void> {
     @Override
     public Void visit(CaseexpressionNode node) {
         addLine("CaseExpression");
+        level++;
+        
+        // You would add logic here to print WHEN/THEN/ELSE branches
+        // depending on your CaseExpressionNode implementation
+        
+        level--;
         return null;
     }
     
-   @Override
-public Void visit(SubqueryNode node) {
-    if (node != null) {
-        String aliasText = (node.alias != null && !node.alias.isEmpty()) ? 
-                         " AS " + node.alias : "";
-        addLine("Subquery" + aliasText);
-        
-        if (node.query != null) {
-            level++;
+    @Override
+    public Void visit(SubqueryNode node) {
+        if (node != null) {
+            String aliasText = (node.getAlias() != null && !node.getAlias().isEmpty()) ? 
+                             " AS " + node.getAlias() : "";
+            addLine("Subquery" + aliasText);
             
-            // الطريقة 1: استخدام accept() إذا كان الـ query يدعمها
-            if (node.query instanceof SelectStatementNode) {
-                // نحتاج إلى معرفة نوع الـ query وزيارته
-                addLine("Query Type: " + node.query.getClass().getSimpleName());
-                node.query.accept(this);
-            } else {
-                addLine("Query: " + node.query.getClass().getSimpleName());
+            if (node.getQuery() != null) {
+                level++;
+                node.getQuery().accept(this);
+                level--;
             }
-            
-            level--;
         }
+        return null;
     }
-    return null;
-}
 }

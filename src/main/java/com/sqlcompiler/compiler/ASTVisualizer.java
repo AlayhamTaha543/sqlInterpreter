@@ -1,18 +1,19 @@
 package com.sqlcompiler.compiler;
 
 import com.sqlcompiler.parser.ast.ASTNode;
+import com.sqlcompiler.parser.ast.ASTVisitor;
+import com.sqlcompiler.parser.ast.clauses.*;
+import com.sqlcompiler.parser.ast.expressions.*;
+import com.sqlcompiler.parser.ast.statements.SelectStatementNode;
+
 import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Utility to visualize custom AST using Graphviz DOT format.
- * Uses reflection to work with any ASTNode structure.
+ * Uses the Visitor pattern for proper traversal.
  */
-public class ASTVisualizer {
+public class ASTVisualizer implements ASTVisitor<Integer> {
     private StringBuilder dotContent;
     private int nodeCount;
 
@@ -29,9 +30,12 @@ public class ASTVisualizer {
         nodeCount = 0;
         
         dotContent.append("digraph AST {\n");
-        dotContent.append("  node [shape=box, fontname=\"Arial\"];\n");
+        dotContent.append("  node [shape=box, fontname=\"Arial\", style=filled];\n");
+        dotContent.append("  edge [fontname=\"Arial\", fontsize=10];\n");
         
-        walk(ast, -1);
+        if (ast != null) {
+            ast.accept(this);
+        }
         
         dotContent.append("}\n");
         
@@ -41,148 +45,368 @@ public class ASTVisualizer {
     }
 
     /**
-     * Recursively walks the AST and builds the DOT content.
+     * Creates a node in the DOT graph and returns its ID
      */
-    private int walk(ASTNode node, int parentId) {
-        if (node == null) return -1;
-        
+    private int createNode(String label, String color) {
         int currentId = nodeCount++;
-        
-        // Get node label
-        String label = getNodeLabel(node);
-        
-        // Determine color based on class name
-        String fillColor = getColorForNodeType(node.getClass().getSimpleName());
+        String escapedLabel = escapeLabel(label);
         dotContent.append(String.format(
-            "  node%d [label=\"%s\", style=filled, fillcolor=%s];\n", 
-            currentId, label, fillColor
+            "  node%d [label=\"%s\", fillcolor=%s];\n", 
+            currentId, escapedLabel, color
         ));
-        
-        // Connect to parent
-        if (parentId != -1) {
-            dotContent.append(String.format("  node%d -> node%d;\n", parentId, currentId));
-        }
-        
-        // Process children using reflection
-        List<ASTNode> children = getChildren(node);
-        for (ASTNode child : children) {
-            walk(child, currentId);
-        }
-        
         return currentId;
     }
 
     /**
-     * Gets the label for a node (class name and any relevant data).
+     * Creates an edge between two nodes
      */
-    private String getNodeLabel(ASTNode node) {
-        String className = node.getClass().getSimpleName();
-        String nodeStr = node.toString();
-        
-        // If toString() provides useful info, use it
-        if (nodeStr != null && !nodeStr.startsWith(node.getClass().getName() + "@")) {
-            nodeStr = nodeStr.replace("\"", "\\\"").replace("\n", "\\n");
-            if (nodeStr.length() > 60) {
-                nodeStr = nodeStr.substring(0, 57) + "...";
-            }
-            return nodeStr;
+    private void createEdge(int fromId, int toId, String label) {
+        if (label != null && !label.isEmpty()) {
+            dotContent.append(String.format(
+                "  node%d -> node%d [label=\"%s\"];\n", 
+                fromId, toId, escapeLabel(label)
+            ));
+        } else {
+            dotContent.append(String.format(
+                "  node%d -> node%d;\n", 
+                fromId, toId
+            ));
         }
-        
-        return className;
     }
 
     /**
-     * Uses reflection to find and return child nodes.
+     * Escapes special characters for DOT format
      */
-    private List<ASTNode> getChildren(ASTNode node) {
-        List<ASTNode> children = new ArrayList<>();
+    private String escapeLabel(String label) {
+        if (label == null) return "";
+        return label.replace("\"", "\\\"")
+                   .replace("\n", "\\n")
+                   .replace("\\", "\\\\")
+                   .substring(0, Math.min(label.length(), 50));
+    }
+
+    // ========== Statements ==========
+    @Override
+    public Integer visit(SelectStatementNode node) {
+        int nodeId = createNode("SELECT STATEMENT", "lightgreen");
         
-        try {
-            // Try common method names first
-            Method[] methods = {
-                findMethod(node, "getChildren"),
-                findMethod(node, "children"),
-                findMethod(node, "getChildNodes")
-            };
+        if (node.selectClause != null) {
+            int childId = node.selectClause.accept(this);
+            createEdge(nodeId, childId, null);
+        }
+        
+        if (node.fromClause != null) {
+            int childId = node.fromClause.accept(this);
+            createEdge(nodeId, childId, null);
+        }
+        
+        if (node.whereClause != null) {
+            int childId = node.whereClause.accept(this);
+            createEdge(nodeId, childId, null);
+        }
+        
+        if (node.groupByClause != null) {
+            int childId = node.groupByClause.accept(this);
+            createEdge(nodeId, childId, null);
+        }
+        
+        if (node.havingClause != null) {
+            int childId = node.havingClause.accept(this);
+            createEdge(nodeId, childId, null);
+        }
+        
+        if (node.orderByClause != null) {
+            int childId = node.orderByClause.accept(this);
+            createEdge(nodeId, childId, null);
+        }
+        
+        return nodeId;
+    }
+
+    // ========== Clauses ==========
+    @Override
+    public Integer visit(SelectClauseNode node) {
+        String label = "SELECT" + (node.distinct ? " DISTINCT" : "");
+        int nodeId = createNode(label, "lightgreen");
+        
+        for (SelectClauseNode.SelectItem item : node.selectItems) {
+            String itemLabel = "Item";
+            if (item.alias != null && !item.alias.isEmpty()) {
+                itemLabel += " AS " + item.alias;
+            }
+            int itemId = createNode(itemLabel, "palegreen");
+            createEdge(nodeId, itemId, null);
             
-            for (Method method : methods) {
-                if (method != null) {
-                    Object result = method.invoke(node);
-                    if (result instanceof List) {
-                        @SuppressWarnings("unchecked")
-                        List<ASTNode> list = (List<ASTNode>) result;
-                        children.addAll(list);
-                        return children;
-                    }
-                }
+            if (item.expression != null) {
+                int exprId = item.expression.accept(this);
+                createEdge(itemId, exprId, null);
+            }
+        }
+        
+        return nodeId;
+    }
+
+    @Override
+    public Integer visit(FromClauseNode node) {
+        int nodeId = createNode("FROM", "lightblue");
+        
+        for (FromClauseNode.TableSource table : node.tableSources) {
+            String sourceLabel = "Source";
+            if (table.alias != null && !table.alias.isEmpty()) {
+                sourceLabel += " AS " + table.alias;
+            }
+            int sourceId = createNode(sourceLabel, "lightcyan");
+            createEdge(nodeId, sourceId, null);
+            
+            // Visit the table/subquery
+            if (table.source != null) {
+                int tableId = table.source.accept(this);
+                createEdge(sourceId, tableId, null);
             }
             
-            // If no method found, try fields
-            Field[] fields = node.getClass().getDeclaredFields();
-            for (Field field : fields) {
-                field.setAccessible(true);
-                Object value = field.get(node);
-                
-                if (value instanceof List) {
-                    @SuppressWarnings("unchecked")
-                    List<?> list = (List<?>) value;
-                    for (Object item : list) {
-                        if (item instanceof ASTNode) {
-                            children.add((ASTNode) item);
+            // Visit all joins
+            if (table.joins != null) {
+                for (JoinClauseNode join : table.joins) {
+                    int joinId = join.accept(this);
+                    createEdge(sourceId, joinId, "join");
+                }
+            }
+        }
+        
+        return nodeId;
+    }
+
+    @Override
+    public Integer visit(WhereClauseNode node) {
+        int nodeId = createNode("WHERE", "lightyellow");
+        
+        if (node.condition != null) {
+            int condId = node.condition.accept(this);
+            createEdge(nodeId, condId, null);
+        }
+        
+        return nodeId;
+    }
+
+    @Override
+    public Integer visit(JoinClauseNode node) {
+        String label = node.joinType.toString();
+        int nodeId = createNode(label, "lightcoral");
+        
+        // Joined table
+        if (node.table != null) {
+            String tableLabel = "Table";
+            if (node.alias != null && !node.alias.isEmpty()) {
+                tableLabel += " AS " + node.alias;
+            }
+            int tableContainerId = createNode(tableLabel, "mistyrose");
+            createEdge(nodeId, tableContainerId, null);
+            
+            int tableId = node.table.accept(this);
+            createEdge(tableContainerId, tableId, null);
+        }
+        
+        // Join condition
+        if (node.condition != null) {
+            int condId = createNode("ON", "lightgoldenrodyellow");
+            createEdge(nodeId, condId, null);
+            
+            int exprId = node.condition.accept(this);
+            createEdge(condId, exprId, null);
+        }
+        
+        return nodeId;
+    }
+
+    @Override
+    public Integer visit(GroupByClauseNode node) {
+        int nodeId = createNode("GROUP BY", "palegreen");
+        
+        if (node.groupingElements != null) {
+            for (GroupByClauseNode.GroupingElement elem : node.groupingElements) {
+                if (elem.expression != null) {
+                    int exprId = elem.expression.accept(this);
+                    createEdge(nodeId, exprId, null);
+                }
+            }
+        }
+        
+        return nodeId;
+    }
+
+    @Override
+    public Integer visit(HavingClauseNode node) {
+        int nodeId = createNode("HAVING", "lightgoldenrodyellow");
+        
+        if (node.condition != null) {
+            int condId = node.condition.accept(this);
+            createEdge(nodeId, condId, null);
+        }
+        
+        return nodeId;
+    }
+
+    @Override
+    public Integer visit(OrderByClauseNode node) {
+        int nodeId = createNode("ORDER BY", "lightgoldenrodyellow");
+        
+        if (node.sortItems != null) {
+            for (OrderByClauseNode.SortItem item : node.sortItems) {
+                // determine direction via common accessors/fields using reflection, fallback to ASC
+                String direction = "ASC";
+                try {
+                    Boolean asc = null;
+                    try {
+                        java.lang.reflect.Method m = item.getClass().getMethod("isAscending");
+                        asc = (Boolean) m.invoke(item);
+                    } catch (NoSuchMethodException e1) {
+                        try {
+                            java.lang.reflect.Method m = item.getClass().getMethod("isAsc");
+                            asc = (Boolean) m.invoke(item);
+                        } catch (NoSuchMethodException e2) {
+                            try {
+                                java.lang.reflect.Method m = item.getClass().getMethod("getAscending");
+                                asc = (Boolean) m.invoke(item);
+                            } catch (NoSuchMethodException e3) {
+                                try {
+                                    java.lang.reflect.Field f = item.getClass().getDeclaredField("ascending");
+                                    f.setAccessible(true);
+                                    asc = (Boolean) f.get(item);
+                                } catch (NoSuchFieldException | IllegalAccessException e4) {
+                                    try {
+                                        java.lang.reflect.Field f2 = item.getClass().getDeclaredField("asc");
+                                        f2.setAccessible(true);
+                                        asc = (Boolean) f2.get(item);
+                                    } catch (NoSuchFieldException | IllegalAccessException e5) {
+                                        asc = Boolean.TRUE;
+                                    }
+                                }
+                            }
                         }
                     }
-                } else if (value instanceof ASTNode) {
-                    children.add((ASTNode) value);
+                    direction = (asc != null && asc) ? "ASC" : "DESC";
+                } catch (Exception ignored) {
+                    direction = "ASC";
+                }
+
+                int itemId = createNode("Sort [" + direction + "]", "palegoldenrod");
+                createEdge(nodeId, itemId, null);
+                
+                if (item.expression != null) {
+                    int exprId = item.expression.accept(this);
+                    createEdge(itemId, exprId, null);
                 }
             }
-            
-        } catch (Exception e) {
-            // Silently continue if reflection fails
         }
         
-        return children;
+        return nodeId;
     }
 
-    /**
-     * Helper method to find a method by name.
-     */
-    private Method findMethod(Object obj, String methodName) {
-        try {
-            return obj.getClass().getMethod(methodName);
-        } catch (NoSuchMethodException e) {
-            return null;
-        }
-    }
-
-    /**
-     * Assigns colors to different node types for better visualization.
-     */
-    private String getColorForNodeType(String nodeClassName) {
-        String type = nodeClassName.toUpperCase();
-        
-        if (type.contains("SELECT")) {
-            return "lightgreen";
-        } else if (type.contains("FROM")) {
-            return "lightblue";
-        } else if (type.contains("WHERE")) {
-            return "lightyellow";
-        } else if (type.contains("JOIN")) {
-            return "lightcoral";
-        } else if (type.contains("COLUMN")) {
-            return "lightcyan";
-        } else if (type.contains("TABLE")) {
-            return "lavender";
-        } else if (type.contains("CONDITION") || type.contains("EXPRESSION")) {
-            return "wheat";
-        } else if (type.contains("LITERAL") || type.contains("VALUE")) {
-            return "lightpink";
-        } else if (type.contains("ORDER")) {
-            return "lightgoldenrodyellow";
-        } else if (type.contains("GROUP")) {
-            return "palegreen";
+    // ========== Expressions ==========
+    @Override
+    public Integer visit(ColumnNode node) {
+        String label = "Column: ";
+        if (node.tableName != null) {
+            label += node.tableName + "." + node.columnName;
         } else {
-            return "white";
+            label += node.columnName;
         }
+        return createNode(label, "lightcyan");
+    }
+
+    @Override
+    public Integer visit(TableNode node) {
+        String label = "Table: " + node.tableName;
+        if (node.alias != null && !node.alias.isEmpty()) {
+            label += " AS " + node.alias;
+        }
+        return createNode(label, "lavender");
+    }
+
+    @Override
+    public Integer visit(LiteralNode node) {
+        String label = "Literal[" + node.type + "]: " + 
+                      (node.value != null ? node.value.toString() : "NULL");
+        return createNode(label, "lightpink");
+    }
+
+    @Override
+    public Integer visit(BinaryExpressionNode node) {
+        int nodeId = createNode("BinaryExpr: " + node.operator, "wheat");
+        
+        if (node.left != null) {
+            int leftId = node.left.accept(this);
+            createEdge(nodeId, leftId, "left");
+        }
+        
+        if (node.right != null) {
+            int rightId = node.right.accept(this);
+            createEdge(nodeId, rightId, "right");
+        }
+        
+        return nodeId;
+    }
+
+    @Override
+    public Integer visit(FunctionCallNode node) {
+        String label = "Function: " + node.functionName;
+        int nodeId = createNode(label, "plum");
+        
+        if (node.arguments != null) {
+            for (int i = 0; i < node.arguments.size(); i++) {
+                int argId = node.arguments.get(i).accept(this);
+                createEdge(nodeId, argId, "arg" + i);
+            }
+        }
+        
+        return nodeId;
+    }
+
+    @Override
+    public Integer visit(AggregateFunctionNode node) {
+        String label = "Aggregate: " + node.type;
+        if (node.distinct) {
+            label += " DISTINCT";
+        }
+        int nodeId = createNode(label, "orchid");
+        
+        if (node.argument != null) {
+            int argId = node.argument.accept(this);
+            createEdge(nodeId, argId, null);
+        }
+        
+        return nodeId;
+    }
+
+    @Override
+    public Integer visit(CaseexpressionNode node) {
+        int nodeId = createNode("CASE Expression", "thistle");
+        
+        // Add logic here based on your CaseExpressionNode structure
+        // For example:
+        // if (node.whenClauses != null) {
+        //     for (WhenClause when : node.whenClauses) {
+        //         // process WHEN clauses
+        //     }
+        // }
+        
+        return nodeId;
+    }
+
+    @Override
+    public Integer visit(SubqueryNode node) {
+        String label = "Subquery";
+        if (node.getAlias() != null && !node.getAlias().isEmpty()) {
+            label += " AS " + node.getAlias();
+        }
+        int nodeId = createNode(label, "lightsteelblue");
+        
+        if (node.getQuery() != null) {
+            int queryId = node.getQuery().accept(this);
+            createEdge(nodeId, queryId, null);
+        }
+        
+        return nodeId;
     }
 
     /**
