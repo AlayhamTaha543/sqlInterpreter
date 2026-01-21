@@ -46,12 +46,15 @@ public class ASTBuilder extends SQLParserBaseVisitor<ASTNode> {
     private SQLParser.QuerySpecificationContext extractQuerySpecification(
             SQLParser.QueryExpressionContext ctx) {
 
-        if (ctx.querySpecification() != null) {
-            return ctx.querySpecification();
+        // If this queryExpression contains one or more QuerySpecification children,
+        // return the first one (handles set operators like UNION/EXCEPT/INTERSECT).
+        if (ctx.querySpecification() != null && ctx.querySpecification().size() > 0) {
+            return ctx.querySpecification(0);
         }
 
-        if (ctx.queryExpression().size() == 1) {
-            return extractQuerySpecification(ctx.queryExpression(0));
+        // Otherwise this is a parenthesized queryExpression: recurse into it.
+        if (ctx.queryExpression() != null) {
+            return extractQuerySpecification(ctx.queryExpression());
         }
 
         return null;

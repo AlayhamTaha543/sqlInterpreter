@@ -16,17 +16,43 @@ sqlStatement
       | bulkInsertStatement
       | updateStatement
       | deleteStatement
+      | mergeStatement
       | createStatement
       | alterStatement
       | dropStatement
       | renameStatement
       | truncateStatement
+      | useStatement                   
+      // Cursor statements
+      | declareCursorStatement
+      | openCursorStatement
+      | closeCursorStatement
+      | fetchStatement
+      | deallocateCursorStatement
+      // Transaction control
+      | beginTransactionStatement
+      | commitTransactionStatement
+      | rollbackTransactionStatement
+      | savepointStatement
+      // Control flow
+      | tryCatchStatement
+      | printStatement
+      | raiseErrorStatement
+      | declareStatement
+      | setStatement
+      | ifStatement
+      | whileStatement
+      | returnStatement
       ) SEMICOLON?
     ;
 
 // Root rule for parsing - includes EOF
 sqlStatements
-    : sqlStatement* EOF
+    : batch (GO INTEGER? batch)* EOF
+    ;
+
+batch
+    : sqlStatement*
     ;
 
 // =============================================
@@ -37,14 +63,10 @@ selectStatement
     : queryExpression orderByClause? offsetFetchClause?
     ;
 
-// CRITICAL FIX: Keep the original recursive structure
-// This prevents ambiguity in CREATE TABLE parsing
 queryExpression
-    : querySpecification
+    : querySpecification (setOperator querySpecification)*
     | LPAREN queryExpression RPAREN
-    | queryExpression setOperator queryExpression
     ;
-
 querySpecification
     : SELECT topClause? distinctClause? selectList
       fromClause?
@@ -158,7 +180,9 @@ joinCondition
 whereClause
     : WHERE searchCondition
     ;
-
+whereCurrentOfClause
+    : WHERE CURRENT OF (GLOBAL? identifier | USER_VARIABLE)
+    ; 
 // =============================================
 // SEARCH CONDITIONS (WHERE, HAVING, ON, CASE)
 // =============================================
@@ -236,6 +260,9 @@ expression
     | expression (PLUS | MINUS) expression
     | expression (PIPE_PIPE | PLUS) expression
     | expression comparisonOperator expression
+    | expression AMPERSAND expression                          
+    | expression PIPE expression                             
+    | expression CARET expression  
     | castExpression
     | windowFunction
     ;
@@ -288,6 +315,8 @@ windowFrameBound
     | FOLLOWING
     | INTEGER PRECEDING
     | INTEGER FOLLOWING
+    | UNBOUNDED PRECEDING                                    
+    | UNBOUNDED FOLLOWING 
     ;
 
 rankingFunction
@@ -310,12 +339,22 @@ functionCall
     | dateFunction
     | stringFunction
     | conversionFunction
+    | systemFunction 
     ;
 
 aggregateFunction
     : (COUNT | SUM | AVG | MIN | MAX) LPAREN (DISTINCT | ALL)? (expression | STAR) RPAREN
     ;
-
+//  System functions (COALESCE, NULLIF, IIF, etc.)
+systemFunction
+    : COALESCE LPAREN expressionList RPAREN
+    | NULLIF LPAREN expression COMMA expression RPAREN
+    | IIF LPAREN searchCondition COMMA expression COMMA expression RPAREN
+    | ISNULL LPAREN expression COMMA expression RPAREN
+    | ISNUMERIC LPAREN expression RPAREN
+    | NEWID LPAREN RPAREN
+    | SCOPE_IDENTITY LPAREN RPAREN
+    ;
 scalarFunction
     : functionName LPAREN (expression (COMMA expression)*)? RPAREN
     ;
@@ -398,6 +437,16 @@ nonReservedKeyword
     : KEY | ROLE | USER | TYPE | OPTION | PARTITION | RANGE | ROWS | ROW | WRITE
     | NAME | SIZE | OWNER | FILE | SCHEMA | INPUT | OUTPUT | ACTION | MONTH | DAY | YEAR
     | TRANSACTION | TRIGGER | LOGIN | PERMISSION | DATABASE | GO
+    | SOURCE      
+    | DESC        
+    | ASC         
+    | DATE        
+    | TIME        
+    | TIMESTAMP   
+    // | COMMENT     
+    // | STATUS      
+    // | LEVEL       
+    | COUNT       
     ;
 
 dataType
@@ -453,7 +502,7 @@ insertStatement
 
 // Supporting rules for INSERT
 withClause
-    : WITH cteExpression (COMMA cteExpression)*
+    : WITH RECURSIVE? cteExpression (COMMA cteExpression)*
     ;
 
 cteExpression
@@ -569,6 +618,7 @@ updateStatement
       outputClause?
       fromClause?
       whereClause?
+      whereCurrentOfClause?
       optionClause?
       SEMICOLON?
     ;
@@ -627,6 +677,66 @@ joinClause
       ON searchCondition
     ;
 
+
+
+// =============================================
+// MERGE STATEMENT 
+// =============================================
+
+mergeStatement
+    : withClause?                        // Optional CTE
+      MERGE
+      INTO mergeTarget
+      USING mergeSource
+      ON searchCondition
+      mergeWhenClause+                  // One or more WHEN clauses
+      optionClause?
+      SEMICOLON?
+    ;
+
+// Target and Source definitions
+mergeTarget
+    : tableName (AS? tableAlias)?
+    ;
+
+mergeSource
+    : tableName (AS? tableAlias)?
+    | LPAREN queryExpression RPAREN (AS? tableAlias)?
+    ;
+
+// WHEN Clauses
+mergeWhenClause
+    : mergeWhenMatched
+    | mergeWhenNotMatched
+    ;
+
+// WHEN MATCHED
+mergeWhenMatched
+    : WHEN MATCHED (AND searchCondition)? THEN mergeMatchedAction
+    ;
+
+// WHEN NOT MATCHED
+mergeWhenNotMatched
+    : WHEN NOT MATCHED (AND searchCondition)? THEN mergeNotMatchedAction
+    ;
+
+// Actions
+mergeMatchedAction
+    : UPDATE SET mergeSetClause (COMMA mergeSetClause)*
+    | DELETE
+    ;
+
+mergeSetClause
+    : fullColumnName EQUALS expression
+    ;
+
+mergeNotMatchedAction
+    : INSERT (LPAREN columnName (COMMA columnName)* RPAREN)?
+      VALUES LPAREN expressionList RPAREN
+    ;    
+
+
+
 // =============================================
 // CREATE STATEMENT
 // =============================================
@@ -652,14 +762,40 @@ tableElement
     ;
 
 tableConstraint
-    : PRIMARY KEY LPAREN columnName (COMMA columnName)* RPAREN
-    | UNIQUE LPAREN columnName (COMMA columnName)* RPAREN
-    | FOREIGN KEY LPAREN columnName (COMMA columnName)* RPAREN 
+    : (CONSTRAINT identifier)?                                      
+      PRIMARY KEY (CLUSTERED | NONCLUSTERED)?                       
+      LPAREN columnName (COMMA columnName)* RPAREN
+      indexOptions?                                                 
+    | (CONSTRAINT identifier)?                                      
+      UNIQUE (CLUSTERED | NONCLUSTERED)?                            
+      LPAREN columnName (COMMA columnName)* RPAREN
+      indexOptions?                                                 
+    | (CONSTRAINT identifier)?                                      
+      FOREIGN KEY LPAREN columnName (COMMA columnName)* RPAREN 
         REFERENCES tableName (LPAREN columnName (COMMA columnName)* RPAREN)?
         (onDeleteClause? onUpdateClause?)
-    | CHECK LPAREN searchCondition RPAREN
-    | INDEX identifier LPAREN columnName (COMMA columnName)* RPAREN
-    | SPATIAL INDEX identifier LPAREN columnName (COMMA columnName)* RPAREN
+    | (CONSTRAINT identifier)?                                      
+      CHECK LPAREN searchCondition RPAREN
+    | INDEX identifier (CLUSTERED | NONCLUSTERED)?                  
+      LPAREN columnName (COMMA columnName)* RPAREN
+      indexOptions?                                                 
+    | SPATIAL INDEX identifier 
+      LPAREN columnName (COMMA columnName)* RPAREN
+    ;
+
+
+indexOptions
+    : WITH LPAREN indexOption (COMMA indexOption)* RPAREN
+    ;
+
+indexOption
+    : PAD_INDEX EQUALS (ON | OFF)
+    | FILLFACTOR EQUALS INTEGER
+    | IGNORE_DUP_KEY EQUALS (ON | OFF)
+    | STATISTICS_NORECOMPUTE EQUALS (ON | OFF)
+    | ALLOW_ROW_LOCKS EQUALS (ON | OFF)
+    | ALLOW_PAGE_LOCKS EQUALS (ON | OFF)
+    | DATA_COMPRESSION EQUALS (NONE | ROW | PAGE)
     ;
 
 onDeleteClause
@@ -683,8 +819,33 @@ referenceAction
 // =============================================
 
 statementList
-    : (selectStatement | insertStatement | updateStatement | deleteStatement 
-      | declareStatement | setStatement | ifStatement | whileStatement | returnStatement)+
+    : (selectStatement 
+      | insertStatement 
+      | bulkInsertStatement
+      | updateStatement 
+      | deleteStatement 
+      | mergeStatement
+      | createStatement              
+      | alterStatement               
+      | dropStatement                
+      | truncateStatement            
+      | declareStatement 
+      | setStatement 
+      | ifStatement 
+      | whileStatement 
+      | returnStatement
+      | tryCatchStatement
+      | printStatement
+      | raiseErrorStatement
+      | beginTransactionStatement
+      | commitTransactionStatement
+      | rollbackTransactionStatement
+      | savepointStatement
+      | openCursorStatement
+      | closeCursorStatement
+      | fetchStatement
+      | deallocateCursorStatement
+      )+
     ;
 
 declareStatement
@@ -696,7 +857,9 @@ setStatement
     ;
 
 ifStatement
-    : IF searchCondition BEGIN statementList END (ELSE BEGIN statementList END)?
+    : IF searchCondition 
+      (BEGIN statementList END | sqlStatement)
+      (ELSE (BEGIN statementList END | sqlStatement))?
     ;
 
 whileStatement
@@ -705,6 +868,119 @@ whileStatement
 
 returnStatement
     : RETURN expression?
+    ;
+declareCursorStatement
+    : DECLARE identifier CURSOR
+      cursorOptions?
+      FOR queryExpression
+      (FOR (READ ONLY | UPDATE (OF columnName (COMMA columnName)*)?))?
+    ;
+
+cursorOptions
+    : cursorOption+
+    ;
+
+cursorOption
+    : LOCAL
+    | GLOBAL
+    | FORWARD_ONLY
+    | SCROLL
+    | STATIC
+    | KEYSET
+    | DYNAMIC
+    | FAST_FORWARD
+    | READ_ONLY
+    | SCROLL_LOCKS
+    | OPTIMISTIC
+    | TYPE_WARNING
+    ;
+
+openCursorStatement
+    : OPEN (GLOBAL? identifier | USER_VARIABLE)
+    ;
+
+closeCursorStatement
+    : CLOSE (GLOBAL? identifier | USER_VARIABLE)
+    ;
+
+deallocateCursorStatement
+    : DEALLOCATE (GLOBAL? identifier | USER_VARIABLE)
+    ;
+
+fetchStatement
+    : FETCH fetchOrientation? (FROM | IN)?
+      (GLOBAL? identifier | USER_VARIABLE)
+      (INTO USER_VARIABLE (COMMA USER_VARIABLE)*)?
+    ;
+
+fetchOrientation
+    : NEXT
+    | PRIOR
+    | FIRST
+    | LAST
+    | ABSOLUTE expression
+    | RELATIVE expression
+    ;
+    // =============================================
+// ➕ NEW: TRANSACTION CONTROL STATEMENTS
+// Location: After cursor statements
+// =============================================
+
+beginTransactionStatement
+    : BEGIN (TRAN | TRANSACTION) (identifier | USER_VARIABLE)?
+      (WITH MARK STRING?)?
+    ;
+
+commitTransactionStatement
+    : COMMIT (TRAN | TRANSACTION | WORK)? (identifier | USER_VARIABLE)?
+    ;
+
+rollbackTransactionStatement
+    : ROLLBACK (TRAN | TRANSACTION | WORK)? (identifier | USER_VARIABLE)?
+      (TO (SAVEPOINT)? (identifier | USER_VARIABLE))?
+    ;
+
+savepointStatement
+    : SAVE (TRAN | TRANSACTION) (identifier | USER_VARIABLE)
+    ;
+
+// =============================================
+// ➕ NEW: TRY-CATCH BLOCK
+// Location: After transaction statements
+// =============================================
+
+tryCatchStatement
+    : BEGIN TRY
+        statementList
+      END TRY
+      BEGIN CATCH
+        statementList
+      END CATCH
+    ;
+
+// =============================================
+// ➕ NEW: PRINT AND RAISERROR
+// Location: After TRY-CATCH
+// =============================================
+
+printStatement
+    : PRINT (expression | USER_VARIABLE | STRING)
+    ;
+
+raiseErrorStatement
+    : RAISERROR LPAREN
+        (INTEGER | STRING | USER_VARIABLE) COMMA
+        INTEGER COMMA
+        INTEGER
+        (COMMA expression)*
+      RPAREN
+      (WITH raiseErrorOption (COMMA raiseErrorOption)*)?
+    ;
+
+raiseErrorOption
+    : LOG
+    | NOWAIT
+    | SETERROR
     ;
 
 // =============================================
@@ -744,7 +1020,8 @@ parameterList
     ;
 
 parameter
-    : USER_VARIABLE dataType
+    : USER_VARIABLE dataType (EQUALS expression)?             
+    | USER_VARIABLE dataType OUTPUT                          
     ;
 
 // =============================================
@@ -828,4 +1105,7 @@ triggerName
 truncateStatement
     : TRUNCATE TABLE tableName (SEMICOLON)?
     ;
-
+///////////////////////////////use statement///////////////////////////////
+useStatement
+    : USE databaseName
+    ;
