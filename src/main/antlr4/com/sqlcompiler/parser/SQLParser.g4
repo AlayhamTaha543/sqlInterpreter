@@ -13,7 +13,6 @@ options {
 sqlStatement
     : ( selectStatement
       | insertStatement
-      |renameStatement
       | bulkInsertStatement
       | updateStatement
       | deleteStatement
@@ -359,7 +358,7 @@ columnReference
     ;
 
 tableName
-    : (schemaName DOT)? identifier
+    : (databaseName DOT)? (schemaName DOT)? identifier
     ;
 
 columnName
@@ -810,13 +809,6 @@ dropTrigger
 ifExists
     : IF EXISTS
     ;
-
-databaseName
-    : identifier
-    ;
-
-
-
 procedureName
     : (schemaName DOT)? identifier
     ;
