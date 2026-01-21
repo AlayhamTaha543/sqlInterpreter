@@ -364,7 +364,6 @@ NVARCHAR: N V A R C H A R;
 // O
 OF: O F;
 OFF: O F F;
-OF: O F;
 OFFLINE: O F F L I N E;
 OFFSET: O F F S E T;
 ON: O N;
