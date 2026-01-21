@@ -727,9 +727,7 @@ deleteJoinClause
 limitClause
     : LIMIT INTEGER (OFFSET INTEGER)?
     ;
-whereCurrentOfClause
-    : WHERE CURRENT OF (GLOBAL? identifier | USER_VARIABLE)
-    ;
+    
 // Reuse existing rules:
 // - withClause (from INSERT)
 // - topClause (from SELECT)
