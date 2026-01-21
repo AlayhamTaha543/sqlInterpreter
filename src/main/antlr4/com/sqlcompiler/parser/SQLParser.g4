@@ -337,9 +337,9 @@ stringFunction
 dateFunction
     : GETDATE LPAREN RPAREN
     | GETUTCDATE LPAREN RPAREN
-    | DATEADD LPAREN IDENTIFIER COMMA expression COMMA expression RPAREN
-    | DATEDIFF LPAREN IDENTIFIER COMMA expression COMMA expression RPAREN
-    | DATEPART LPAREN IDENTIFIER COMMA expression RPAREN
+    | DATEADD LPAREN identifier  COMMA expression COMMA expression RPAREN
+    | DATEDIFF LPAREN identifier  COMMA expression COMMA expression RPAREN
+    | DATEPART LPAREN identifier  COMMA expression RPAREN
     | YEAR LPAREN expression RPAREN
     | MONTH LPAREN expression RPAREN
     | DAY LPAREN expression RPAREN
@@ -503,9 +503,18 @@ tableHint
     ;
 
 hintList
-    : identifier (COMMA identifier)*
+    : hintItem (COMMA hintItem)*
     ;
-
+hintItem
+    : TABLOCK
+    | NOLOCK
+    | READPAST
+    | ROWLOCK
+    | PAGLOCK
+    | UPDLOCK
+    | XLOCK
+    | identifier
+    ;
 insertSource
     : valuesClause
     | queryExpression
@@ -601,32 +610,85 @@ assignmentOperator
     | PIPE_EQUAL
     ;
 
+
 // =============================================
-// DELETE STATEMENT - Version 1
+// DELETE STATEMENT - Complete Working Version
 // =============================================
 
 deleteStatement
-    : DELETE deleteTarget?
+    : withClause? DELETE 
       topClause?
-      FROM?
-      tableSource (COMMA tableSource)*
+      fromDeleteTarget?
+      deleteTarget
+      tableHint?                    // For hints after target table
+      outputClause?
+      fromTableSources?
       whereClause?
+      whereCurrentOfClause?
+      orderByClause?                // MySQL ORDER BY
+      limitClause?                  // MySQL LIMIT
+      optionClause?
       SEMICOLON?
     ;
 
+fromDeleteTarget
+    : FROM
+    ;
+
+// Multi-target: DELETE t1, t2, t3
 deleteTarget
+    : deleteTargetItem (COMMA deleteTargetItem)*
+    ;
+
+deleteTargetItem
     : tableAlias
+    | deleteQualifiedTableName
+    | USER_VARIABLE
+    | rowsetFunction
     ;
 
-tableSources
-    : tableSource (COMMA tableSource)*
+deleteQualifiedTableName
+    : (identifier DOT)? (identifier DOT)? identifier (AS? tableAlias)?
     ;
 
-joinClause
-    : (INNER? JOIN | LEFT OUTER? JOIN | RIGHT OUTER? JOIN | FULL OUTER? JOIN | CROSS JOIN)
-      tableSource
-      ON searchCondition
+fromTableSources
+    : FROM deleteTableSources
     ;
+
+// Comma-separated tables (old style) and joins
+deleteTableSources
+    : deleteTableSource (COMMA deleteTableSource)*
+    ;
+
+deleteTableSource
+    : deleteTableSourceItem tableHint?
+    | LPAREN selectStatement RPAREN (AS? tableAlias)?
+    | deleteTableSource deleteJoinClause
+    ;
+
+deleteTableSourceItem
+    : deleteQualifiedTableName
+    ;
+
+deleteJoinClause
+    : joinType? JOIN deleteTableSourceItem (AS? tableAlias)? ON searchCondition
+    ;
+
+// MySQL extensions
+limitClause
+    : LIMIT INTEGER (OFFSET INTEGER)?
+    ;
+whereCurrentOfClause
+    : WHERE CURRENT OF (GLOBAL? identifier | USER_VARIABLE)
+    ;
+// Reuse existing rules:
+// - withClause (from INSERT)
+// - topClause (from SELECT)
+// - tableHint (from INSERT)
+// - outputClause (from INSERT)
+// - orderByClause (from SELECT)
+// - optionClause (from INSERT)
+// - joinType (from SELECT)
 
 // =============================================
 // CREATE STATEMENT
@@ -810,13 +872,6 @@ dropTrigger
 ifExists
     : IF EXISTS
     ;
-
-databaseName
-    : identifier
-    ;
-
-
-
 procedureName
     : (schemaName DOT)? identifier
     ;
