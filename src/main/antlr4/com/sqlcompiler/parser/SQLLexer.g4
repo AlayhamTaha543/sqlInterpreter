@@ -376,6 +376,12 @@ XML: X M L;
 
 // Y
 YEAR: Y E A R;
+// =============================================
+// MERGE + TRUNCATE TOKENS
+// =============================================
+RESTART: R E S T A R T;
+
+
 
 // =============================================
 // SECTION 5: IDENTIFIERS AND VARIABLES
@@ -457,14 +463,12 @@ FLOATN: [0-9]+ '.' [0-9]+;
 INTEGER: [0-9]+;
 
 /**
- * STRING LITERALS
- * 
- * Handles:
- * - Single-quoted strings with '' escaping (ANSI SQL standard)
- * - Optional N prefix for Unicode strings (NVARCHAR literals)
- * - Multi-line strings (implicitly supported)
+ * STRING
  */
-STRING: 'N'? '\'' (~'\'' | '\'\'')* '\'';
+STRING: 'N'? '\'' (~'\'' | '\'\'')* '\''
+    | '{ts \'' (~('\'' | '\r' | '\n'))* '\'}'
+    | '{d \'' (~('\'' | '\r' | '\n'))* '\'}'
+    | '{t \'' (~('\'' | '\r' | '\n'))* '\'}';
 
 /**
  * REGULAR IDENTIFIERS (Priority: Lowest)
