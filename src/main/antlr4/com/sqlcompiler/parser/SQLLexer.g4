@@ -296,7 +296,8 @@ ROW_NUMBER: R O W '_' N U M B E R;
 ROWGUIDCOL: R O W G U I D C O L;
 ROWS: R O W S;
 RTRIM: R T R I M;
-
+OUT:       O U T;//kaldd
+READONLY:  R E A D O N L Y;
 // S
 SAVE: S A V E;
 SAVEPOINT: S A V E P O I N T;
