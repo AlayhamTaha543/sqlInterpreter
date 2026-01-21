@@ -1,5 +1,105 @@
 // Define a grammar called SqlLexer
 lexer grammar SQLLexer;
+@members {
+    /**
+     * Normalizes a regular string literal according to T-SQL rules:
+     * 1. Backslash + newline = line continuation (remove both)
+     * 2. Newline alone = space
+     * 3. Leading whitespace after newline = removed
+     */
+    private String normalizeString(String raw) {
+        if (raw.length() <= 2) {
+            return raw; // Empty string ''
+        }
+        
+        // Remove outer quotes
+        String content = raw.substring(1, raw.length() - 1);
+        
+        // Normalize
+        String normalized = normalizeWhitespace(content);
+        
+        // Re-add quotes
+        return "'" + normalized + "'";
+    }
+    
+    /**
+     * Normalizes a Unicode string literal (N'...')
+     */
+    private String normalizeUnicodeString(String raw) {
+        if (raw.length() <= 3) {
+            return raw; // Empty string N''
+        }
+        
+        // Remove N' prefix and closing '
+        String content = raw.substring(2, raw.length() - 1);
+        
+        // Normalize
+        String normalized = normalizeWhitespace(content);
+        
+        // Re-add N prefix and quotes
+        return "N'" + normalized + "'";
+    }
+    
+    /**
+     * Core normalization logic
+     */
+    private String normalizeWhitespace(String content) {
+        StringBuilder result = new StringBuilder();
+        int i = 0;
+        int len = content.length();
+        boolean afterNewline = false;
+        
+        while (i < len) {
+            char ch = content.charAt(i);
+            
+            // RULE 1: Line continuation (backslash + newline)
+            // Remove both the backslash and the newline
+            if (ch == '\\' && i + 1 < len) {
+                char next = content.charAt(i + 1);
+                if (next == '\n' || next == '\r') {
+                    // Skip the backslash
+                    i++;
+                    // Skip the newline
+                    i++;
+                    // Handle \r\n
+                    if (i < len && content.charAt(i - 1) == '\r' && content.charAt(i) == '\n') {
+                        i++;
+                    }
+                    afterNewline = true;
+                    continue;
+                }
+            }
+            
+            // RULE 2: Newline without backslash
+            // Convert to space (unless we just had a newline)
+            if (ch == '\n' || ch == '\r') {
+                if (!afterNewline) {
+                    result.append(' ');
+                }
+                afterNewline = true;
+                i++;
+                // Handle \r\n
+                if (i < len && content.charAt(i - 1) == '\r' && content.charAt(i) == '\n') {
+                    i++;
+                }
+                continue;
+            }
+            
+            // RULE 3: Skip leading whitespace after newline
+            if (afterNewline && (ch == ' ' || ch == '\t')) {
+                i++;
+                continue;
+            }
+            
+            // Regular character
+            afterNewline = false;
+            result.append(ch);
+            i++;
+        }
+        
+        return result.toString();
+    }
+}
 
 // =============================================
 // SECTION 1: SKIP RULES (Must be first)
@@ -46,6 +146,9 @@ PERCENT_SIGN: '%';
 PLUS: '+';
 MINUS: '-';
 TILDE: '~';
+AMPERSAND: '&';      
+PIPE: '|';           
+CARET: '^';          
 
 // =============================================
 // SECTION 4: KEYWORDS (Alphabetically grouped)
@@ -53,6 +156,7 @@ TILDE: '~';
 
 // A
 ACTION: A C T I O N;
+ABSOLUTE: A B S O L U T E;
 ADD: A D D;
 ALL: A L L;
 ALLOW_PAGE_LOCKS: A L L O W '_' P A G E '_' L O C K S;
@@ -89,6 +193,8 @@ CASCADE: C A S C A D E;
 CASE: C A S E;
 CAST: C A S T;
 CATCH: C A T C H;
+COALESCE: C O A L E S C E;
+CURSOR: C U R S O R;
 CHAR: C H A R;
 CHARINDEX: C H A R I N D E X;
 CHECK: C H E C K;
@@ -128,6 +234,7 @@ DESC: D E S C;
 DISABLE: D I S A B L E;
 DISTINCT: D I S T I N C T;
 DROP: D R O P;
+DYNAMIC: D Y N A M I C;
 
 // E
 ELSE: E L S E;
@@ -156,6 +263,8 @@ FLOAT: F L O A T;
 FOLLOWING: F O L L O W I N G;
 FOR: F O R;
 FOREIGN: F O R E I G N;
+FAST_FORWARD: F A S T '_' F O R W A R D;
+FORWARD_ONLY: F O R W A R D '_' O N L Y;
 FROM: F R O M;
 FULL: F U L L;
 FUNCTION: F U N C T I O N;
@@ -175,6 +284,9 @@ HOUR: H O U R;
 // I
 IDENTITY: I D E N T I T Y;
 IF: I F;
+IIF: I I F;
+ISNULL: I S N U L L;
+ISNUMERIC: I S N U M E R I C;
 IGNORE_DUP_KEY: I G N O R E '_' D U P '_' K E Y;
 IMAGE: I M A G E;
 IN: I N;
@@ -188,26 +300,32 @@ INTERSECT: I N T E R S E C T;
 INTO: I N T O;
 IS: I S;
 
+
 // J
 JOIN: J O I N;
 
 // K
 KB: K B;
 KEY: K E Y;
+KEYSET: K E Y S E T;
 
 // L
 LAG: L A G;
+LAST: L A S T;
 LAST_VALUE: L A S T '_' V A L U E;
 LEAD: L E A D;
 LEFT: L E F T;
 LEN: L E N;
 LIMIT:L I M I T;
 LIKE: L I K E;
+LOCAL: L O C A L;
+LOG: L O G;
 LOGIN: L O G I N;
 LOWER: L O W E R;
 LTRIM: L T R I M;
 
 // M
+MARK: M A R K;
 MATCHED: M A T C H E D;
 MAX: M A X;
 MAXM: M A X;
@@ -227,6 +345,9 @@ MULTI_USER: M U L T I '_' U S E R;
 NAME: N A M E;
 NCHAR: N C H A R;
 NEXT: N E X T;
+NEWID: N E W I D;
+NULLIF: N U L L I F;
+NOWAIT: N O W A I T;
 NO: N O;
 NOLOCK: N O L O C K;
 
@@ -243,6 +364,7 @@ NVARCHAR: N V A R C H A R;
 // O
 OF: O F;
 OFF: O F F;
+OF: O F;
 OFFLINE: O F F L I N E;
 OFFSET: O F F S E T;
 ON: O N;
@@ -251,6 +373,7 @@ ONLY: O N L Y;
 OPEN: O P E N;
 OPENQUERY: O P E N Q U E R Y;
 OPENROWSET: O P E N R O W S E T;
+OPTIMISTIC: O P T I M I S T I C;
 OPTION: O P T I O N;
 OR: O R;
 ORDER: O R D E R;
@@ -270,6 +393,7 @@ PERMISSION: P E R M I S S I O N;
 PERSISTED: P E R S I S T E D;
 POINT: P O I N T;
 PRECEDING: P R E C E D I N G;
+PRIOR: P R I O R;
 PRIMARY: P R I M A R Y;
 PRINT: P R I N T;
 PROC: P R O C;
@@ -281,7 +405,11 @@ QUARTER: Q U A R T E R;
 RAISERROR: R A I S E R R O R;
 RANGE: R A N G E;
 RANK: R A N K;
+READ: R E A D;
 READ_ONLY: R E A D '_' O N L Y;
+RECURSIVE: R E C U R S I V E;
+RELATIVE: R E L A T I V E;
+RETURNS: R E T U R N S;
 READ_WRITE: R E A D '_' W R I T E;
 READPAST: R E A D P A S T;
 REAL: R E A L;
@@ -296,7 +424,6 @@ REPLACE: R E P L A C E;
 REPLICATION: R E P L I C A T I O N;
 RESTRICT: R E S T R I C T ;
 RETURN: R E T U R N;
-RETURNS: R E T U R N S;
 REVOKE: R E V O K E;
 RIGHT: R I G H T;
 ROLE: R O L E;
@@ -307,12 +434,19 @@ ROWLOCK: R O W L O C K;
 ROWGUIDCOL: R O W G U I D C O L;
 ROWS: R O W S;
 RTRIM: R T R I M;
-
+OUT:       O U T;//kaldd
+READONLY:  R E A D O N L Y;
 // S
 SAVE: S A V E;
 SAVEPOINT: S A V E P O I N T;
 SCHEMA: S C H E M A;
 SCHEMABINDING: S C H E M A B I N D I N G;
+SCOPE_IDENTITY: S C O P E '_' I D E N T I T Y;
+SCROLL: S C R O L L;
+SCROLL_LOCKS: S C R O L L '_' L O C K S;
+SETERROR: S E T E R R O R;
+SOURCE: S O U R C E;
+STATIC: S T A T I C;
 SELECT: S E L E C T;
 SELF: S E L F;
 SET: S E T;
@@ -338,6 +472,10 @@ SWITCH: S W I T C H;
 TABLE: T A B L E;
 TABLOCK: T A B L O C K;
 TEMPORARY: T E M P O R A R Y ;
+TARGET: T A R G E T;
+TRAN: T R A N;
+TRY: T R Y;
+TYPE_WARNING: T Y P E '_' W A R N I N G;
 
 TEXT: T E X T;
 THEN: T H E N;
@@ -352,12 +490,12 @@ TRANSACTION: T R A N S A C T I O N;
 TRIGGER: T R I G G E R;
 TRUE: T R U E;
 TRUNCATE: T R U N C A T E ;
-TRY: T R Y;
 TRY_CAST: T R Y '_' C A S T;
 TRY_CONVERT: T R Y '_' C O N V E R T;
 TYPE: T Y P E;
 
 // U
+UNBOUNDED: U N B O U N D E D;
 UNION: U N I O N;
 UNIQUE: U N I Q U E;
 UNIQUEIDENTIFIER: U N I Q U E I D E N T I F I E R;
@@ -384,7 +522,7 @@ WHERE: W H E R E;
 WHILE: W H I L E;
 WITH: W I T H;
 WRITE: W R I T E;
-
+WORK: W O R K;
 // X
 XML: X M L;
 XLOCK: X L O C K;
@@ -479,10 +617,19 @@ INTEGER: [0-9]+;
 /**
  * STRING
  */
-STRING: 'N'? '\'' (~'\'' | '\'\'')* '\''
+STRING
+    : '\'' (~'\'' | '\'\'')* '\''
+      {
+          setText(normalizeString(getText()));
+      }
+    | 'N' '\'' (~'\'' | '\'\'')* '\''
+      {
+          setText(normalizeUnicodeString(getText()));
+      }
     | '{ts \'' (~('\'' | '\r' | '\n'))* '\'}'
     | '{d \'' (~('\'' | '\r' | '\n'))* '\'}'
-    | '{t \'' (~('\'' | '\r' | '\n'))* '\'}';
+    | '{t \'' (~('\'' | '\r' | '\n'))* '\'}'
+    ;
 
 /**
  * REGULAR IDENTIFIERS (Priority: Lowest)
@@ -500,6 +647,10 @@ STRING: 'N'? '\'' (~'\'' | '\'\'')* '\''
  * before system variables and user variables are recognized
  */
 IDENTIFIER: [A-Za-z_][A-Za-z0-9_]*;
+
+
+
+
 
 // =============================================
 // FRAGMENTS
