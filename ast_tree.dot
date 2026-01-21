@@ -3,6 +3,6 @@ digraph AST {
   node0 [label="SelectStatementNode", style=filled, fillcolor=lightgreen];
   node1 [label="SELECT name,  AS status", style=filled, fillcolor=lightgreen];
   node0 -> node1;
-  node2 [label="FROM users", style=filled, fillcolor=lightblue];
+  node2 [label="FROM employees", style=filled, fillcolor=lightblue];
   node0 -> node2;
 }
