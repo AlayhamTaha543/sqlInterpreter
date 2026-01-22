@@ -13,37 +13,36 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ASTBuilder extends SQLParserBaseVisitor<ASTNode> {
-@Override
-public ASTNode visitSqlStatements(SQLParser.SqlStatementsContext ctx) {
-    ProgramNode program = new ProgramNode();
-    
-    for (SQLParser.BatchContext batch : ctx.batch()) {
-        for (SQLParser.SqlStatementContext stmtCtx : batch.sqlStatement()) {
-            ASTNode stmt = null;
-            
-            if (stmtCtx.selectStatement() != null) {
-                stmt = visit(stmtCtx.selectStatement());
-            } else if (stmtCtx.updateStatement() != null) {
-                stmt = visit(stmtCtx.updateStatement());
-            } else if (stmtCtx.insertStatement() != null) {
-                // stmt = visit(stmtCtx.insertStatement());
-                System.out.println("⚠️  INSERT statement found but not yet implemented");
-            } else if (stmtCtx.deleteStatement() != null) {
-                // stmt = visit(stmtCtx.deleteStatement());
-                System.out.println("⚠️  DELETE statement found but not yet implemented");
-            }
-            else if (stmtCtx.alterStatement() != null) {           
-                stmt = visit(stmtCtx.alterStatement());
-            }
-            
-            if (stmt != null) {
-                program.addStatement(stmt);
+    @Override
+    public ASTNode visitSqlStatements(SQLParser.SqlStatementsContext ctx) {
+        ProgramNode program = new ProgramNode();
+
+        for (SQLParser.BatchContext batch : ctx.batch()) {
+            for (SQLParser.SqlStatementContext stmtCtx : batch.sqlStatement()) {
+                ASTNode stmt = null;
+
+                if (stmtCtx.selectStatement() != null) {
+                    stmt = visit(stmtCtx.selectStatement());
+                } else if (stmtCtx.updateStatement() != null) {
+                    stmt = visit(stmtCtx.updateStatement());
+                } else if (stmtCtx.insertStatement() != null) {
+                    // stmt = visit(stmtCtx.insertStatement());
+                    System.out.println("⚠️  INSERT statement found but not yet implemented");
+                } else if (stmtCtx.deleteStatement() != null) {
+                    // stmt = visit(stmtCtx.deleteStatement());
+                    System.out.println("⚠️  DELETE statement found but not yet implemented");
+                } else if (stmtCtx.alterStatement() != null) {
+                    stmt = visit(stmtCtx.alterStatement());
+                }
+
+                if (stmt != null) {
+                    program.addStatement(stmt);
+                }
             }
         }
+
+        return program;
     }
-    
-    return program;
-}
     // =================================================
     // UPDATE STATEMENT
     // =================================================
@@ -103,56 +102,57 @@ public ASTNode visitSqlStatements(SQLParser.SqlStatementsContext ctx) {
                 topWithTies);
     }
     // =================================================
-// ALTER STATEMENT
-// =================================================
+    // ALTER STATEMENT
+    // =================================================
 
-@Override
-public ASTNode visitAlterStatement(SQLParser.AlterStatementContext ctx) {
-    
-    // Get table name
-    ExpressionNode tableName = new TableNode(ctx.tableName().getText());
-    
-    // Check if it's ADD or DROP
-    if (ctx.ADD() != null && ctx.columnDefinition() != null) {
-        // ALTER TABLE ADD column
-        return buildAlterAddColumn(tableName, ctx.columnDefinition());
-        
-    } else if (ctx.DROP() != null && ctx.COLUMN() != null && ctx.columnName() != null) {
-        // ALTER TABLE DROP COLUMN
-        String dropColumnName = ctx.columnName().getText();
-        return new AlterStatementNode(tableName, dropColumnName);
-    }
-    
-    throw new RuntimeException("Unsupported ALTER TABLE operation");
-}
+    @Override
+    public ASTNode visitAlterStatement(SQLParser.AlterStatementContext ctx) {
 
-/**
- * Builds ALTER TABLE ADD COLUMN
- */
-private AlterStatementNode buildAlterAddColumn(
-        ExpressionNode tableName, 
-        SQLParser.ColumnDefinitionContext ctx) {
-    
-    String columnName = ctx.columnName().getText();
-    String dataType = ctx.dataType().getText();
-    
-    // Build constraints string (simplified - you can make this more detailed)
-    StringBuilder constraints = new StringBuilder();
-    if (ctx.columnAttribute() != null && !ctx.columnAttribute().isEmpty()) {
-        for (SQLParser.ColumnAttributeContext attr : ctx.columnAttribute()) {
-            if (constraints.length() > 0) constraints.append(" ");
-            constraints.append(attr.getText());
+        // Get table name
+        ExpressionNode tableName = new TableNode(ctx.tableName().getText());
+
+        // Check if it's ADD or DROP
+        if (ctx.ADD() != null && ctx.columnDefinition() != null) {
+            // ALTER TABLE ADD column
+            return buildAlterAddColumn(tableName, ctx.columnDefinition());
+
+        } else if (ctx.DROP() != null && ctx.COLUMN() != null && ctx.columnName() != null) {
+            // ALTER TABLE DROP COLUMN
+            String dropColumnName = ctx.columnName().getText();
+            return new AlterStatementNode(tableName, dropColumnName);
         }
+
+        throw new RuntimeException("Unsupported ALTER TABLE operation");
     }
-    
-    AlterStatementNode.ColumnDefinition colDef = new AlterStatementNode.ColumnDefinition(
-        columnName, 
-        dataType, 
-        constraints.length() > 0 ? constraints.toString() : null
-    );
-    
-    return new AlterStatementNode(tableName, colDef);
-}
+
+    /**
+     * Builds ALTER TABLE ADD COLUMN
+     */
+    private AlterStatementNode buildAlterAddColumn(
+            ExpressionNode tableName,
+            SQLParser.ColumnDefinitionContext ctx) {
+
+        String columnName = ctx.columnName().getText();
+        String dataType = ctx.dataType().getText();
+
+        // Build constraints string (simplified - you can make this more detailed)
+        StringBuilder constraints = new StringBuilder();
+        if (ctx.columnAttribute() != null && !ctx.columnAttribute().isEmpty()) {
+            for (SQLParser.ColumnAttributeContext attr : ctx.columnAttribute()) {
+                if (constraints.length() > 0)
+                    constraints.append(" ");
+                constraints.append(attr.getText());
+            }
+        }
+
+        AlterStatementNode.ColumnDefinition colDef = new AlterStatementNode.ColumnDefinition(
+                columnName,
+                dataType,
+                constraints.length() > 0 ? constraints.toString() : null);
+
+        return new AlterStatementNode(tableName, colDef);
+    }
+
     /**
      * Builds the update target (table name or variable)
      */
@@ -221,12 +221,12 @@ private AlterStatementNode buildAlterAddColumn(
         SelectClauseNode selectClause = buildSelectClause(qs.selectList());
         FromClauseNode fromClause = buildFromClause(qs.fromClause());
         WhereClauseNode whereClause = qs.whereClause() != null ? buildWhereClause(qs.whereClause()) : null;
-
+        OrderByClauseNode orderByClause = ctx.orderByClause() != null ? buildOrderByClause(ctx.orderByClause()) : null;
         return new SelectStatementNode(
                 selectClause,
                 fromClause,
                 whereClause,
-                null, groupByClause, havingClause, null, null, null);
+                null, groupByClause, havingClause, orderByClause, null, null);
     }
 
     private SQLParser.QuerySpecificationContext extractQuerySpecification(
@@ -615,40 +615,61 @@ private AlterStatementNode buildAlterAddColumn(
         return new HavingClauseNode(condition);
     }
     // =================================================
-// AGGREGATE FUNCTIONS
-// =================================================
+    // AGGREGATE FUNCTIONS
+    // =================================================
 
-@Override
-public ASTNode visitAggregateFunction(SQLParser.AggregateFunctionContext ctx) {
-    // Determine the aggregate type
-    AggregateFunctionNode.AggregateType type;
-    if (ctx.COUNT() != null) {
-        type = AggregateFunctionNode.AggregateType.COUNT;
-    } else if (ctx.SUM() != null) {
-        type = AggregateFunctionNode.AggregateType.SUM;
-    } else if (ctx.AVG() != null) {
-        type = AggregateFunctionNode.AggregateType.AVG;
-    } else if (ctx.MIN() != null) {
-        type = AggregateFunctionNode.AggregateType.MIN;
-    } else if (ctx.MAX() != null) {
-        type = AggregateFunctionNode.AggregateType.MAX;
-    } else {
-        throw new RuntimeException("Unknown aggregate function");
+    @Override
+    public ASTNode visitAggregateFunction(SQLParser.AggregateFunctionContext ctx) {
+        // Determine the aggregate type
+        AggregateFunctionNode.AggregateType type;
+        if (ctx.COUNT() != null) {
+            type = AggregateFunctionNode.AggregateType.COUNT;
+        } else if (ctx.SUM() != null) {
+            type = AggregateFunctionNode.AggregateType.SUM;
+        } else if (ctx.AVG() != null) {
+            type = AggregateFunctionNode.AggregateType.AVG;
+        } else if (ctx.MIN() != null) {
+            type = AggregateFunctionNode.AggregateType.MIN;
+        } else if (ctx.MAX() != null) {
+            type = AggregateFunctionNode.AggregateType.MAX;
+        } else {
+            throw new RuntimeException("Unknown aggregate function");
+        }
+
+        // Check for DISTINCT
+        boolean distinct = ctx.DISTINCT() != null;
+
+        // Get the argument (expression or *)
+        ExpressionNode argument = null;
+        if (ctx.expression() != null) {
+            argument = (ExpressionNode) visit(ctx.expression());
+        } else if (ctx.STAR() != null) {
+            // For COUNT(*), we can use a special marker or null
+            argument = new ColumnNode("*");
+        }
+
+        return new AggregateFunctionNode(type, argument, distinct, null);
     }
-    
-    // Check for DISTINCT
-    boolean distinct = ctx.DISTINCT() != null;
-    
-    // Get the argument (expression or *)
-    ExpressionNode argument = null;
-    if (ctx.expression() != null) {
-        argument = (ExpressionNode) visit(ctx.expression());
-    } else if (ctx.STAR() != null) {
-        // For COUNT(*), we can use a special marker or null
-        argument = new ColumnNode("*");
+    // =================================================
+    // ORDER BY CLAUSE
+    // =================================================
+
+    private OrderByClauseNode buildOrderByClause(SQLParser.OrderByClauseContext ctx) {
+        List<OrderByClauseNode.SortItem> sortItems = new ArrayList<>();
+
+        for (SQLParser.OrderByExpressionContext item : ctx.orderByExpression()) {
+            ExpressionNode expression = (ExpressionNode) visit(item.expression());
+
+            // Determine sort direction
+            OrderByClauseNode.SortDirection direction = OrderByClauseNode.SortDirection.ASC;
+            if (item.DESC() != null) {
+                direction = OrderByClauseNode.SortDirection.DESC;
+            }
+
+            sortItems.add(new OrderByClauseNode.SortItem(expression, direction));
+        }
+
+        return new OrderByClauseNode(sortItems);
     }
-    
-    return new AggregateFunctionNode(type, argument, distinct, null);
-}
 
 }
