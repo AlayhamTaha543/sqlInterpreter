@@ -4,7 +4,9 @@ import com.sqlcompiler.parser.ast.ASTNode;
 import com.sqlcompiler.parser.ast.ASTVisitor;
 import com.sqlcompiler.parser.ast.clauses.*;
 import com.sqlcompiler.parser.ast.expressions.*;
+import com.sqlcompiler.parser.ast.statements.ProgramNode;
 import com.sqlcompiler.parser.ast.statements.SelectStatementNode;
+import com.sqlcompiler.parser.ast.statements.UpdateStatementNode;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -73,7 +75,6 @@ public class ASTVisualizer implements ASTVisitor<Integer> {
             ));
         }
     }
-
     /**
      * Escapes special characters for DOT format
      */
@@ -84,6 +85,46 @@ public class ASTVisualizer implements ASTVisitor<Integer> {
                    .replace("\\", "\\\\")
                    .substring(0, Math.min(label.length(), 50));
     }
+
+    /**
+     * Determine whether a SortItem represents ascending order.
+     * Uses reflection to support various SortItem implementations without requiring a specific API.
+     */
+    private boolean getSortItemAscending(OrderByClauseNode.SortItem item) {
+        if (item == null) return true;
+        try {
+            // Try common method names
+            java.lang.reflect.Method m = null;
+            try { m = item.getClass().getMethod("isAscending"); } catch (NoSuchMethodException ignored) {}
+            if (m == null) try { m = item.getClass().getMethod("isAsc"); } catch (NoSuchMethodException ignored) {}
+            if (m == null) try { m = item.getClass().getMethod("getAscending"); } catch (NoSuchMethodException ignored) {}
+            if (m == null) try { m = item.getClass().getMethod("getAsc"); } catch (NoSuchMethodException ignored) {}
+
+            if (m != null) {
+                Object res = m.invoke(item);
+                if (res instanceof Boolean) return (Boolean) res;
+            }
+
+            // Try common field names
+            String[] fieldNames = {"ascending", "asc", "isAscending", "isAsc", "direction"};
+            for (String fname : fieldNames) {
+                try {
+                    java.lang.reflect.Field f = item.getClass().getField(fname);
+                    Object val = f.get(item);
+                    if (val instanceof Boolean) return (Boolean) val;
+                    if (val != null) {
+                        String s = val.toString().toLowerCase();
+                        if (s.equals("asc") || s.equals("ascending")) return true;
+                        if (s.equals("desc") || s.equals("descending")) return false;
+                    }
+                } catch (NoSuchFieldException ignored) {}
+            }
+        } catch (Exception ignored) {
+            // fallback to default
+        }
+        return true; // default to ascending
+    }
+    
 
     // ========== Statements ==========
     @Override
@@ -118,6 +159,63 @@ public class ASTVisualizer implements ASTVisitor<Integer> {
         if (node.orderByClause != null) {
             int childId = node.orderByClause.accept(this);
             createEdge(nodeId, childId, null);
+        }
+        
+        return nodeId;
+    }
+    
+    @Override
+    public Integer visit(UpdateStatementNode node) {
+        int nodeId = createNode("UPDATE STATEMENT", "lightcoral");
+        
+        // TOP clause
+        if (node.hasTopClause()) {
+            String topLabel = "TOP: " + node.topExpression;
+            if (node.topPercent) topLabel += " PERCENT";
+            int topId = createNode(topLabel, "mistyrose");
+            createEdge(nodeId, topId, null);
+        }
+        
+        // Target table
+        if (node.targetTable != null) {
+            int targetId = createNode("Target", "lightcoral");
+            createEdge(nodeId, targetId, null);
+            
+            int tableId = node.targetTable.accept(this);
+            createEdge(targetId, tableId, null);
+        }
+        
+        // SET assignments
+        int setId = createNode("SET", "lightsalmon");
+        createEdge(nodeId, setId, null);
+        
+        for (UpdateStatementNode.SetAssignment assignment : node.setAssignments) {
+            int assignId = createNode("Assignment [" + assignment.operator + "]", "peachpuff");
+            createEdge(setId, assignId, null);
+            
+            // Target column
+            if (assignment.target != null) {
+                int targetColId = assignment.target.accept(this);
+                createEdge(assignId, targetColId, "target");
+            }
+            
+            // Value
+            if (assignment.value != null) {
+                int valueId = assignment.value.accept(this);
+                createEdge(assignId, valueId, "value");
+            }
+        }
+        
+        // FROM clause
+        if (node.hasFromClause()) {
+            int fromId = node.fromClause.accept(this);
+            createEdge(nodeId, fromId, null);
+        }
+        
+        // WHERE clause
+        if (node.hasWhereClause()) {
+            int whereId = node.whereClause.accept(this);
+            createEdge(nodeId, whereId, null);
         }
         
         return nodeId;
@@ -245,50 +343,13 @@ public class ASTVisualizer implements ASTVisitor<Integer> {
         
         return nodeId;
     }
-
     @Override
     public Integer visit(OrderByClauseNode node) {
         int nodeId = createNode("ORDER BY", "lightgoldenrodyellow");
         
         if (node.sortItems != null) {
             for (OrderByClauseNode.SortItem item : node.sortItems) {
-                // determine direction via common accessors/fields using reflection, fallback to ASC
-                String direction = "ASC";
-                try {
-                    Boolean asc = null;
-                    try {
-                        java.lang.reflect.Method m = item.getClass().getMethod("isAscending");
-                        asc = (Boolean) m.invoke(item);
-                    } catch (NoSuchMethodException e1) {
-                        try {
-                            java.lang.reflect.Method m = item.getClass().getMethod("isAsc");
-                            asc = (Boolean) m.invoke(item);
-                        } catch (NoSuchMethodException e2) {
-                            try {
-                                java.lang.reflect.Method m = item.getClass().getMethod("getAscending");
-                                asc = (Boolean) m.invoke(item);
-                            } catch (NoSuchMethodException e3) {
-                                try {
-                                    java.lang.reflect.Field f = item.getClass().getDeclaredField("ascending");
-                                    f.setAccessible(true);
-                                    asc = (Boolean) f.get(item);
-                                } catch (NoSuchFieldException | IllegalAccessException e4) {
-                                    try {
-                                        java.lang.reflect.Field f2 = item.getClass().getDeclaredField("asc");
-                                        f2.setAccessible(true);
-                                        asc = (Boolean) f2.get(item);
-                                    } catch (NoSuchFieldException | IllegalAccessException e5) {
-                                        asc = Boolean.TRUE;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    direction = (asc != null && asc) ? "ASC" : "DESC";
-                } catch (Exception ignored) {
-                    direction = "ASC";
-                }
-
+                String direction = getSortItemAscending(item) ? "ASC" : "DESC";
                 int itemId = createNode("Sort [" + direction + "]", "palegoldenrod");
                 createEdge(nodeId, itemId, null);
                 
@@ -301,6 +362,17 @@ public class ASTVisualizer implements ASTVisitor<Integer> {
         
         return nodeId;
     }
+    @Override
+public Integer visit(ProgramNode node) {
+    int nodeId = createNode("SQL Program [" + node.getStatementCount() + " stmt(s)]", "lightgray");
+    
+    for (int i = 0; i < node.statements.size(); i++) {
+        int stmtId = node.statements.get(i).accept(this);
+        createEdge(nodeId, stmtId, "stmt" + (i + 1));
+    }
+    
+    return nodeId;
+}
 
     // ========== Expressions ==========
     @Override

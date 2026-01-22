@@ -17,7 +17,9 @@ import com.sqlcompiler.parser.ast.expressions.FunctionCallNode;
 import com.sqlcompiler.parser.ast.expressions.LiteralNode;
 import com.sqlcompiler.parser.ast.expressions.SubqueryNode;
 import com.sqlcompiler.parser.ast.expressions.TableNode;
+import com.sqlcompiler.parser.ast.statements.ProgramNode;
 import com.sqlcompiler.parser.ast.statements.SelectStatementNode;
+import com.sqlcompiler.parser.ast.statements.UpdateStatementNode;
 
 public class TreePrinter implements ASTVisitor<Void> {
     private int level = 0;
@@ -44,6 +46,21 @@ public class TreePrinter implements ASTVisitor<Void> {
     }
     
     // ========== Statements ==========
+    @Override
+public Void visit(ProgramNode node) {
+    addLine("Program [" + node.getStatementCount() + " statement(s)]");
+    level++;
+    
+    for (int i = 0; i < node.statements.size(); i++) {
+        addLine("Statement[" + (i + 1) + "]:");
+        level++;
+        node.statements.get(i).accept(this);
+        level--;
+    }
+    
+    level--;
+    return null;
+}
     @Override
     public Void visit(SelectStatementNode node) {
         addLine("SelectStatement");
@@ -87,6 +104,68 @@ public class TreePrinter implements ASTVisitor<Void> {
         // OFFSET (make sure you have this property in SelectStatementNode)
         if (node.offset != null) {
             addLine("OFFSET: " + node.offset);
+        }
+        
+        level--;
+        return null;
+    }
+    
+    @Override
+    public Void visit(UpdateStatementNode node) {
+        addLine("UpdateStatement");
+        level++;
+        
+        // TOP clause
+        if (node.hasTopClause()) {
+            String topText = "TOP: " + node.topExpression;
+            if (node.topPercent) topText += " PERCENT";
+            if (node.topWithTies) topText += " WITH TIES";
+            addLine(topText);
+        }
+        
+        // Target table
+        addLine("UPDATE Target");
+        level++;
+        if (node.targetTable != null) {
+            node.targetTable.accept(this);
+        }
+        level--;
+        
+        // SET clause
+        addLine("SET");
+        level++;
+        for (UpdateStatementNode.SetAssignment assignment : node.setAssignments) {
+            addLine("Assignment [" + assignment.operator + "]");
+            level++;
+            
+            // Target column
+            addLine("Target:");
+            level++;
+            if (assignment.target != null) {
+                assignment.target.accept(this);
+            }
+            level--;
+            
+            // Value expression
+            addLine("Value:");
+            level++;
+            if (assignment.value != null) {
+                assignment.value.accept(this);
+            }
+            level--;
+            
+            level--;
+        }
+        level--;
+        
+        // FROM clause (for joins)
+        if (node.hasFromClause()) {
+            node.fromClause.accept(this);
+        }
+        
+        // WHERE clause
+        if (node.hasWhereClause()) {
+            node.whereClause.accept(this);
         }
         
         level--;
@@ -228,7 +307,18 @@ public class TreePrinter implements ASTVisitor<Void> {
             level++;
             for (OrderByClauseNode.SortItem item : node.sortItems) {
                 if (item.expression != null) {
-                    addLine("SortItem");
+                    String direction = "ASC";
+                    // Use reflection to check for an isAscending() method if the field is not present
+                    try {
+                        java.lang.reflect.Method m = item.getClass().getMethod("isAscending");
+                        Object val = m.invoke(item);
+                        if (val instanceof Boolean && !((Boolean) val)) {
+                            direction = "DESC";
+                        }
+                    } catch (Exception e) {
+                        // If no method/accessible, default to ASC
+                    }
+                    addLine("SortItem [" + direction + "]");
                     level++;
                     item.expression.accept(this);
                     level--;

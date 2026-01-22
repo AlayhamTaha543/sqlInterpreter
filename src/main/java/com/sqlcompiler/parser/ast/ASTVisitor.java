@@ -15,16 +15,18 @@ import com.sqlcompiler.parser.ast.expressions.FunctionCallNode;
 import com.sqlcompiler.parser.ast.expressions.LiteralNode;
 import com.sqlcompiler.parser.ast.expressions.SubqueryNode;
 import com.sqlcompiler.parser.ast.expressions.TableNode;
+import com.sqlcompiler.parser.ast.statements.ProgramNode;
 import com.sqlcompiler.parser.ast.statements.SelectStatementNode;
+import com.sqlcompiler.parser.ast.statements.UpdateStatementNode;
 
 
 public interface ASTVisitor<T> {
     // Statements
     T visit(SelectStatementNode node);
     // T visit(InsertStatementNode node);
-    // T visit(UpdateStatementNode node);
+    T visit(UpdateStatementNode node);
     // T visit(DeleteStatementNode node);
-    
+    T visit(ProgramNode node);
     // Clauses
     T visit(SelectClauseNode node);
     T visit(FromClauseNode node);

@@ -4,12 +4,153 @@ import com.sqlcompiler.parser.SQLParser;
 import com.sqlcompiler.parser.SQLParserBaseVisitor;
 import com.sqlcompiler.parser.ast.clauses.*;
 import com.sqlcompiler.parser.ast.expressions.*;
+import com.sqlcompiler.parser.ast.statements.ProgramNode;
 import com.sqlcompiler.parser.ast.statements.SelectStatementNode;
+import com.sqlcompiler.parser.ast.statements.UpdateStatementNode;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class ASTBuilder extends SQLParserBaseVisitor<ASTNode> {
+@Override
+public ASTNode visitSqlStatements(SQLParser.SqlStatementsContext ctx) {
+    ProgramNode program = new ProgramNode();
+    
+    for (SQLParser.BatchContext batch : ctx.batch()) {
+        for (SQLParser.SqlStatementContext stmtCtx : batch.sqlStatement()) {
+            ASTNode stmt = null;
+            
+            if (stmtCtx.selectStatement() != null) {
+                stmt = visit(stmtCtx.selectStatement());
+            } else if (stmtCtx.updateStatement() != null) {
+                stmt = visit(stmtCtx.updateStatement());
+            } else if (stmtCtx.insertStatement() != null) {
+                // stmt = visit(stmtCtx.insertStatement());
+                System.out.println("⚠️  INSERT statement found but not yet implemented");
+            } else if (stmtCtx.deleteStatement() != null) {
+                // stmt = visit(stmtCtx.deleteStatement());
+                System.out.println("⚠️  DELETE statement found but not yet implemented");
+            }
+            
+            if (stmt != null) {
+                program.addStatement(stmt);
+            }
+        }
+    }
+    
+    return program;
+}
+    // =================================================
+    // UPDATE STATEMENT
+    // =================================================
+
+    @Override
+    public ASTNode visitUpdateStatement(SQLParser.UpdateStatementContext ctx) {
+        
+        // 1. Get target table
+        ExpressionNode targetTable = buildUpdateTarget(ctx.updateTarget());
+        
+        // 2. Build SET assignments
+        List<UpdateStatementNode.SetAssignment> assignments = new ArrayList<>();
+        for (SQLParser.UpdateSetClauseContext setCtx : ctx.updateSetClause()) {
+            assignments.add(buildSetAssignment(setCtx));
+        }
+        
+        // 3. Build optional FROM clause
+        FromClauseNode fromClause = null;
+        if (ctx.fromClause() != null) {
+            fromClause = buildFromClause(ctx.fromClause());
+        }
+        
+        // 4. Build optional WHERE clause
+        WhereClauseNode whereClause = null;
+        if (ctx.whereClause() != null) {
+            whereClause = buildWhereClause(ctx.whereClause());
+        }
+        
+        // 5. Handle TOP clause (optional)
+        ExpressionNode topExpression = null;
+        boolean topPercent = false;
+        boolean topWithTies = false;
+        
+        if (ctx.topClause() != null) {
+            SQLParser.TopClauseContext topCtx = ctx.topClause();
+            
+            // TOP can be: TOP n or TOP (expression)
+            if (topCtx.INTEGER() != null) {
+                topExpression = new LiteralNode(
+                    Long.parseLong(topCtx.INTEGER().getText()), 
+                    "INTEGER"
+                );
+            } else if (topCtx.expression() != null) {
+                topExpression = (ExpressionNode) visit(topCtx.expression());
+            }
+            
+            topPercent = topCtx.PERCENT() != null;
+            topWithTies = topCtx.TIES() != null;
+        }
+        
+        return new UpdateStatementNode(
+            targetTable,
+            assignments,
+            fromClause,
+            whereClause,
+            topExpression,
+            topPercent,
+            topWithTies
+        );
+    }
+    
+    /**
+     * Builds the update target (table name or variable)
+     */
+    private ExpressionNode buildUpdateTarget(SQLParser.UpdateTargetContext ctx) {
+        if (ctx.tableName() != null) {
+            return new TableNode(ctx.tableName().getText());
+        } else if (ctx.USER_VARIABLE() != null) {
+            // Handle table variables like @temp_table
+            return new LiteralNode(ctx.USER_VARIABLE().getText(), "VARIABLE");
+        }
+        throw new RuntimeException("Unsupported update target");
+    }
+    
+    /**
+     * Builds a SET assignment: column = expression
+     */
+    private UpdateStatementNode.SetAssignment buildSetAssignment(
+            SQLParser.UpdateSetClauseContext ctx) {
+        
+        // Get the column being updated
+        ExpressionNode target = buildFullColumnName(ctx.fullColumnName());
+        
+        // Get the operator (=, +=, -=, etc.)
+        String operator = ctx.assignmentOperator().getText();
+        
+        // Get the value expression
+        ExpressionNode value = (ExpressionNode) visit(ctx.expression());
+        
+        return new UpdateStatementNode.SetAssignment(target, operator, value);
+    }
+    
+    /**
+     * Builds a column reference from fullColumnName
+     */
+    private ExpressionNode buildFullColumnName(SQLParser.FullColumnNameContext ctx) {
+        if (ctx.tableName() != null && ctx.columnName() != null) {
+            // table.column
+            return new ColumnNode(
+                ctx.columnName().getText(),
+                ctx.tableName().getText()
+            );
+        } else if (ctx.columnName() != null) {
+            // just column
+            return new ColumnNode(ctx.columnName().getText());
+        } else if (ctx.USER_VARIABLE() != null) {
+            // @variable
+            return new LiteralNode(ctx.USER_VARIABLE().getText(), "VARIABLE");
+        }
+        throw new RuntimeException("Unsupported column name format");
+    }
 
     // =================================================
     // SELECT STATEMENT
