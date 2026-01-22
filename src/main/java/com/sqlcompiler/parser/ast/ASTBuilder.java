@@ -6,6 +6,8 @@ import com.sqlcompiler.parser.ast.clauses.*;
 import com.sqlcompiler.parser.ast.expressions.*;
 import com.sqlcompiler.parser.ast.statements.AlterStatementNode;
 import com.sqlcompiler.parser.ast.statements.ProgramNode;
+import com.sqlcompiler.parser.ast.statements.RenameItemNode;
+import com.sqlcompiler.parser.ast.statements.RenameStatementNode;
 import com.sqlcompiler.parser.ast.statements.SelectStatementNode;
 import com.sqlcompiler.parser.ast.statements.UpdateStatementNode;
 
@@ -33,6 +35,8 @@ public class ASTBuilder extends SQLParserBaseVisitor<ASTNode> {
                     System.out.println("⚠️  DELETE statement found but not yet implemented");
                 } else if (stmtCtx.alterStatement() != null) {
                     stmt = visit(stmtCtx.alterStatement());
+                } else if (stmtCtx.renameStatement() != null) {
+                    stmt = visit(stmtCtx.renameStatement());
                 }
 
                 if (stmt != null) {
@@ -671,42 +675,60 @@ public class ASTBuilder extends SQLParserBaseVisitor<ASTNode> {
 
         return new OrderByClauseNode(sortItems);
     }
-// =================================================
-// CASE EXPRESSION
-// =================================================
+    // =================================================
+    // CASE EXPRESSION
+    // =================================================
 
-@Override
-public ASTNode visitCaseExpression(SQLParser.CaseExpressionContext ctx) {
-    // Input expression (optional - for simple CASE)
-    ExpressionNode inputExpression = null;
-    List<SQLParser.ExpressionContext> expressions = ctx.expression();
-    int expressionIndex = 0;
-    
-    // Check if first expression is the input expression (simple CASE)
-    // If there are more expressions than just the ELSE, first one is input
-    if (!expressions.isEmpty() && ctx.whenClause().size() > 0) {
-        // We need to determine if first expression is input or ELSE
-        // Simple heuristic: if expression count > 1 OR (count == 1 AND no ELSE), it's input
-        if (expressions.size() > 1 || (expressions.size() == 1 && ctx.ELSE() == null)) {
-            inputExpression = (ExpressionNode) visit(expressions.get(0));
-            expressionIndex = 1;
+    @Override
+    public ASTNode visitCaseExpression(SQLParser.CaseExpressionContext ctx) {
+        // Input expression (optional - for simple CASE)
+        ExpressionNode inputExpression = null;
+        List<SQLParser.ExpressionContext> expressions = ctx.expression();
+        int expressionIndex = 0;
+
+        // Check if first expression is the input expression (simple CASE)
+        // If there are more expressions than just the ELSE, first one is input
+        if (!expressions.isEmpty() && ctx.whenClause().size() > 0) {
+            // We need to determine if first expression is input or ELSE
+            // Simple heuristic: if expression count > 1 OR (count == 1 AND no ELSE), it's
+            // input
+            if (expressions.size() > 1 || (expressions.size() == 1 && ctx.ELSE() == null)) {
+                inputExpression = (ExpressionNode) visit(expressions.get(0));
+                expressionIndex = 1;
+            }
         }
+
+        // Build WHEN clauses
+        List<WhenClauseNode> whenClauses = new ArrayList<>();
+        for (SQLParser.WhenClauseContext whenCtx : ctx.whenClause()) {
+            ExpressionNode condition = (ExpressionNode) visit(whenCtx.searchCondition());
+            ExpressionNode thenExpr = (ExpressionNode) visit(whenCtx.expression());
+            whenClauses.add(new WhenClauseNode(condition, thenExpr));
+        }
+
+        // ELSE expression (optional)
+        ExpressionNode elseExpression = null;
+        if (ctx.ELSE() != null && expressionIndex < expressions.size()) {
+            elseExpression = (ExpressionNode) visit(expressions.get(expressionIndex));
+        }
+
+        return new CaseexpressionNode(inputExpression, whenClauses, elseExpression);
     }
-    
-    // Build WHEN clauses
-    List<WhenClauseNode> whenClauses = new ArrayList<>();
-    for (SQLParser.WhenClauseContext whenCtx : ctx.whenClause()) {
-        ExpressionNode condition = (ExpressionNode) visit(whenCtx.searchCondition());
-        ExpressionNode thenExpr = (ExpressionNode) visit(whenCtx.expression());
-        whenClauses.add(new WhenClauseNode(condition, thenExpr));
+    // =================================================
+    // RENAME STATEMENT
+    // =================================================
+
+    @Override
+    public ASTNode visitRenameStatement(SQLParser.RenameStatementContext ctx) {
+        List<RenameItemNode> renameItems = new ArrayList<>();
+
+        for (SQLParser.RenameTableItemContext item : ctx.renameTableItem()) {
+            String oldName = item.qualifiedName(0).getText();
+            String newName = item.qualifiedName(1).getText();
+            renameItems.add(new RenameItemNode(oldName, newName));
+        }
+
+        return new RenameStatementNode(renameItems);
     }
-    
-    // ELSE expression (optional)
-    ExpressionNode elseExpression = null;
-    if (ctx.ELSE() != null && expressionIndex < expressions.size()) {
-        elseExpression = (ExpressionNode) visit(expressions.get(expressionIndex));
-    }
-    
-    return new CaseexpressionNode(inputExpression, whenClauses, elseExpression);
-}
+
 }

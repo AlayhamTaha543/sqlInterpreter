@@ -18,6 +18,8 @@ import com.sqlcompiler.parser.ast.expressions.SubqueryNode;
 import com.sqlcompiler.parser.ast.expressions.TableNode;
 import com.sqlcompiler.parser.ast.statements.AlterStatementNode;
 import com.sqlcompiler.parser.ast.statements.ProgramNode;
+import com.sqlcompiler.parser.ast.statements.RenameItemNode;
+import com.sqlcompiler.parser.ast.statements.RenameStatementNode;
 import com.sqlcompiler.parser.ast.statements.SelectStatementNode;
 import com.sqlcompiler.parser.ast.statements.UpdateStatementNode;
 
@@ -49,4 +51,6 @@ public interface ASTVisitor<T> {
     T visit(CaseexpressionNode node);
     T visit(SubqueryNode node);
     T visit(WhenClauseNode  node);
+    T visit(RenameStatementNode node);
+    T visit(RenameItemNode node);
 }

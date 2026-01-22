@@ -6,6 +6,8 @@ import com.sqlcompiler.parser.ast.clauses.*;
 import com.sqlcompiler.parser.ast.expressions.*;
 import com.sqlcompiler.parser.ast.statements.AlterStatementNode;
 import com.sqlcompiler.parser.ast.statements.ProgramNode;
+import com.sqlcompiler.parser.ast.statements.RenameItemNode;
+import com.sqlcompiler.parser.ast.statements.RenameStatementNode;
 import com.sqlcompiler.parser.ast.statements.SelectStatementNode;
 import com.sqlcompiler.parser.ast.statements.UpdateStatementNode;
 
@@ -582,5 +584,30 @@ public class ASTVisualizer implements ASTVisitor<Integer> {
         }
 
         return nodeId;
+    }
+
+    @Override
+    public Integer visit(RenameStatementNode node) {
+        int nodeId = createNode("RENAME TABLE", "lightsalmon");
+
+        for (RenameItemNode item : node.renameItems) {
+            int itemId = item.accept(this);
+            createEdge(nodeId, itemId, null);
+        }
+
+        return nodeId;
+    }
+
+    @Override
+    public Integer visit(RenameItemNode node) {
+        int itemId = createNode("RenameItem", "peachpuff");
+
+        int oldId = createNode("Old: " + node.oldName, "lightblue");
+        createEdge(itemId, oldId, "from");
+
+        int newId = createNode("New: " + node.newName, "lightgreen");
+        createEdge(itemId, newId, "to");
+
+        return itemId;
     }
 }

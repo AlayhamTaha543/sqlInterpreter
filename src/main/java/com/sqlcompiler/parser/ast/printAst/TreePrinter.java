@@ -20,6 +20,8 @@ import com.sqlcompiler.parser.ast.expressions.SubqueryNode;
 import com.sqlcompiler.parser.ast.expressions.TableNode;
 import com.sqlcompiler.parser.ast.statements.AlterStatementNode;
 import com.sqlcompiler.parser.ast.statements.ProgramNode;
+import com.sqlcompiler.parser.ast.statements.RenameItemNode;
+import com.sqlcompiler.parser.ast.statements.RenameStatementNode;
 import com.sqlcompiler.parser.ast.statements.SelectStatementNode;
 import com.sqlcompiler.parser.ast.statements.UpdateStatementNode;
 
@@ -52,17 +54,18 @@ public class TreePrinter implements ASTVisitor<Void> {
     public Void visit(ProgramNode node) {
         addLine("Program [" + node.getStatementCount() + " statement(s)]");
         level++;
-        
+
         for (int i = 0; i < node.statements.size(); i++) {
             addLine("Statement[" + (i + 1) + "]:");
             level++;
             node.statements.get(i).accept(this);
             level--;
         }
-        
+
         level--;
         return null;
     }
+
     @Override
     public Void visit(SelectStatementNode node) {
         addLine("SelectStatement");
@@ -111,20 +114,22 @@ public class TreePrinter implements ASTVisitor<Void> {
         level--;
         return null;
     }
-    
+
     @Override
     public Void visit(UpdateStatementNode node) {
         addLine("UpdateStatement");
         level++;
-        
+
         // TOP clause
         if (node.hasTopClause()) {
             String topText = "TOP: " + node.topExpression;
-            if (node.topPercent) topText += " PERCENT";
-            if (node.topWithTies) topText += " WITH TIES";
+            if (node.topPercent)
+                topText += " PERCENT";
+            if (node.topWithTies)
+                topText += " WITH TIES";
             addLine(topText);
         }
-        
+
         // Target table
         addLine("UPDATE Target");
         level++;
@@ -132,14 +137,14 @@ public class TreePrinter implements ASTVisitor<Void> {
             node.targetTable.accept(this);
         }
         level--;
-        
+
         // SET clause
         addLine("SET");
         level++;
         for (UpdateStatementNode.SetAssignment assignment : node.setAssignments) {
             addLine("Assignment [" + assignment.operator + "]");
             level++;
-            
+
             // Target column
             addLine("Target:");
             level++;
@@ -147,7 +152,7 @@ public class TreePrinter implements ASTVisitor<Void> {
                 assignment.target.accept(this);
             }
             level--;
-            
+
             // Value expression
             addLine("Value:");
             level++;
@@ -155,30 +160,30 @@ public class TreePrinter implements ASTVisitor<Void> {
                 assignment.value.accept(this);
             }
             level--;
-            
+
             level--;
         }
         level--;
-        
+
         // FROM clause (for joins)
         if (node.hasFromClause()) {
             node.fromClause.accept(this);
         }
-        
+
         // WHERE clause
         if (node.hasWhereClause()) {
             node.whereClause.accept(this);
         }
-        
+
         level--;
         return null;
     }
-    
+
     @Override
     public Void visit(AlterStatementNode node) {
         addLine("AlterStatement");
         level++;
-        
+
         // Table name
         addLine("ALTER TABLE");
         level++;
@@ -186,7 +191,7 @@ public class TreePrinter implements ASTVisitor<Void> {
             node.tableName.accept(this);
         }
         level--;
-        
+
         // Action
         if (node.isAddColumn()) {
             addLine("ADD COLUMN");
@@ -203,11 +208,12 @@ public class TreePrinter implements ASTVisitor<Void> {
             addLine("Column: " + node.dropColumnName);
             level--;
         }
-        
+
         level--;
         return null;
     }
-        // ========== Clauses ==========
+
+    // ========== Clauses ==========
     @Override
     public Void visit(SelectClauseNode node) {
         addLine("SELECT" + (node.distinct ? " DISTINCT" : ""));
@@ -340,7 +346,8 @@ public class TreePrinter implements ASTVisitor<Void> {
             for (OrderByClauseNode.SortItem item : node.sortItems) {
                 if (item.expression != null) {
                     String direction = "ASC";
-                    // Use reflection to check for an isAscending() method if the field is not present
+                    // Use reflection to check for an isAscending() method if the field is not
+                    // present
                     try {
                         java.lang.reflect.Method m = item.getClass().getMethod("isAscending");
                         Object val = m.invoke(item);
@@ -477,7 +484,8 @@ public class TreePrinter implements ASTVisitor<Void> {
         }
         return null;
     }
-    // Add other visit methods for different ASTNode types as needed    
+
+    // Add other visit methods for different ASTNode types as needed
     public Void visit(WhenClauseNode node) {
         if (node != null) {
             addLine("WhenClause");
@@ -501,6 +509,36 @@ public class TreePrinter implements ASTVisitor<Void> {
 
             level--;
         }
+        return null;
+    }
+
+    @Override
+    public Void visit(RenameStatementNode node) {
+        getIndent();
+        System.out.println("RenameStatement");
+        level++;
+
+        for (RenameItemNode item : node.renameItems) {
+            item.accept(this);
+        }
+
+        level--;
+        return null;
+    }
+
+    @Override
+    public Void visit(RenameItemNode node) {
+        getIndent();
+        System.out.println("RenameItem");
+        level++;
+
+        getIndent();
+        System.out.println("OldName: " + node.oldName);
+
+        getIndent();
+        System.out.println("NewName: " + node.newName);
+
+        level--;
         return null;
     }
 }
