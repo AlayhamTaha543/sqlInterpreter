@@ -4,19 +4,9 @@ import com.sqlcompiler.parser.ast.ASTNode;
 import com.sqlcompiler.parser.ast.ASTVisitor;
 import com.sqlcompiler.parser.ast.clauses.*;
 import com.sqlcompiler.parser.ast.expressions.*;
+import com.sqlcompiler.parser.ast.other.ColumnDefinitionNode;
 import com.sqlcompiler.parser.ast.other.DropDatabaseNode;
 import com.sqlcompiler.parser.ast.other.DropTableNode;
-import com.sqlcompiler.parser.ast.statements.AlterStatementNode;
-import com.sqlcompiler.parser.ast.statements.CloseCursorNode;
-import com.sqlcompiler.parser.ast.statements.DeallocateCursorNode;
-import com.sqlcompiler.parser.ast.statements.DeclareCursorNode;
-import com.sqlcompiler.parser.ast.statements.FetchCursorNode;
-import com.sqlcompiler.parser.ast.statements.OpenCursorNode;
-import com.sqlcompiler.parser.ast.statements.ProgramNode;
-import com.sqlcompiler.parser.ast.statements.RenameItemNode;
-import com.sqlcompiler.parser.ast.statements.RenameStatementNode;
-import com.sqlcompiler.parser.ast.statements.SelectStatementNode;
-import com.sqlcompiler.parser.ast.statements.UpdateStatementNode;
 import com.sqlcompiler.parser.ast.statements.*; 
 
 import java.io.FileWriter;
@@ -27,6 +17,32 @@ import java.io.IOException;
  * Uses the Visitor pattern for proper traversal.
  */
 public class ASTVisualizer implements ASTVisitor<Integer> {
+            @Override
+            public Integer visit(CreateStatementNode node) {
+                int nodeId = createNode("CREATE STATEMENT", "lightyellow");
+
+                if (node.table != null) {
+                    int tableId = node.table.accept(this);
+                    createEdge(nodeId, tableId, "table");
+                }
+
+                if (node.tableElements != null && !node.tableElements.isEmpty()) {
+                    int elemsId = createNode("Elements", "khaki");
+                    createEdge(nodeId, elemsId, null);
+                    for (com.sqlcompiler.parser.ast.ASTNode element : node.tableElements) {
+                        int elemId = element.accept(this);
+                        createEdge(elemsId, elemId, null);
+                    }
+                }
+
+                return nodeId;
+            }
+        // Implement missing visit for DataTypeNode
+        @Override
+        public Integer visit(com.sqlcompiler.parser.ast.other.DataTypeNode node) {
+            String label = "DataType: " + (node.typeName != null ? node.typeName : "?");
+            return createNode(label, "lightgray");
+        }
     private StringBuilder dotContent;
     private int nodeCount;
 
@@ -198,6 +214,97 @@ public class ASTVisualizer implements ASTVisitor<Integer> {
         return nodeId;
     }
 
+     @Override
+    public Integer visit(InsertStatementNode node) {
+        int nodeId = createNode("INSERT STATEMENT", "lightblue");
+
+
+        // Use reflection to access table and source fields or getters
+        Object tableObj = null;
+        try {
+            java.lang.reflect.Field f = node.getClass().getField("table");
+            tableObj = f.get(node);
+        } catch (Exception e) {
+            try {
+                java.lang.reflect.Method m = node.getClass().getMethod("getTable");
+                tableObj = m.invoke(node);
+            } catch (Exception ignored) {}
+        }
+        if (tableObj instanceof ASTNode) {
+            int tableId = ((ASTNode) tableObj).accept(this);
+            createEdge(nodeId, tableId, "table");
+        }
+
+        if (node.columns != null && !node.columns.isEmpty()) {
+            int colsId = createNode("Columns", "lightcyan");
+            createEdge(nodeId, colsId, null);
+            for (Object colObj : node.columns) {
+                if (colObj instanceof com.sqlcompiler.parser.ast.expressions.ColumnNode) {
+                    int colId = ((com.sqlcompiler.parser.ast.expressions.ColumnNode) colObj).accept(this);
+                    createEdge(colsId, colId, null);
+                } else if (colObj instanceof String) {
+                    int colId = createNode("Column: " + colObj, "lightcyan");
+                    createEdge(colsId, colId, null);
+                }
+            }
+        }
+
+        Object sourceObj = null;
+        try {
+            java.lang.reflect.Field f = node.getClass().getField("source");
+            sourceObj = f.get(node);
+        } catch (Exception e) {
+            try {
+                java.lang.reflect.Method m = node.getClass().getMethod("getSource");
+                sourceObj = m.invoke(node);
+            } catch (Exception ignored) {}
+        }
+        if (sourceObj instanceof ASTNode) {
+            int sourceId = ((ASTNode) sourceObj).accept(this);
+            createEdge(nodeId, sourceId, "source");
+        }
+
+        return nodeId;
+    }
+ @Override
+    public Integer visit(ValuesClauseNode node) {
+        int nodeId = createNode("VALUES", "lightgray");
+        for (com.sqlcompiler.parser.ast.statements.ValuesRowNode row : node.rows) {
+            int rowId = row.accept(this);
+            createEdge(nodeId, rowId, null);
+        }
+        return nodeId;
+    }
+
+    @Override
+    public Integer visit(ValuesRowNode node) {
+        int nodeId = createNode("Row", "whitesmoke");
+        for (com.sqlcompiler.parser.ast.expressions.ExpressionNode val : node.values) {
+            int valId = val.accept(this);
+            createEdge(nodeId, valId, null);
+        }
+        return nodeId;
+    }
+
+    @Override
+    public Integer visit(ColumnDefinitionNode node) {
+        String label = "ColumnDef: " + node.columnName;
+        int nodeId = createNode(label, "palegoldenrod");
+
+        if (node.dataType != null) {
+            int typeId = node.dataType.accept(this);
+            createEdge(nodeId, typeId, "type");
+        }
+
+        if (node.attributes != null && !node.attributes.isEmpty()) {
+            int attrsId = createNode("Attrs: " + String.join(", ", node.attributes), "lemonchiffon");
+            createEdge(nodeId, attrsId, null);
+        }
+
+        return nodeId;
+
+    }
+
     @Override
     public Integer visit(UpdateStatementNode node) {
         int nodeId = createNode("UPDATE STATEMENT", "lightcoral");
@@ -293,10 +400,33 @@ public class ASTVisualizer implements ASTVisitor<Integer> {
             int sourceId = createNode(sourceLabel, "lightcyan");
             createEdge(nodeId, sourceId, null);
 
-            // Visit the table/subquery
-            if (table.source != null) {
-                int tableId = table.source.accept(this);
-                createEdge(sourceId, tableId, "source");
+            // Visit the table/subquery (use reflection to support different TableSource APIs)
+            try {
+                Object src = null;
+                // try common public field
+                try {
+                    java.lang.reflect.Field f = table.getClass().getField("source");
+                    src = f.get(table);
+                } catch (NoSuchFieldException | IllegalAccessException ignored) {
+                }
+                // try common getters if field not found
+                if (src == null) {
+                    try {
+                        java.lang.reflect.Method m = table.getClass().getMethod("getSource");
+                        src = m.invoke(table);
+                    } catch (NoSuchMethodException ignored) {
+                        try {
+                            java.lang.reflect.Method m2 = table.getClass().getMethod("getTable");
+                            src = m2.invoke(table);
+                        } catch (NoSuchMethodException ignored2) {
+                        }
+                    }
+                }
+                if (src instanceof ASTNode) {
+                    int tableId = ((ASTNode) src).accept(this);
+                    createEdge(sourceId, tableId, "source");
+                }
+            } catch (Exception ignored) {
             }
 
             // Visit all joins
@@ -307,7 +437,6 @@ public class ASTVisualizer implements ASTVisitor<Integer> {
                 }
             }
         }
-
         return nodeId;
     }
 
@@ -549,6 +678,16 @@ public class ASTVisualizer implements ASTVisitor<Integer> {
     }
 
     @Override
+    public Integer visit(NotExpressionNode node) {
+        int nodeId = createNode("NOT", "lightsteelblue");
+        if (node.getExpression() != null) {
+            int exprId = node.getExpression().accept(this);
+            createEdge(nodeId, exprId, "expr");
+        }
+        return nodeId;
+    }
+
+    @Override
     public Integer visit(WhenClauseNode node) {
         int nodeId = createNode("WHEN", "lemonchiffon");
         try {
@@ -784,4 +923,5 @@ public Integer visit(DropDatabaseNode node) {
     } catch (Exception ignored) {}
     return createNode(label, "lightyellow");
 }
+
 }

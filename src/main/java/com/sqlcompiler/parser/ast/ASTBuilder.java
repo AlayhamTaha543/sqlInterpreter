@@ -4,10 +4,13 @@ import com.sqlcompiler.parser.SQLParser;
 import com.sqlcompiler.parser.SQLParserBaseVisitor;
 import com.sqlcompiler.parser.ast.clauses.*;
 import com.sqlcompiler.parser.ast.expressions.*;
+import com.sqlcompiler.parser.ast.other.ColumnDefinitionNode;
+import com.sqlcompiler.parser.ast.other.DataTypeNode;
 import com.sqlcompiler.parser.ast.other.DropDatabaseNode;
 import com.sqlcompiler.parser.ast.other.DropTableNode;
 import com.sqlcompiler.parser.ast.statements.AlterStatementNode;
 import com.sqlcompiler.parser.ast.statements.CloseCursorNode;
+import com.sqlcompiler.parser.ast.statements.CreateStatementNode;
 import com.sqlcompiler.parser.ast.statements.DeallocateCursorNode;
 import com.sqlcompiler.parser.ast.statements.DeclareCursorNode;
 import com.sqlcompiler.parser.ast.statements.DeleteStatementNode;
@@ -19,9 +22,13 @@ import com.sqlcompiler.parser.ast.statements.RenameItemNode;
 import com.sqlcompiler.parser.ast.statements.RenameStatementNode;
 import com.sqlcompiler.parser.ast.statements.SelectStatementNode;
 import com.sqlcompiler.parser.ast.statements.UpdateStatementNode;
+import com.sqlcompiler.parser.ast.statements.InsertStatementNode;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import org.antlr.v4.runtime.RuleContext;
 
 public class ASTBuilder extends SQLParserBaseVisitor<ASTNode> {
 @Override
@@ -39,7 +46,12 @@ public ASTNode visitSqlStatements(SQLParser.SqlStatementsContext ctx) {
             } else if (stmtCtx.insertStatement() != null) {
                 stmt = visit(stmtCtx.insertStatement());
                 System.out.println("⚠️  INSERT statement found but not yet implemented");
-            } else if (stmtCtx.deleteStatement() != null) {
+            } 
+            else if (stmtCtx.createStatement() != null) {
+                stmt = visit(stmtCtx.createStatement());
+                System.out.println("⚠️  CREATE statement found but not yet implemented");
+            } 
+            else if (stmtCtx.deleteStatement() != null) {
                 stmt = visit(stmtCtx.deleteStatement());
                 System.out.println("⚠️  DELETE statement found but not yet implemented");
             }
@@ -147,12 +159,112 @@ public ASTNode visitSqlStatements(SQLParser.SqlStatementsContext ctx) {
     }
 
     @Override
+    public ASTNode visitInsertStatement(SQLParser.InsertStatementContext ctx) {
+        // Target specification text (qualified name or special form)
+        String target = ctx.targetSpecification() != null ? ctx.targetSpecification().getText() : null;
+
+        // Columns
+        List<String> columns = null;
+        if (ctx.columnList() != null) {
+            columns = new ArrayList<>();
+            for (SQLParser.ColumnNameContext cn : ctx.columnList().columnName()) {
+                columns.add(cn.getText());
+            }
+        }
+
+        // Values rows
+        List<List<ExpressionNode>> valueRows = null;
+        ExpressionNode querySource = null;
+        boolean defaultValues = false;
+
+        if (ctx.insertSource() != null) {
+            if (ctx.insertSource().valuesClause() != null) {
+                valueRows = new ArrayList<>();
+                for (SQLParser.ValueRowContext vr : ctx.insertSource().valuesClause().valueRow()) {
+                    List<ExpressionNode> row = new ArrayList<>();
+                    if (vr.expressionList() != null) {
+                        for (SQLParser.ExpressionContext ectx : vr.expressionList().expression()) {
+                            row.add((ExpressionNode) visit(ectx));
+                        }
+                    }
+                    valueRows.add(row);
+                }
+            } else if (ctx.insertSource().queryExpression() != null) {
+                querySource = buildSubquery(ctx.insertSource().queryExpression());
+            } else if (ctx.insertSource().DEFAULT() != null) {
+                defaultValues = true;
+            }
+        }
+
+        return new InsertStatementNode(target, columns, valueRows, querySource, defaultValues);
+    }
+
+    @Override
     public ASTNode visitDropDatabase(SQLParser.DropDatabaseContext ctx) {
         String name = ctx.databaseName().getText();
         
         System.out.println("DEBUG CHECK: The parser found database -> " + name);
         
         return new DropDatabaseNode(name, ctx.ifExists() != null);
+    }
+    //create  
+    @Override
+    public ASTNode visitCreateStatement(SQLParser.CreateStatementContext ctx) {
+        if (ctx.CREATE() != null && ctx.TABLE() != null) {
+            // Extract table name (handles qualified names like database.schema.table)
+            String tableName = ctx.tableName().getText();
+            TableNode table = new TableNode(tableName);
+            List<ASTNode> elements = new ArrayList<>();
+            for (SQLParser.TableElementContext te : ctx.tableElement()) {
+                ASTNode element = visit(te);
+                if (element != null) {
+                    elements.add(element);
+                }
+            }
+            return new CreateStatementNode(table, elements);
+        }
+        return visitChildren(ctx);
+    }
+    
+    @Override
+    public ASTNode visitTableElement(SQLParser.TableElementContext ctx) {
+        // tableElement can be either columnDefinition or tableConstraint
+        if (ctx.columnDefinition() != null) {
+            return visit(ctx.columnDefinition());
+        } else if (ctx.tableConstraint() != null) {
+            // For now, we'll handle table constraints as generic AST nodes
+            // You can create a TableConstraintNode class later if needed
+            return visitChildren(ctx);
+        }
+        return visitChildren(ctx);
+    }
+
+    @Override
+    public ASTNode visitColumnDefinition(SQLParser.ColumnDefinitionContext ctx) {
+        String name = ctx.columnName().getText();
+        DataTypeNode type = (DataTypeNode) visit(ctx.dataType());
+        List<String> attrs = ctx.columnAttribute().stream()
+                .map(RuleContext::getText)
+                .collect(Collectors.toList());
+        return new ColumnDefinitionNode(name, type, attrs);
+    }
+
+    @Override
+    public ASTNode visitDataType(SQLParser.DataTypeContext ctx) {
+        String name = ctx.getChild(0).getText();
+        Integer precision = null;
+        Integer scale = null;
+
+        if (ctx.INTEGER().size() > 0) {
+            precision = Integer.parseInt(ctx.INTEGER(0).getText());
+            if (ctx.INTEGER().size() > 1) {
+                scale = Integer.parseInt(ctx.INTEGER(1).getText());
+            }
+        } else if (ctx.MAX() != null) {
+            // Handle MAX if needed
+        }
+
+        return new DataTypeNode(name, precision, scale);
     }
 
     @Override

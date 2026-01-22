@@ -22,10 +22,14 @@ import com.sqlcompiler.parser.ast.expressions.FunctionCallNode;
 import com.sqlcompiler.parser.ast.expressions.LiteralNode;
 import com.sqlcompiler.parser.ast.expressions.SubqueryNode;
 import com.sqlcompiler.parser.ast.expressions.TableNode;
+import com.sqlcompiler.parser.ast.expressions.NotExpressionNode;
+import com.sqlcompiler.parser.ast.other.ColumnDefinitionNode;
+import com.sqlcompiler.parser.ast.other.DataTypeNode;
 import com.sqlcompiler.parser.ast.other.DropDatabaseNode;
 import com.sqlcompiler.parser.ast.other.DropTableNode;
 import com.sqlcompiler.parser.ast.statements.AlterStatementNode;
 import com.sqlcompiler.parser.ast.statements.CloseCursorNode;
+import com.sqlcompiler.parser.ast.statements.CreateStatementNode;
 import com.sqlcompiler.parser.ast.statements.DeallocateCursorNode;
 import com.sqlcompiler.parser.ast.statements.DeclareCursorNode;
 import com.sqlcompiler.parser.ast.statements.DeleteStatementNode;
@@ -36,7 +40,10 @@ import com.sqlcompiler.parser.ast.statements.ProgramNode;
 import com.sqlcompiler.parser.ast.statements.RenameItemNode;
 import com.sqlcompiler.parser.ast.statements.RenameStatementNode;
 import com.sqlcompiler.parser.ast.statements.SelectStatementNode;
+import com.sqlcompiler.parser.ast.statements.InsertStatementNode;
 import com.sqlcompiler.parser.ast.statements.UpdateStatementNode;
+import com.sqlcompiler.parser.ast.statements.ValuesClauseNode;
+import com.sqlcompiler.parser.ast.statements.ValuesRowNode;
 
 public class TreePrinter implements ASTVisitor<Void> {
     private int level = 0;
@@ -138,9 +145,9 @@ public class TreePrinter implements ASTVisitor<Void> {
         // TOP clause
         if (node.hasTopClause()) {
             String topText = "TOP: " + node.topExpression;
-            if (node.topPercent)
+        if (node.topPercent)
                 topText += " PERCENT";
-            if (node.topWithTies)
+        if (node.topWithTies)
                 topText += " WITH TIES";
             addLine(topText);
         }
@@ -316,7 +323,7 @@ public class TreePrinter implements ASTVisitor<Void> {
         level--;
         return null;
     }
-        
+
 // ========== Clauses ==========
     @Override
     public Void visit(SelectClauseNode node) {
@@ -618,6 +625,18 @@ public class TreePrinter implements ASTVisitor<Void> {
         return null;
     }
     @Override
+    public Void visit(NotExpressionNode node) {
+        if (node != null) {
+            addLine("NOT");
+            level++;
+            if (node.getExpression() != null) {
+                node.getExpression().accept(this);
+            }
+            level--;
+        }
+        return null;
+    }
+    @Override
     public Void visit(WithClauseNode node) {
         String label = "WITH";
         if (node.recursive) label += " RECURSIVE";
@@ -772,6 +791,180 @@ public class TreePrinter implements ASTVisitor<Void> {
         System.out.println("NewName: " + node.newName);
 
         level--;
+        return null;
+    }
+    @Override
+    public Void visit(InsertStatementNode node) {
+        addLine("InsertStatement");
+        level++;
+
+        // Access table via reflection/getter to support different AST implementations
+        Object tableObj = null;
+        try {
+            java.lang.reflect.Field f = node.getClass().getField("table");
+            tableObj = f.get(node);
+        } catch (Exception e) {
+            try {
+                java.lang.reflect.Method m = node.getClass().getMethod("getTable");
+                tableObj = m.invoke(node);
+            } catch (Exception ignored) {
+            }
+        }
+
+        if (tableObj != null) {
+            String tname = null;
+            try {
+                java.lang.reflect.Field fn = tableObj.getClass().getField("tableName");
+                Object v = fn.get(tableObj);
+                if (v != null) tname = v.toString();
+            } catch (Exception e) {
+                try {
+                    java.lang.reflect.Method mn = tableObj.getClass().getMethod("getTableName");
+                    Object v = mn.invoke(tableObj);
+                    if (v != null) tname = v.toString();
+                } catch (Exception ignored) {
+                }
+            }
+
+            if (tname != null) {
+                addLine("TargetTable: " + tname);
+            } else if (tableObj instanceof ASTNode) {
+                addLine("TargetTable:");
+                level++;
+                ((ASTNode) tableObj).accept(this);
+                level--;
+            } else {
+                addLine("TargetTable: " + tableObj.toString());
+            }
+        }
+
+        // Columns (reflectively get list)
+        Object colsObj = null;
+        try {
+            java.lang.reflect.Field f = node.getClass().getField("columns");
+            colsObj = f.get(node);
+        } catch (Exception e) {
+            try {
+                java.lang.reflect.Method m = node.getClass().getMethod("getColumns");
+                colsObj = m.invoke(node);
+            } catch (Exception ignored) {
+            }
+        }
+
+        if (colsObj instanceof java.util.List) {
+            java.util.List<?> colsList = (java.util.List<?>) colsObj;
+            if (!colsList.isEmpty()) {
+                StringBuilder cols = new StringBuilder("Columns: ");
+                for (int i = 0; i < colsList.size(); i++) {
+                    Object col = colsList.get(i);
+                    String colName = null;
+                    if (col != null) {
+                        try {
+                            java.lang.reflect.Field fn = col.getClass().getField("columnName");
+                            Object v = fn.get(col);
+                            if (v != null) colName = v.toString();
+                        } catch (Exception e) {
+                            try {
+                                java.lang.reflect.Method mn = col.getClass().getMethod("getColumnName");
+                                Object v = mn.invoke(col);
+                                if (v != null) colName = v.toString();
+                            } catch (Exception ignored) {
+                            }
+                        }
+                        if (colName == null) colName = col.toString();
+                    } else {
+                        colName = "null";
+                    }
+                    cols.append(colName);
+                    if (i < colsList.size() - 1) cols.append(", ");
+                }
+                addLine(cols.toString());
+            }
+        }
+
+        // Source (reflective)
+        Object sourceObj = null;
+        try {
+            java.lang.reflect.Field f = node.getClass().getField("source");
+            sourceObj = f.get(node);
+        } catch (Exception e) {
+            try {
+                java.lang.reflect.Method m = node.getClass().getMethod("getSource");
+                sourceObj = m.invoke(node);
+            } catch (Exception ignored) {
+            }
+        }
+
+        if (sourceObj instanceof ASTNode) {
+            addLine("Source:");
+            level++;
+            ((ASTNode) sourceObj).accept(this);
+            level--;
+        }
+
+        level--;
+        return null;
+    }
+
+    @Override
+    public Void visit(CreateStatementNode node) {
+        addLine("CreateStatement");
+        level++;
+
+        if (node.table != null) {
+            addLine("Table: " + node.table.tableName);
+        }
+
+        if (node.tableElements != null && !node.tableElements.isEmpty()) {
+            addLine("Elements:");
+            level++;
+            for (ASTNode element : node.tableElements) {
+                element.accept(this);
+            }
+            level--;
+        }
+
+        level--;
+        return null;
+    }
+@Override
+    public Void visit(ValuesClauseNode node) {
+        addLine("VALUES");
+        level++;
+        for (ValuesRowNode row : node.rows) {
+            row.accept(this);
+        }
+        level--;
+        return null;
+    }
+
+    @Override
+    public Void visit(ValuesRowNode node) {
+        addLine("Row");
+        level++;
+        for (com.sqlcompiler.parser.ast.expressions.ExpressionNode val : node.values) {
+            val.accept(this);
+        }
+        level--;
+        return null;
+    }
+    @Override
+    public Void visit(ColumnDefinitionNode node) {
+        addLine("ColumnDefinition: " + node.columnName);
+        level++;
+        if (node.dataType != null) {
+            node.dataType.accept(this);
+        }
+        if (node.attributes != null && !node.attributes.isEmpty()) {
+            addLine("Attributes: " + String.join(", ", node.attributes));
+        }
+        level--;
+        return null;
+    }
+
+    @Override
+    public Void visit(DataTypeNode node) {
+        addLine("DataType: " + node.toString());
         return null;
     }
 }
