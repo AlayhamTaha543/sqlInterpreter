@@ -12,95 +12,93 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ASTBuilder extends SQLParserBaseVisitor<ASTNode> {
-@Override
-public ASTNode visitSqlStatements(SQLParser.SqlStatementsContext ctx) {
-    ProgramNode program = new ProgramNode();
-    
-    for (SQLParser.BatchContext batch : ctx.batch()) {
-        for (SQLParser.SqlStatementContext stmtCtx : batch.sqlStatement()) {
-            ASTNode stmt = null;
-            
-            if (stmtCtx.selectStatement() != null) {
-                stmt = visit(stmtCtx.selectStatement());
-            } else if (stmtCtx.updateStatement() != null) {
-                stmt = visit(stmtCtx.updateStatement());
-            } else if (stmtCtx.insertStatement() != null) {
-                // stmt = visit(stmtCtx.insertStatement());
-                System.out.println("⚠️  INSERT statement found but not yet implemented");
-            } else if (stmtCtx.deleteStatement() != null) {
-                // stmt = visit(stmtCtx.deleteStatement());
-                System.out.println("⚠️  DELETE statement found but not yet implemented");
-            }
-            
-            if (stmt != null) {
-                program.addStatement(stmt);
+    @Override
+    public ASTNode visitSqlStatements(SQLParser.SqlStatementsContext ctx) {
+        ProgramNode program = new ProgramNode();
+
+        for (SQLParser.BatchContext batch : ctx.batch()) {
+            for (SQLParser.SqlStatementContext stmtCtx : batch.sqlStatement()) {
+                ASTNode stmt = null;
+
+                if (stmtCtx.selectStatement() != null) {
+                    stmt = visit(stmtCtx.selectStatement());
+                } else if (stmtCtx.updateStatement() != null) {
+                    stmt = visit(stmtCtx.updateStatement());
+                } else if (stmtCtx.insertStatement() != null) {
+                    // stmt = visit(stmtCtx.insertStatement());
+                    System.out.println("⚠️  INSERT statement found but not yet implemented");
+                } else if (stmtCtx.deleteStatement() != null) {
+                    // stmt = visit(stmtCtx.deleteStatement());
+                    System.out.println("⚠️  DELETE statement found but not yet implemented");
+                }
+
+                if (stmt != null) {
+                    program.addStatement(stmt);
+                }
             }
         }
+
+        return program;
     }
-    
-    return program;
-}
     // =================================================
     // UPDATE STATEMENT
     // =================================================
 
     @Override
     public ASTNode visitUpdateStatement(SQLParser.UpdateStatementContext ctx) {
-        
+
         // 1. Get target table
         ExpressionNode targetTable = buildUpdateTarget(ctx.updateTarget());
-        
+
         // 2. Build SET assignments
         List<UpdateStatementNode.SetAssignment> assignments = new ArrayList<>();
         for (SQLParser.UpdateSetClauseContext setCtx : ctx.updateSetClause()) {
             assignments.add(buildSetAssignment(setCtx));
         }
-        
+
         // 3. Build optional FROM clause
         FromClauseNode fromClause = null;
         if (ctx.fromClause() != null) {
             fromClause = buildFromClause(ctx.fromClause());
         }
-        
+
         // 4. Build optional WHERE clause
         WhereClauseNode whereClause = null;
         if (ctx.whereClause() != null) {
             whereClause = buildWhereClause(ctx.whereClause());
         }
-        
+
         // 5. Handle TOP clause (optional)
         ExpressionNode topExpression = null;
         boolean topPercent = false;
         boolean topWithTies = false;
-        
+
         if (ctx.topClause() != null) {
             SQLParser.TopClauseContext topCtx = ctx.topClause();
-            
+
             // TOP can be: TOP n or TOP (expression)
             if (topCtx.INTEGER() != null) {
                 topExpression = new LiteralNode(
-                    Long.parseLong(topCtx.INTEGER().getText()), 
-                    "INTEGER"
-                );
+                        Long.parseLong(topCtx.INTEGER().getText()),
+                        "INTEGER");
             } else if (topCtx.expression() != null) {
                 topExpression = (ExpressionNode) visit(topCtx.expression());
             }
-            
+
             topPercent = topCtx.PERCENT() != null;
             topWithTies = topCtx.TIES() != null;
         }
-        
+
         return new UpdateStatementNode(
-            targetTable,
-            assignments,
-            fromClause,
-            whereClause,
-            topExpression,
-            topPercent,
-            topWithTies
-        );
+                targetTable,
+                assignments,
+                fromClause,
+                whereClause,
+                topExpression,
+                topPercent,
+                topWithTies);
     }
-    
+
     /**
      * Builds the update target (table name or variable)
      */
@@ -113,25 +111,25 @@ public ASTNode visitSqlStatements(SQLParser.SqlStatementsContext ctx) {
         }
         throw new RuntimeException("Unsupported update target");
     }
-    
+
     /**
      * Builds a SET assignment: column = expression
      */
     private UpdateStatementNode.SetAssignment buildSetAssignment(
             SQLParser.UpdateSetClauseContext ctx) {
-        
+
         // Get the column being updated
         ExpressionNode target = buildFullColumnName(ctx.fullColumnName());
-        
+
         // Get the operator (=, +=, -=, etc.)
         String operator = ctx.assignmentOperator().getText();
-        
+
         // Get the value expression
         ExpressionNode value = (ExpressionNode) visit(ctx.expression());
-        
+
         return new UpdateStatementNode.SetAssignment(target, operator, value);
     }
-    
+
     /**
      * Builds a column reference from fullColumnName
      */
@@ -139,9 +137,8 @@ public ASTNode visitSqlStatements(SQLParser.SqlStatementsContext ctx) {
         if (ctx.tableName() != null && ctx.columnName() != null) {
             // table.column
             return new ColumnNode(
-                ctx.columnName().getText(),
-                ctx.tableName().getText()
-            );
+                    ctx.columnName().getText(),
+                    ctx.tableName().getText());
         } else if (ctx.columnName() != null) {
             // just column
             return new ColumnNode(ctx.columnName().getText());
@@ -165,6 +162,7 @@ public ASTNode visitSqlStatements(SQLParser.SqlStatementsContext ctx) {
             throw new RuntimeException(
                     "Only simple SELECT queries are supported (no UNION yet).");
         }
+        GroupByClauseNode groupByClause = qs.groupByClause() != null ? buildGroupByClause(qs.groupByClause()) : null;
         HavingClauseNode havingClause = qs.havingClause() != null ? buildHavingClause(qs.havingClause()) : null;
         SelectClauseNode selectClause = buildSelectClause(qs.selectList());
         FromClauseNode fromClause = buildFromClause(qs.fromClause());
@@ -174,7 +172,7 @@ public ASTNode visitSqlStatements(SQLParser.SqlStatementsContext ctx) {
                 selectClause,
                 fromClause,
                 whereClause,
-                null, null, havingClause, null, null, null);
+                null, groupByClause, havingClause, null, null, null);
     }
 
     private SQLParser.QuerySpecificationContext extractQuerySpecification(
@@ -460,13 +458,13 @@ public ASTNode visitSqlStatements(SQLParser.SqlStatementsContext ctx) {
         SelectClauseNode selectClause = buildSelectClause(qs.selectList());
         FromClauseNode fromClause = buildFromClause(qs.fromClause());
         WhereClauseNode whereClause = qs.whereClause() != null ? buildWhereClause(qs.whereClause()) : null;
-
+        GroupByClauseNode groupByClause = qs.groupByClause() != null ? buildGroupByClause(qs.groupByClause()) : null;
         // Create the select statement
         SelectStatementNode subSelect = new SelectStatementNode(
                 selectClause,
                 fromClause,
                 whereClause,
-                null, null, havingClause, null, null, null);
+                null, groupByClause, havingClause, null, null, null);
 
         // Wrap in SubqueryNode
         return new SubqueryNode(subSelect);
@@ -544,15 +542,15 @@ public ASTNode visitSqlStatements(SQLParser.SqlStatementsContext ctx) {
     // GROUP BY CLAUSE
     // =================================================
 
-    // private GroupByClauseNode buildGroupByClause(SQLParser.GroupByClauseContext ctx) {
-    //     List<ExpressionNode> groupByExpressions = new ArrayList<>();
+    private GroupByClauseNode buildGroupByClause(SQLParser.GroupByClauseContext ctx) {
+        List<ExpressionNode> groupByExpressions = new ArrayList<>();
 
-    //     for (SQLParser.ExpressionContext expr : ctx.expression()) {
-    //         groupByExpressions.add((ExpressionNode) visit(expr));
-    //     }
+        for (SQLParser.GroupByItemContext item : ctx.groupByItem()) {
+            groupByExpressions.add((ExpressionNode) visit(item.expression()));
+        }
 
-    //     return new GroupByClauseNode(groupByExpressions);
-    // }
+        return new GroupByClauseNode(groupByExpressions);
+    }
 
     // =================================================
     // HAVING CLAUSE
