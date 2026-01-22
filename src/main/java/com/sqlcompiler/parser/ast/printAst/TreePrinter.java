@@ -11,6 +11,7 @@ import com.sqlcompiler.parser.ast.clauses.HavingClauseNode;
 import com.sqlcompiler.parser.ast.clauses.JoinClauseNode;
 import com.sqlcompiler.parser.ast.clauses.OrderByClauseNode;
 import com.sqlcompiler.parser.ast.clauses.SelectClauseNode;
+import com.sqlcompiler.parser.ast.clauses.WhenClauseNode;
 import com.sqlcompiler.parser.ast.clauses.WhereClauseNode;
 import com.sqlcompiler.parser.ast.clauses.WithClauseNode;
 import com.sqlcompiler.parser.ast.expressions.AggregateFunctionNode;
@@ -707,6 +708,32 @@ public class TreePrinter implements ASTVisitor<Void> {
     @Override
     public Void visit(DeallocateCursorNode node) {
         addLine("DEALLOCATE CURSOR: " + (node.global ? "GLOBAL " : "") + node.cursorName);
+        return null;
+    }
+    // Add other visit methods for different ASTNode types as needed    
+    public Void visit(WhenClauseNode node) {
+        if (node != null) {
+            addLine("WhenClause");
+            level++;
+
+            // WHEN condition
+            if (node.whenCondition != null) {
+                addLine("WHEN:");
+                level++;
+                node.whenCondition.accept(this);
+                level--;
+            }
+
+            // THEN expression
+            if (node.thenExpression != null) {
+                addLine("THEN:");
+                level++;
+                node.thenExpression.accept(this);
+                level--;
+            }
+
+            level--;
+        }
         return null;
     }
 }

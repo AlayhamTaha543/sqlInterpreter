@@ -231,56 +231,57 @@ public ASTNode visitSqlStatements(SQLParser.SqlStatementsContext ctx) {
     }
 
     // =================================================
-// ALTER STATEMENT
-// =================================================
+    // ALTER STATEMENT
+    // =================================================
 
-@Override
-public ASTNode visitAlterStatement(SQLParser.AlterStatementContext ctx) {
-    
-    // Get table name
-    ExpressionNode tableName = new TableNode(ctx.tableName().getText());
-    
-    // Check if it's ADD or DROP
-    if (ctx.ADD() != null && ctx.columnDefinition() != null) {
-        // ALTER TABLE ADD column
-        return buildAlterAddColumn(tableName, ctx.columnDefinition());
-        
-    } else if (ctx.DROP() != null && ctx.COLUMN() != null && ctx.columnName() != null) {
-        // ALTER TABLE DROP COLUMN
-        String dropColumnName = ctx.columnName().getText();
-        return new AlterStatementNode(tableName, dropColumnName);
-    }
-    
-    throw new RuntimeException("Unsupported ALTER TABLE operation");
-}
+    @Override
+    public ASTNode visitAlterStatement(SQLParser.AlterStatementContext ctx) {
 
-/**
- * Builds ALTER TABLE ADD COLUMN
- */
-private AlterStatementNode buildAlterAddColumn(
-        ExpressionNode tableName, 
-        SQLParser.ColumnDefinitionContext ctx) {
-    
-    String columnName = ctx.columnName().getText();
-    String dataType = ctx.dataType().getText();
-    
-    // Build constraints string (simplified - you can make this more detailed)
-    StringBuilder constraints = new StringBuilder();
-    if (ctx.columnAttribute() != null && !ctx.columnAttribute().isEmpty()) {
-        for (SQLParser.ColumnAttributeContext attr : ctx.columnAttribute()) {
-            if (constraints.length() > 0) constraints.append(" ");
-            constraints.append(attr.getText());
+        // Get table name
+        ExpressionNode tableName = new TableNode(ctx.tableName().getText());
+
+        // Check if it's ADD or DROP
+        if (ctx.ADD() != null && ctx.columnDefinition() != null) {
+            // ALTER TABLE ADD column
+            return buildAlterAddColumn(tableName, ctx.columnDefinition());
+
+        } else if (ctx.DROP() != null && ctx.COLUMN() != null && ctx.columnName() != null) {
+            // ALTER TABLE DROP COLUMN
+            String dropColumnName = ctx.columnName().getText();
+            return new AlterStatementNode(tableName, dropColumnName);
         }
+
+        throw new RuntimeException("Unsupported ALTER TABLE operation");
     }
-    
-    AlterStatementNode.ColumnDefinition colDef = new AlterStatementNode.ColumnDefinition(
-        columnName, 
-        dataType, 
-        constraints.length() > 0 ? constraints.toString() : null
-    );
-    
-    return new AlterStatementNode(tableName, colDef);
-}
+
+    /**
+     * Builds ALTER TABLE ADD COLUMN
+     */
+    private AlterStatementNode buildAlterAddColumn(
+            ExpressionNode tableName,
+            SQLParser.ColumnDefinitionContext ctx) {
+
+        String columnName = ctx.columnName().getText();
+        String dataType = ctx.dataType().getText();
+
+        // Build constraints string (simplified - you can make this more detailed)
+        StringBuilder constraints = new StringBuilder();
+        if (ctx.columnAttribute() != null && !ctx.columnAttribute().isEmpty()) {
+            for (SQLParser.ColumnAttributeContext attr : ctx.columnAttribute()) {
+                if (constraints.length() > 0)
+                    constraints.append(" ");
+                constraints.append(attr.getText());
+            }
+        }
+
+        AlterStatementNode.ColumnDefinition colDef = new AlterStatementNode.ColumnDefinition(
+                columnName,
+                dataType,
+                constraints.length() > 0 ? constraints.toString() : null);
+
+        return new AlterStatementNode(tableName, colDef);
+    }
+
     /**
      * Builds the update target (table name or variable)
      */
@@ -350,16 +351,15 @@ private AlterStatementNode buildAlterAddColumn(
 
         SelectClauseNode selectClause = buildSelectClause(qs.selectList());
         FromClauseNode fromClause = buildFromClause(qs.fromClause());
-        WhereClauseNode whereClause =
-                qs.whereClause() != null ? buildWhereClause(qs.whereClause()) : null;
-
-        return new SelectStatementNode(
+        WhereClauseNode whereClause = qs.whereClause() != null ? buildWhereClause(qs.whereClause()) : null;
+        OrderByClauseNode orderByClause = ctx.orderByClause() != null ? buildOrderByClause(ctx.orderByClause()) : null;
+        HavingClauseNode havingClause = qs.havingClause() != null ? buildHavingClause(qs.havingClause()) : null;
+        GroupByClauseNode groupByClause = qs.groupByClause() != null ? buildGroupByClause(qs.groupByClause()) : null;return new SelectStatementNode(
                 null,
                 selectClause,
                 fromClause,
                 whereClause,
-                null, null, null, null, null,null
-        );
+                null, groupByClause, havingClause, orderByClause, null, null);
     }
 
     private SQLParser.QuerySpecificationContext extractQuerySpecification(
@@ -926,5 +926,99 @@ private AlterStatementNode buildAlterAddColumn(
                         ctx.USER_VARIABLE().getText();
         
         return new DeallocateCursorNode(cursorName, global);
+    }    // =================================================
+    // AGGREGATE FUNCTIONS
+    // =================================================
+
+    @Override
+    public ASTNode visitAggregateFunction(SQLParser.AggregateFunctionContext ctx) {
+        // Determine the aggregate type
+        AggregateFunctionNode.AggregateType type;
+        if (ctx.COUNT() != null) {
+            type = AggregateFunctionNode.AggregateType.COUNT;
+        } else if (ctx.SUM() != null) {
+            type = AggregateFunctionNode.AggregateType.SUM;
+        } else if (ctx.AVG() != null) {
+            type = AggregateFunctionNode.AggregateType.AVG;
+        } else if (ctx.MIN() != null) {
+            type = AggregateFunctionNode.AggregateType.MIN;
+        } else if (ctx.MAX() != null) {
+            type = AggregateFunctionNode.AggregateType.MAX;
+        } else {
+            throw new RuntimeException("Unknown aggregate function");
+        }
+
+        // Check for DISTINCT
+        boolean distinct = ctx.DISTINCT() != null;
+
+        // Get the argument (expression or *)
+        ExpressionNode argument = null;
+        if (ctx.expression() != null) {
+            argument = (ExpressionNode) visit(ctx.expression());
+        } else if (ctx.STAR() != null) {
+            // For COUNT(*), we can use a special marker or null
+            argument = new ColumnNode("*");
+        }
+
+        return new AggregateFunctionNode(type, argument, distinct, null);
     }
+    // =================================================
+    // ORDER BY CLAUSE
+    // =================================================
+
+    private OrderByClauseNode buildOrderByClause(SQLParser.OrderByClauseContext ctx) {
+        List<OrderByClauseNode.SortItem> sortItems = new ArrayList<>();
+
+        for (SQLParser.OrderByExpressionContext item : ctx.orderByExpression()) {
+            ExpressionNode expression = (ExpressionNode) visit(item.expression());
+
+            // Determine sort direction
+            OrderByClauseNode.SortDirection direction = OrderByClauseNode.SortDirection.ASC;
+            if (item.DESC() != null) {
+                direction = OrderByClauseNode.SortDirection.DESC;
+            }
+
+            sortItems.add(new OrderByClauseNode.SortItem(expression, direction));
+        }
+
+        return new OrderByClauseNode(sortItems);
+    }
+// =================================================
+// CASE EXPRESSION
+// =================================================
+
+@Override
+public ASTNode visitCaseExpression(SQLParser.CaseExpressionContext ctx) {
+    // Input expression (optional - for simple CASE)
+    ExpressionNode inputExpression = null;
+    List<SQLParser.ExpressionContext> expressions = ctx.expression();
+    int expressionIndex = 0;
+    
+    // Check if first expression is the input expression (simple CASE)
+    // If there are more expressions than just the ELSE, first one is input
+    if (!expressions.isEmpty() && ctx.whenClause().size() > 0) {
+        // We need to determine if first expression is input or ELSE
+        // Simple heuristic: if expression count > 1 OR (count == 1 AND no ELSE), it's input
+        if (expressions.size() > 1 || (expressions.size() == 1 && ctx.ELSE() == null)) {
+            inputExpression = (ExpressionNode) visit(expressions.get(0));
+            expressionIndex = 1;
+        }
+    }
+    
+    // Build WHEN clauses
+    List<WhenClauseNode> whenClauses = new ArrayList<>();
+    for (SQLParser.WhenClauseContext whenCtx : ctx.whenClause()) {
+        ExpressionNode condition = (ExpressionNode) visit(whenCtx.searchCondition());
+        ExpressionNode thenExpr = (ExpressionNode) visit(whenCtx.expression());
+        whenClauses.add(new WhenClauseNode(condition, thenExpr));
+    }
+    
+    // ELSE expression (optional)
+    ExpressionNode elseExpression = null;
+    if (ctx.ELSE() != null && expressionIndex < expressions.size()) {
+        elseExpression = (ExpressionNode) visit(expressions.get(expressionIndex));
+    }
+    
+    return new CaseexpressionNode(inputExpression, whenClauses, elseExpression);
+}
 }
