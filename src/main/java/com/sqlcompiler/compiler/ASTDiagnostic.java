@@ -3,32 +3,50 @@ package com.sqlcompiler.compiler;
 import com.sqlcompiler.parser.ast.ASTNode;
 import com.sqlcompiler.parser.ast.clauses.*;
 import com.sqlcompiler.parser.ast.expressions.*;
+import com.sqlcompiler.parser.ast.statements.ProgramNode;
 import com.sqlcompiler.parser.ast.statements.SelectStatementNode;
+import com.sqlcompiler.parser.ast.statements.UpdateStatementNode;
 
 /**
  * Diagnostic utility to inspect AST structure and identify issues
  */
 public class ASTDiagnostic {
     
-    public static void diagnose(ASTNode ast) {
-        System.out.println("\n" + "=".repeat(60));
-        System.out.println("AST DIAGNOSTIC REPORT");
-        System.out.println("=".repeat(60));
-        
-        if (ast == null) {
-            System.out.println("❌ AST is NULL!");
-            return;
-        }
-        
-        System.out.println("✅ AST Root: " + ast.getClass().getSimpleName());
-        
-        if (ast instanceof SelectStatementNode) {
-            diagnoseSelectStatement((SelectStatementNode) ast);
-        }
-        
-        System.out.println("=".repeat(60));
+public static void diagnose(ASTNode ast) {
+    System.out.println("\n" + "=".repeat(60));
+    System.out.println("AST DIAGNOSTIC REPORT");
+    System.out.println("=".repeat(60));
+    
+    if (ast == null) {
+        System.out.println("❌ AST is NULL!");
+        return;
     }
     
+    System.out.println("✅ AST Root: " + ast.getClass().getSimpleName());
+    
+    if (ast instanceof ProgramNode) {
+        diagnoseProgramNode((ProgramNode) ast);
+        // Diagnose each statement
+        ProgramNode program = (ProgramNode) ast;
+        for (int i = 0; i < program.statements.size(); i++) {
+            System.out.println("\n" + "-".repeat(60));
+            System.out.println("Analyzing Statement[" + (i + 1) + "]:");
+            System.out.println("-".repeat(60));
+            
+            if (program.statements.get(i) instanceof SelectStatementNode) {
+                diagnoseSelectStatement((SelectStatementNode) program.statements.get(i));
+            } else if (program.statements.get(i) instanceof UpdateStatementNode) {
+                // You can add diagnoseUpdateStatement if needed
+                System.out.println("   UpdateStatement detected");
+            }
+        }
+    } else if (ast instanceof SelectStatementNode) {
+        diagnoseSelectStatement((SelectStatementNode) ast);
+    }
+    
+    System.out.println("=".repeat(60));
+}
+
     private static void diagnoseSelectStatement(SelectStatementNode node) {
         System.out.println("\n📊 SELECT STATEMENT DETAILS:");
         
@@ -196,4 +214,13 @@ public class ASTDiagnostic {
             }
         }
     }
+    private static void diagnoseProgramNode(ProgramNode node) {
+    System.out.println("\n📦 PROGRAM DETAILS:");
+    System.out.println("   - Total statements: " + node.getStatementCount());
+    
+    for (int i = 0; i < node.statements.size(); i++) {
+        System.out.println("\n   Statement[" + (i + 1) + "]: " + 
+                          node.statements.get(i).getClass().getSimpleName());
+    }
+}
 }
