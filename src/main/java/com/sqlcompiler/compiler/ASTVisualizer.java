@@ -923,5 +923,25 @@ public Integer visit(DropDatabaseNode node) {
     } catch (Exception ignored) {}
     return createNode(label, "lightyellow");
 }
+@Override
+public Integer visit(IfStatementNode node) {
+    int nodeId = createNode("IF STATEMENT", "orange");
 
+    if (node.condition != null) {
+        int condId = node.condition.accept(this);
+        createEdge(nodeId, condId, "condition");
+    }
+
+    if (node.thenStatement != null) {
+        int thenId = node.thenStatement.accept(this);
+        createEdge(nodeId, thenId, "then");
+    }
+
+    if (node.elseStatement != null) {
+        int elseId = node.elseStatement.accept(this);
+        createEdge(nodeId, elseId, "else");
+    }
+
+    return nodeId;
+}
 }

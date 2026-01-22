@@ -33,6 +33,7 @@ import com.sqlcompiler.parser.ast.statements.DeclareCursorNode;
 import com.sqlcompiler.parser.ast.statements.DeleteStatementNode;
 import com.sqlcompiler.parser.ast.statements.DropStatementNode;
 import com.sqlcompiler.parser.ast.statements.FetchCursorNode;
+import com.sqlcompiler.parser.ast.statements.IfStatementNode;
 import com.sqlcompiler.parser.ast.statements.OpenCursorNode;
 import com.sqlcompiler.parser.ast.statements.ProgramNode;
 import com.sqlcompiler.parser.ast.statements.RenameItemNode;
@@ -96,7 +97,7 @@ T visit(ValuesClauseNode node);
 
     T visit(ValuesRowNode node);
 
-
+T visit(IfStatementNode node);
 // Other
     T visit(ColumnDefinitionNode node);
 

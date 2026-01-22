@@ -16,6 +16,7 @@ import com.sqlcompiler.parser.ast.statements.DeclareCursorNode;
 import com.sqlcompiler.parser.ast.statements.DeleteStatementNode;
 import com.sqlcompiler.parser.ast.statements.DropStatementNode;
 import com.sqlcompiler.parser.ast.statements.FetchCursorNode;
+import com.sqlcompiler.parser.ast.statements.IfStatementNode;
 import com.sqlcompiler.parser.ast.statements.OpenCursorNode;
 import com.sqlcompiler.parser.ast.statements.ProgramNode;
 import com.sqlcompiler.parser.ast.statements.RenameItemNode;
@@ -58,6 +59,8 @@ public ASTNode visitSqlStatements(SQLParser.SqlStatementsContext ctx) {
             else if (stmtCtx.alterStatement() != null) {           
                 stmt = visit(stmtCtx.alterStatement());
             }
+            else if (stmtCtx.ifStatement() != null) { // <--- ADD THIS
+    stmt = visit(stmtCtx.ifStatement());}
             else if (stmtCtx.declareCursorStatement() != null) {
                 stmt = visit(stmtCtx.declareCursorStatement());
             } else if (stmtCtx.openCursorStatement() != null) {
@@ -1153,5 +1156,20 @@ public ASTNode visitSqlStatements(SQLParser.SqlStatementsContext ctx) {
 
         return new RenameStatementNode(renameItems);
     }
+@Override
+public ASTNode visitIfStatement(SQLParser.IfStatementContext ctx) {
+    // 1. Visit the condition (usually a searchCondition in T-SQL)
+    ExpressionNode condition = (ExpressionNode) visit(ctx.searchCondition());
 
+    // 2. Visit the 'THEN' statement (the statement immediately after IF)
+    ASTNode thenStmt = visit(ctx.sqlStatement(0));
+
+    // 3. Visit the 'ELSE' statement if it exists
+    ASTNode elseStmt = null;
+    if (ctx.ELSE() != null && ctx.sqlStatement().size() > 1) {
+        elseStmt = visit(ctx.sqlStatement(1));
+    }
+
+    return new IfStatementNode(condition, thenStmt, elseStmt);
+}
 }

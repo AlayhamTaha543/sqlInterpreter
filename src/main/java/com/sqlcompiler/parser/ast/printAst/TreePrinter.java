@@ -35,6 +35,7 @@ import com.sqlcompiler.parser.ast.statements.DeclareCursorNode;
 import com.sqlcompiler.parser.ast.statements.DeleteStatementNode;
 import com.sqlcompiler.parser.ast.statements.DropStatementNode;
 import com.sqlcompiler.parser.ast.statements.FetchCursorNode;
+import com.sqlcompiler.parser.ast.statements.IfStatementNode;
 import com.sqlcompiler.parser.ast.statements.OpenCursorNode;
 import com.sqlcompiler.parser.ast.statements.ProgramNode;
 import com.sqlcompiler.parser.ast.statements.RenameItemNode;
@@ -967,4 +968,33 @@ public class TreePrinter implements ASTVisitor<Void> {
         addLine("DataType: " + node.toString());
         return null;
     }
+    @Override
+public Void visit(IfStatementNode node) {
+    addLine("IfStatement");
+    level++;
+
+    addLine("Condition:");
+    level++;
+    if (node.condition != null) {
+        node.condition.accept(this);
+    }
+    level--;
+
+    addLine("THEN:");
+    level++;
+    if (node.thenStatement != null) {
+        node.thenStatement.accept(this);
+    }
+    level--;
+
+    if (node.elseStatement != null) {
+        addLine("ELSE:");
+        level++;
+        node.elseStatement.accept(this);
+        level--;
+    }
+
+    level--;
+    return null;
+}
 }
