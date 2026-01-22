@@ -250,16 +250,18 @@ public class ASTVisualizer implements ASTVisitor<Integer> {
         int nodeId = createNode(label, "lightgreen");
 
         for (SelectClauseNode.SelectItem item : node.selectItems) {
-            String itemLabel = "Item";
+            // Include alias in the Item label itself
+            String itemLabel = "SelectItem";
             if (item.alias != null && !item.alias.isEmpty()) {
-                itemLabel += " AS " + item.alias;
+                itemLabel += " (AS " + item.alias + ")";
             }
             int itemId = createNode(itemLabel, "palegreen");
             createEdge(nodeId, itemId, null);
 
+            // Only add the expression as child
             if (item.expression != null) {
                 int exprId = item.expression.accept(this);
-                createEdge(itemId, exprId, null);
+                createEdge(itemId, exprId, "expression");
             }
         }
 
@@ -271,9 +273,9 @@ public class ASTVisualizer implements ASTVisitor<Integer> {
         int nodeId = createNode("FROM", "lightblue");
 
         for (FromClauseNode.TableSource table : node.tableSources) {
-            String sourceLabel = "Source";
+            String sourceLabel = "TableSource";
             if (table.alias != null && !table.alias.isEmpty()) {
-                sourceLabel += " AS " + table.alias;
+                sourceLabel += " (AS " + table.alias + ")";
             }
             int sourceId = createNode(sourceLabel, "lightcyan");
             createEdge(nodeId, sourceId, null);
@@ -281,7 +283,7 @@ public class ASTVisualizer implements ASTVisitor<Integer> {
             // Visit the table/subquery
             if (table.source != null) {
                 int tableId = table.source.accept(this);
-                createEdge(sourceId, tableId, null);
+                createEdge(sourceId, tableId, "source");
             }
 
             // Visit all joins
@@ -313,17 +315,17 @@ public class ASTVisualizer implements ASTVisitor<Integer> {
         String label = node.joinType.toString();
         int nodeId = createNode(label, "lightcoral");
 
-        // Joined table
+        // Joined table with alias in label
         if (node.table != null) {
-            String tableLabel = "Table";
+            String tableLabel = "JoinedTable";
             if (node.alias != null && !node.alias.isEmpty()) {
-                tableLabel += " AS " + node.alias;
+                tableLabel += " (AS " + node.alias + ")";
             }
             int tableContainerId = createNode(tableLabel, "mistyrose");
-            createEdge(nodeId, tableContainerId, null);
+            createEdge(nodeId, tableContainerId, "table");
 
             int tableId = node.table.accept(this);
-            createEdge(tableContainerId, tableId, null);
+            createEdge(tableContainerId, tableId, "source");
         }
 
         // Join condition
@@ -332,7 +334,7 @@ public class ASTVisualizer implements ASTVisitor<Integer> {
             createEdge(nodeId, condId, null);
 
             int exprId = node.condition.accept(this);
-            createEdge(condId, exprId, null);
+            createEdge(condId, exprId, "condition");
         }
 
         return nodeId;
@@ -449,7 +451,7 @@ public class ASTVisualizer implements ASTVisitor<Integer> {
     public Integer visit(TableNode node) {
         String label = "Table: " + node.tableName;
         if (node.alias != null && !node.alias.isEmpty()) {
-            label += " AS " + node.alias;
+            label += " (AS " + node.alias + ")";
         }
         return createNode(label, "lavender");
     }
@@ -537,13 +539,13 @@ public class ASTVisualizer implements ASTVisitor<Integer> {
     public Integer visit(SubqueryNode node) {
         String label = "Subquery";
         if (node.getAlias() != null && !node.getAlias().isEmpty()) {
-            label += " AS " + node.getAlias();
+            label += " (AS " + node.getAlias() + ")";
         }
         int nodeId = createNode(label, "lightsteelblue");
 
         if (node.getQuery() != null) {
             int queryId = node.getQuery().accept(this);
-            createEdge(nodeId, queryId, null);
+            createEdge(nodeId, queryId, "query");
         }
 
         return nodeId;
@@ -563,21 +565,22 @@ public class ASTVisualizer implements ASTVisitor<Integer> {
             return false;
         }
     }
-@Override
-public Integer visit(WhenClauseNode node) {
-    int nodeId = createNode("WHEN Clause", "violet");
-    
-    if (node.whenCondition != null) {
-        int whenId = node.whenCondition.accept(this);
-        createEdge(nodeId, whenId, "condition");
+
+    @Override
+    public Integer visit(WhenClauseNode node) {
+        int nodeId = createNode("WHEN Clause", "violet");
+
+        if (node.whenCondition != null) {
+            int whenId = node.whenCondition.accept(this);
+            createEdge(nodeId, whenId, "condition");
+        }
+
+        // Visit THEN expression
+        if (node.thenExpression != null) {
+            int thenId = node.thenExpression.accept(this);
+            createEdge(nodeId, thenId, "then");
+        }
+
+        return nodeId;
     }
-    
-    // Visit THEN expression
-    if (node.thenExpression != null) {
-        int thenId = node.thenExpression.accept(this);
-        createEdge(nodeId, thenId, "then");
-    }
-    
-    return nodeId;
-}
 }
