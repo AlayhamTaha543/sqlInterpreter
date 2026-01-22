@@ -6,6 +6,7 @@ import com.sqlcompiler.parser.ast.clauses.HavingClauseNode;
 import com.sqlcompiler.parser.ast.clauses.JoinClauseNode;
 import com.sqlcompiler.parser.ast.clauses.OrderByClauseNode;
 import com.sqlcompiler.parser.ast.clauses.SelectClauseNode;
+import com.sqlcompiler.parser.ast.clauses.WhenClauseNode;
 import com.sqlcompiler.parser.ast.clauses.WhereClauseNode;
 import com.sqlcompiler.parser.ast.expressions.AggregateFunctionNode;
 import com.sqlcompiler.parser.ast.expressions.BinaryExpressionNode;
@@ -47,4 +48,5 @@ public interface ASTVisitor<T> {
     T visit(AggregateFunctionNode node);
     T visit(CaseexpressionNode node);
     T visit(SubqueryNode node);
+    T visit(WhenClauseNode  node);
 }
