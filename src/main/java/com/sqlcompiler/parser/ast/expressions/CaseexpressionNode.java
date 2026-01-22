@@ -1,44 +1,43 @@
 package com.sqlcompiler.parser.ast.expressions;
-import com.sqlcompiler.parser.ast.ASTVisitor;
 
+import com.sqlcompiler.parser.ast.ASTNode;
+import com.sqlcompiler.parser.ast.ASTVisitor;
+import com.sqlcompiler.parser.ast.clauses.WhenClauseNode;
 import java.util.ArrayList;
 import java.util.List;
 
 public class CaseexpressionNode extends ExpressionNode {
-    public static class WhenClause {
-        public final ExpressionNode whenCondition;
-        public final ExpressionNode thenExpression;
-        
-        public WhenClause(ExpressionNode whenCondition, ExpressionNode thenExpression) {
-            this.whenCondition = whenCondition;
-            this.thenExpression = thenExpression;
-        }
-        
-        @Override
-        public String toString() {
-            return "WHEN " + whenCondition + " THEN " + thenExpression;
-        }
-    }
-    
     public final ExpressionNode inputExpression; // Optional
-    public final List<WhenClause> whenClauses;
+    public final List<WhenClauseNode> whenClauses;
     public final ExpressionNode elseExpression; // Optional
     
-    public CaseexpressionNode(ExpressionNode inputExpression, 
-                             List<WhenClause> whenClauses, 
+    public CaseexpressionNode(ExpressionNode inputExpression,
+                             List<WhenClauseNode> whenClauses,
                              ExpressionNode elseExpression) {
         this.inputExpression = inputExpression;
         this.whenClauses = whenClauses != null ? new ArrayList<>(whenClauses) : new ArrayList<>();
         this.elseExpression = elseExpression;
     }
     
-    public CaseexpressionNode(List<WhenClause> whenClauses, ExpressionNode elseExpression) {
+    public CaseexpressionNode(List<WhenClauseNode> whenClauses, ExpressionNode elseExpression) {
         this(null, whenClauses, elseExpression);
     }
     
     @Override
     public <T> T accept(ASTVisitor<T> visitor) {
         return visitor.visit(this);
+    }
+    
+    public List<ASTNode> getChildren() {
+        List<ASTNode> children = new ArrayList<>();
+        if (inputExpression != null) {
+            children.add(inputExpression);
+        }
+        children.addAll(whenClauses);
+        if (elseExpression != null) {
+            children.add(elseExpression);
+        }
+        return children;
     }
     
     @Override
@@ -49,7 +48,7 @@ public class CaseexpressionNode extends ExpressionNode {
             sb.append(" ").append(inputExpression);
         }
         
-        for (WhenClause clause : whenClauses) {
+        for (WhenClauseNode clause : whenClauses) {
             sb.append(" ").append(clause.toString());
         }
         
