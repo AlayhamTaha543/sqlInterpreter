@@ -37,7 +37,7 @@ public ASTNode visitSqlStatements(SQLParser.SqlStatementsContext ctx) {
             } else if (stmtCtx.updateStatement() != null) {
                 stmt = visit(stmtCtx.updateStatement());
             } else if (stmtCtx.insertStatement() != null) {
-                // stmt = visit(stmtCtx.insertStatement());
+                stmt = visit(stmtCtx.insertStatement());
                 System.out.println("⚠️  INSERT statement found but not yet implemented");
             } else if (stmtCtx.deleteStatement() != null) {
                 stmt = visit(stmtCtx.deleteStatement());
