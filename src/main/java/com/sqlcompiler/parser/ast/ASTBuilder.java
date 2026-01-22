@@ -4,13 +4,24 @@ import com.sqlcompiler.parser.SQLParser;
 import com.sqlcompiler.parser.SQLParserBaseVisitor;
 import com.sqlcompiler.parser.ast.clauses.*;
 import com.sqlcompiler.parser.ast.expressions.*;
+import com.sqlcompiler.parser.ast.other.DropDatabaseNode;
+import com.sqlcompiler.parser.ast.other.DropTableNode;
 import com.sqlcompiler.parser.ast.statements.AlterStatementNode;
+import com.sqlcompiler.parser.ast.statements.CloseCursorNode;
+import com.sqlcompiler.parser.ast.statements.DeallocateCursorNode;
+import com.sqlcompiler.parser.ast.statements.DeclareCursorNode;
+import com.sqlcompiler.parser.ast.statements.DeleteStatementNode;
+import com.sqlcompiler.parser.ast.statements.DropStatementNode;
+import com.sqlcompiler.parser.ast.statements.FetchCursorNode;
+import com.sqlcompiler.parser.ast.statements.OpenCursorNode;
 import com.sqlcompiler.parser.ast.statements.ProgramNode;
 import com.sqlcompiler.parser.ast.statements.SelectStatementNode;
 import com.sqlcompiler.parser.ast.statements.UpdateStatementNode;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import org.antlr.v4.runtime.tree.TerminalNode;
 
 public class ASTBuilder extends SQLParserBaseVisitor<ASTNode> {
 @Override
@@ -29,11 +40,22 @@ public ASTNode visitSqlStatements(SQLParser.SqlStatementsContext ctx) {
                 // stmt = visit(stmtCtx.insertStatement());
                 System.out.println("⚠️  INSERT statement found but not yet implemented");
             } else if (stmtCtx.deleteStatement() != null) {
-                // stmt = visit(stmtCtx.deleteStatement());
+                stmt = visit(stmtCtx.deleteStatement());
                 System.out.println("⚠️  DELETE statement found but not yet implemented");
             }
             else if (stmtCtx.alterStatement() != null) {           
                 stmt = visit(stmtCtx.alterStatement());
+            }
+            else if (stmtCtx.declareCursorStatement() != null) {
+                stmt = visit(stmtCtx.declareCursorStatement());
+            } else if (stmtCtx.openCursorStatement() != null) {
+                stmt = visit(stmtCtx.openCursorStatement());
+            } else if (stmtCtx.closeCursorStatement() != null) {
+                stmt = visit(stmtCtx.closeCursorStatement());
+            } else if (stmtCtx.fetchStatement() != null) {
+                stmt = visit(stmtCtx.fetchStatement());
+            } else if (stmtCtx.deallocateCursorStatement() != null) {
+                stmt = visit(stmtCtx.deallocateCursorStatement());
             }
             
             if (stmt != null) {
@@ -102,6 +124,112 @@ public ASTNode visitSqlStatements(SQLParser.SqlStatementsContext ctx) {
                 topPercent,
                 topWithTies);
     }
+            // DELETE and DROP 
+        
+    @Override
+    public ASTNode visitDropStatement(SQLParser.DropStatementContext ctx) {
+        DropTableNode table = null;
+        DropDatabaseNode db = null;
+
+        if (ctx.dropTable() != null) {
+            table = (DropTableNode) visit(ctx.dropTable());
+        }  
+
+
+        if (ctx.dropDatabase() != null) {
+            db = (DropDatabaseNode) visit(ctx.dropDatabase());
+        }
+
+        return new DropStatementNode(table, db);
+    }
+
+    @Override
+    public ASTNode visitDropDatabase(SQLParser.DropDatabaseContext ctx) {
+        String name = ctx.databaseName().getText();
+        
+        System.out.println("DEBUG CHECK: The parser found database -> " + name);
+        
+        return new DropDatabaseNode(name, ctx.ifExists() != null);
+    }
+
+    @Override
+    public ASTNode visitDropTable(SQLParser.DropTableContext ctx) {
+        List<String> names = new ArrayList<>();
+        
+        for (SQLParser.TableNameContext nameCtx : ctx.tableName()) {
+            names.add(nameCtx.getText());
+        }
+        
+        boolean exists = ctx.ifExists() != null;
+        boolean temp = ctx.TEMPORARY() != null;
+        String behavior = ctx.dropBehavior() != null ? ctx.dropBehavior().getText() : null;
+        
+        return new DropTableNode(names, exists, temp, behavior);
+    }
+        
+    //ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd             delete
+    @Override
+    public ASTNode visitDeleteStatement(SQLParser.DeleteStatementContext ctx) {
+        List<DeleteTargetItemNode> targetItems = new ArrayList<>();
+        
+        if (ctx.deleteTarget() != null) {
+            for (SQLParser.DeleteTargetItemContext item : ctx.deleteTarget().deleteTargetItem()) {
+                if (item.deleteQualifiedTableName() != null) {
+                    SQLParser.DeleteQualifiedTableNameContext qn = item.deleteQualifiedTableName();
+                    List<SQLParser.IdentifierContext> identifiers = qn.identifier();
+                    String schema = null;
+                    String tableName = null;
+                    
+                    String database = null;
+                    
+                    if (identifiers.size() == 1) {
+                        tableName = identifiers.get(0).getText();
+                    } else if (identifiers.size() == 2) {
+                        schema = identifiers.get(0).getText();
+                        tableName = identifiers.get(1).getText();
+                    } else if (identifiers.size() == 3) {
+                        database = identifiers.get(0).getText();
+                        schema = identifiers.get(1).getText();
+                        tableName = identifiers.get(2).getText();
+                    }
+                    
+                    String alias = qn.tableAlias() != null ? qn.tableAlias().getText() : null;
+                    
+                    targetItems.add(new DeleteTargetItemNode(database, schema, tableName, alias));
+                    
+                } else if (item.tableAlias() != null) {
+                    targetItems.add(new DeleteTargetItemNode(null, null, item.tableAlias().getText(), null));
+                }
+            }
+        }
+        
+        DeleteTargetNode targetNode = new DeleteTargetNode(targetItems);
+        
+        WhereClauseNode whereClause = null;
+        if (ctx.whereClause() != null) {
+            ExpressionNode condition = (ExpressionNode) visit(ctx.whereClause().searchCondition());
+            whereClause = new WhereClauseNode(condition);
+        }
+        
+    
+        return new DeleteStatementNode(targetNode, null, whereClause, (ctx.fromDeleteTarget() != null));
+    }
+
+
+
+    @Override
+    public ASTNode visitSqlStatement(SQLParser.SqlStatementContext ctx) {
+        if (ctx.selectStatement() != null) {
+            return visit(ctx.selectStatement());
+        } else if (ctx.deleteStatement() != null) {
+            return visit(ctx.deleteStatement());
+        } else if (ctx.dropStatement() != null) {
+            return visit(ctx.dropStatement());
+        }
+        
+        throw new UnsupportedOperationException("Unsupported SQL statement type");
+    }
+
     // =================================================
 // ALTER STATEMENT
 // =================================================
@@ -208,25 +336,30 @@ private AlterStatementNode buildAlterAddColumn(
     // =================================================
 
     @Override
+   
     public ASTNode visitSelectStatement(SQLParser.SelectStatementContext ctx) {
 
-        SQLParser.QuerySpecificationContext qs = extractQuerySpecification(ctx.queryExpression());
+        SQLParser.QuerySpecificationContext qs =
+                extractQuerySpecification(ctx.queryExpression());
 
         if (qs == null) {
             throw new RuntimeException(
-                    "Only simple SELECT queries are supported (no UNION yet).");
+                "Only simple SELECT queries are supported (no UNION yet)."
+            );
         }
-        GroupByClauseNode groupByClause = qs.groupByClause() != null ? buildGroupByClause(qs.groupByClause()) : null;
-        HavingClauseNode havingClause = qs.havingClause() != null ? buildHavingClause(qs.havingClause()) : null;
+
         SelectClauseNode selectClause = buildSelectClause(qs.selectList());
         FromClauseNode fromClause = buildFromClause(qs.fromClause());
-        WhereClauseNode whereClause = qs.whereClause() != null ? buildWhereClause(qs.whereClause()) : null;
+        WhereClauseNode whereClause =
+                qs.whereClause() != null ? buildWhereClause(qs.whereClause()) : null;
 
         return new SelectStatementNode(
+                null,
                 selectClause,
                 fromClause,
                 whereClause,
-                null, groupByClause, havingClause, null, null, null);
+                null, null, null, null, null,null
+        );
     }
 
     private SQLParser.QuerySpecificationContext extractQuerySpecification(
@@ -515,6 +648,7 @@ private AlterStatementNode buildAlterAddColumn(
         GroupByClauseNode groupByClause = qs.groupByClause() != null ? buildGroupByClause(qs.groupByClause()) : null;
         // Create the select statement
         SelectStatementNode subSelect = new SelectStatementNode(
+                null,
                 selectClause,
                 fromClause,
                 whereClause,
@@ -614,5 +748,183 @@ private AlterStatementNode buildAlterAddColumn(
         ExpressionNode condition = (ExpressionNode) visit(ctx.searchCondition());
         return new HavingClauseNode(condition);
     }
+// =================================================
+// WITH CLAUSE (CTE)
+// =================================================
 
+/**
+ * Builds WITH clause from withClause context
+ */
+    private WithClauseNode buildWithClause(SQLParser.WithClauseContext ctx) {
+        if (ctx == null) return null;
+        
+        boolean recursive = ctx.RECURSIVE() != null;
+        List<CTENode> ctes = new ArrayList<>();
+        
+        for (SQLParser.CteExpressionContext cteCtx : ctx.cteExpression()) {
+            ctes.add(buildCTE(cteCtx));
+        }
+        
+        return new WithClauseNode(recursive, ctes);
+    }
+
+/**
+ * Builds a single CTE
+ */
+    private CTENode buildCTE(SQLParser.CteExpressionContext ctx) {
+        String name = ctx.identifier().getText();
+        
+        // Get column aliases if provided
+        List<String> columnAliases = new ArrayList<>();
+        if (ctx.columnAliases() != null) {
+            for (SQLParser.IdentifierContext idCtx : ctx.columnAliases().identifier()) {
+                columnAliases.add(idCtx.getText());
+            }
+        }
+        
+        // Build the CTE query
+        SQLParser.QueryExpressionContext queryCtx = ctx.queryExpression();
+        SQLParser.QuerySpecificationContext qs = extractQuerySpecification(queryCtx);
+        
+        if (qs == null) {
+            throw new RuntimeException("Invalid CTE query");
+        }
+        
+        SelectClauseNode selectClause = buildSelectClause(qs.selectList());
+        FromClauseNode fromClause = buildFromClause(qs.fromClause());
+        WhereClauseNode whereClause = 
+                qs.whereClause() != null ? buildWhereClause(qs.whereClause()) : null;
+        
+        SelectStatementNode query = new SelectStatementNode(
+            null,  
+            selectClause,
+            fromClause,
+            whereClause,
+            null, null,null, null, null, null
+        );
+        
+        return new CTENode(name, columnAliases.isEmpty() ? null : columnAliases, query);
+    }
+// =================================================
+// CURSOR STATEMENTS
+// =================================================
+
+    @Override
+    public ASTNode visitDeclareCursorStatement(SQLParser.DeclareCursorStatementContext ctx) {
+        String cursorName = ctx.identifier().getText();
+        
+        // Get cursor options
+        List<String> options = new ArrayList<>();
+        if (ctx.cursorOptions() != null) {
+            for (SQLParser.CursorOptionContext opt : ctx.cursorOptions().cursorOption()) {
+                options.add(opt.getText());
+            }
+        }
+        
+        // Build the SELECT query
+        SQLParser.QueryExpressionContext queryCtx = ctx.queryExpression();
+        SQLParser.QuerySpecificationContext qs = extractQuerySpecification(queryCtx);
+        
+        SelectClauseNode selectClause = buildSelectClause(qs.selectList());
+        FromClauseNode fromClause = buildFromClause(qs.fromClause());
+        WhereClauseNode whereClause = 
+                qs.whereClause() != null ? buildWhereClause(qs.whereClause()) : null;
+        
+        SelectStatementNode query = new SelectStatementNode(
+            null, selectClause, fromClause, whereClause,
+            null, null, null, null, null,null
+        );
+        
+        boolean readOnly = false;
+        List<String> updateColumns = new ArrayList<>();
+
+        if (ctx.READ() != null && ctx.ONLY() != null) {
+            readOnly = true;
+        } else if (ctx.UPDATE() != null) {
+            // FOR UPDATE or FOR UPDATE OF columns
+            if (ctx.columnName() != null && !ctx.columnName().isEmpty()) {
+                for (SQLParser.ColumnNameContext col : ctx.columnName()) {
+                    updateColumns.add(col.getText());
+                }
+            }
+        }
+        
+        return new DeclareCursorNode(cursorName, options, query, readOnly, updateColumns);
+    }
+
+    @Override
+    public ASTNode visitOpenCursorStatement(SQLParser.OpenCursorStatementContext ctx) {
+        boolean global = ctx.GLOBAL() != null;
+        String cursorName = ctx.identifier() != null ? 
+                        ctx.identifier().getText() : 
+                        ctx.USER_VARIABLE().getText();
+        
+        return new OpenCursorNode(cursorName, global);
+    }
+
+    @Override
+    public ASTNode visitCloseCursorStatement(SQLParser.CloseCursorStatementContext ctx) {
+        boolean global = ctx.GLOBAL() != null;
+        String cursorName = ctx.identifier() != null ? 
+                        ctx.identifier().getText() : 
+                        ctx.USER_VARIABLE().getText();
+        
+        return new CloseCursorNode(cursorName, global);
+    }
+
+    @Override
+    public ASTNode visitFetchStatement(SQLParser.FetchStatementContext ctx) {
+        String orientation = null;
+        ExpressionNode position = null;
+        
+        if (ctx.fetchOrientation() != null) {
+            SQLParser.FetchOrientationContext orient = ctx.fetchOrientation();
+            if (orient.NEXT() != null) orientation = "NEXT";
+            else if (orient.PRIOR() != null) orientation = "PRIOR";
+            else if (orient.FIRST() != null) orientation = "FIRST";
+            else if (orient.LAST() != null) orientation = "LAST";
+            else if (orient.ABSOLUTE() != null) {
+                orientation = "ABSOLUTE";
+                if (orient.expression() != null) {
+                    position = (ExpressionNode) visit(orient.expression());
+                }
+            } else if (orient.RELATIVE() != null) {
+                orientation = "RELATIVE";
+                if (orient.expression() != null) {
+                    position = (ExpressionNode) visit(orient.expression());
+                }
+            }
+        }
+        
+        boolean global = ctx.GLOBAL() != null;
+        String cursorName;
+
+        if (ctx.identifier() != null) {
+            cursorName = ctx.identifier().getText();
+        } else {
+            cursorName = ctx.USER_VARIABLE(0).getText();
+        }
+
+        // Get INTO variables
+        List<String> intoVars = new ArrayList<>();
+        if (ctx.INTO() != null && ctx.USER_VARIABLE() != null) {
+            // Skip first USER_VARIABLE if it's the cursor name (when identifier is null)
+            int startIndex = ctx.identifier() != null ? 0 : 1;
+            for (int i = startIndex; i < ctx.USER_VARIABLE().size(); i++) {
+                intoVars.add(ctx.USER_VARIABLE(i).getText());
+            }
+        }
+        
+        return new FetchCursorNode(orientation, position, cursorName, global, intoVars);
+    }
+
+    @Override
+    public ASTNode visitDeallocateCursorStatement(SQLParser.DeallocateCursorStatementContext ctx) {
+        boolean global = ctx.GLOBAL() != null;
+        String cursorName = ctx.identifier() != null ? 
+                        ctx.identifier().getText() : 
+                        ctx.USER_VARIABLE().getText();
+        
+        return new DeallocateCursorNode(cursorName, global);
+    }
 }

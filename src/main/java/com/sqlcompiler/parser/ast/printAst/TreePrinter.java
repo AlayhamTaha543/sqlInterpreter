@@ -2,6 +2,9 @@ package com.sqlcompiler.parser.ast.printAst;
 
 import com.sqlcompiler.parser.ast.ASTNode;
 import com.sqlcompiler.parser.ast.ASTVisitor;
+import com.sqlcompiler.parser.ast.clauses.CTENode;
+import com.sqlcompiler.parser.ast.clauses.DeleteTargetItemNode;
+import com.sqlcompiler.parser.ast.clauses.DeleteTargetNode;
 import com.sqlcompiler.parser.ast.clauses.FromClauseNode;
 import com.sqlcompiler.parser.ast.clauses.GroupByClauseNode;
 import com.sqlcompiler.parser.ast.clauses.HavingClauseNode;
@@ -9,6 +12,7 @@ import com.sqlcompiler.parser.ast.clauses.JoinClauseNode;
 import com.sqlcompiler.parser.ast.clauses.OrderByClauseNode;
 import com.sqlcompiler.parser.ast.clauses.SelectClauseNode;
 import com.sqlcompiler.parser.ast.clauses.WhereClauseNode;
+import com.sqlcompiler.parser.ast.clauses.WithClauseNode;
 import com.sqlcompiler.parser.ast.expressions.AggregateFunctionNode;
 import com.sqlcompiler.parser.ast.expressions.BinaryExpressionNode;
 import com.sqlcompiler.parser.ast.expressions.CaseexpressionNode;
@@ -17,7 +21,16 @@ import com.sqlcompiler.parser.ast.expressions.FunctionCallNode;
 import com.sqlcompiler.parser.ast.expressions.LiteralNode;
 import com.sqlcompiler.parser.ast.expressions.SubqueryNode;
 import com.sqlcompiler.parser.ast.expressions.TableNode;
+import com.sqlcompiler.parser.ast.other.DropDatabaseNode;
+import com.sqlcompiler.parser.ast.other.DropTableNode;
 import com.sqlcompiler.parser.ast.statements.AlterStatementNode;
+import com.sqlcompiler.parser.ast.statements.CloseCursorNode;
+import com.sqlcompiler.parser.ast.statements.DeallocateCursorNode;
+import com.sqlcompiler.parser.ast.statements.DeclareCursorNode;
+import com.sqlcompiler.parser.ast.statements.DeleteStatementNode;
+import com.sqlcompiler.parser.ast.statements.DropStatementNode;
+import com.sqlcompiler.parser.ast.statements.FetchCursorNode;
+import com.sqlcompiler.parser.ast.statements.OpenCursorNode;
 import com.sqlcompiler.parser.ast.statements.ProgramNode;
 import com.sqlcompiler.parser.ast.statements.SelectStatementNode;
 import com.sqlcompiler.parser.ast.statements.UpdateStatementNode;
@@ -66,7 +79,9 @@ public class TreePrinter implements ASTVisitor<Void> {
     public Void visit(SelectStatementNode node) {
         addLine("SelectStatement");
         level++;
-
+        if (node.hasWithClause()) {                    
+            node.withClause.accept(this);
+        }
         // SELECT clause
         if (node.selectClause != null) {
             node.selectClause.accept(this);
@@ -206,7 +221,95 @@ public class TreePrinter implements ASTVisitor<Void> {
         level--;
         return null;
     }
-        // ========== Clauses ==========
+      
+    
+    
+    //ddddddddddddddrop drop drop drop drop drop 
+    @Override
+    public Void visit(DropStatementNode node) {
+        addLine("DropStatementNode");
+        level++;
+        
+        if (node.dropTable != null) {
+            node.dropTable.accept(this);
+        }
+        if (node.dropDatabase != null) {
+            node.dropDatabase.accept(this);
+        }
+        
+        level--;
+        return null;
+    }
+
+
+//helper drop 
+    @Override
+    public Void visit(DropTableNode node) {
+        addLine("DropTableNode");
+        level++;
+
+        if (node.ifExists) addLine("IF EXISTS");
+        if (node.isTemporary) addLine("TEMPORARY");
+
+    
+        if (node.tableNames != null) {
+            for (String name : node.tableNames) {
+                addLine("Table: " + name);
+            }
+        }
+
+        if (node.behavior != null) addLine("Behavior: " + node.behavior);
+
+        level--;
+        return null;
+    }
+        
+
+    @Override
+    public Void visit(DropDatabaseNode node) {
+        addLine("DropDatabaseNode");
+        
+        level++;
+        
+        if (node.ifExists) {
+            addLine("IF EXISTS");
+        }
+        
+    
+        if (node.databaseName != null) {
+            addLine("Name: " + node.databaseName); 
+        }
+        
+        level--;
+        return null;
+    }
+
+
+
+//
+//detlet delte delte detlete deltet 
+    @Override
+    public Void visit(DeleteStatementNode node) {
+        addLine("DeleteStatementNode");
+        level++;
+
+        if (node.target != null) {
+            node.target.accept(this);
+        }
+
+        if (node.hasFromKeyword) {
+            addLine("Has FROM: true");
+        }
+
+        if (node.whereClause != null) {
+            node.whereClause.accept(this);
+        }
+
+        level--;
+        return null;
+    }
+        
+// ========== Clauses ==========
     @Override
     public Void visit(SelectClauseNode node) {
         addLine("SELECT" + (node.distinct ? " DISTINCT" : ""));
@@ -360,6 +463,35 @@ public class TreePrinter implements ASTVisitor<Void> {
         return null;
     }
 
+     @Override
+    public Void visit(DeleteTargetNode node) {
+        addLine("DeleteTarget"); // This creates a box labeled 'DeleteTarget'
+        level++;
+        
+        // Tell the printer to go down into each item (the actual tables)
+        for (DeleteTargetItemNode item : node.items) {
+            item.accept(this); 
+        }
+        
+        level--;
+        return null;
+    }
+        @Override
+    public Void visit(DeleteTargetItemNode node) {
+        // This uses your toString() which returns "database.schema.table"
+        addLine("Table: " + node.toString()); 
+        
+        // If you want even more detail in the photo, you can add these:
+        if (node.database != null || node.schema != null) {
+            level++;
+            if (node.database != null) addLine("DB: " + node.database);
+            if (node.schema != null) addLine("Schema: " + node.schema);
+            addLine("Name: " + node.tableName);
+            level--;
+        }
+        
+        return null;
+    }
     // ========== Expressions ==========
     @Override
     public Void visit(ColumnNode node) {
@@ -474,6 +606,107 @@ public class TreePrinter implements ASTVisitor<Void> {
                 level--;
             }
         }
+        return null;
+    }
+    @Override
+    public Void visit(WithClauseNode node) {
+        String label = "WITH";
+        if (node.recursive) label += " RECURSIVE";
+        addLine(label + " [" + node.getCTECount() + " CTE(s)]");
+        level++;
+        
+        for (int i = 0; i < node.ctes.size(); i++) {
+            addLine("CTE[" + (i + 1) + "]:");
+            level++;
+            node.ctes.get(i).accept(this);
+            level--;
+        }
+        
+        level--;
+        return null;
+    }
+
+    @Override
+    public Void visit(CTENode node) {
+        String label = "CTE: " + node.name;
+        if (node.hasColumnAliases()) {
+            label += " (" + String.join(", ", node.columnAliases) + ")";
+        }
+        addLine(label);
+        level++;
+        
+        if (node.query != null) {
+            addLine("Query:");
+            level++;
+            node.query.accept(this);
+            level--;
+        }
+        
+        level--;
+        return null;
+    }
+    @Override
+    public Void visit(DeclareCursorNode node) {
+        addLine("DECLARE CURSOR: " + node.cursorName);
+        level++;
+        
+        if (!node.options.isEmpty()) {
+            addLine("Options: " + String.join(", ", node.options));
+        }
+        
+        addLine("Query:");
+        level++;
+        if (node.query != null) {
+            node.query.accept(this);
+        }
+        level--;
+        
+        if (node.readOnly) {
+            addLine("Mode: READ ONLY");
+        } else if (!node.updateColumns.isEmpty()) {
+            addLine("FOR UPDATE OF: " + String.join(", ", node.updateColumns));
+        }
+        
+        level--;
+        return null;
+    }
+
+    @Override
+    public Void visit(OpenCursorNode node) {
+        addLine("OPEN CURSOR: " + (node.global ? "GLOBAL " : "") + node.cursorName);
+        return null;
+    }
+
+    @Override
+    public Void visit(CloseCursorNode node) {
+        addLine("CLOSE CURSOR: " + (node.global ? "GLOBAL " : "") + node.cursorName);
+        return null;
+    }
+
+    @Override
+    public Void visit(FetchCursorNode node) {
+        String label = "FETCH";
+        if (node.orientation != null) {
+            label += " " + node.orientation;
+            if (node.position != null) {
+                label += " " + node.position;
+            }
+        }
+        label += ": " + (node.global ? "GLOBAL " : "") + node.cursorName;
+        addLine(label);
+        
+        if (!node.intoVariables.isEmpty()) {
+            level++;
+            addLine("INTO: " + String.join(", ", node.intoVariables));
+            level--;
+        }
+        
+        return null;
+    }
+
+    @Override
+    public Void visit(DeallocateCursorNode node) {
+        addLine("DEALLOCATE CURSOR: " + (node.global ? "GLOBAL " : "") + node.cursorName);
         return null;
     }
 }

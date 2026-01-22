@@ -1,5 +1,8 @@
 package com.sqlcompiler.parser.ast;
 
+import com.sqlcompiler.parser.ast.clauses.CTENode;
+import com.sqlcompiler.parser.ast.clauses.DeleteTargetItemNode;
+import com.sqlcompiler.parser.ast.clauses.DeleteTargetNode;
 import com.sqlcompiler.parser.ast.clauses.FromClauseNode;
 import com.sqlcompiler.parser.ast.clauses.GroupByClauseNode;
 import com.sqlcompiler.parser.ast.clauses.HavingClauseNode;
@@ -7,6 +10,7 @@ import com.sqlcompiler.parser.ast.clauses.JoinClauseNode;
 import com.sqlcompiler.parser.ast.clauses.OrderByClauseNode;
 import com.sqlcompiler.parser.ast.clauses.SelectClauseNode;
 import com.sqlcompiler.parser.ast.clauses.WhereClauseNode;
+import com.sqlcompiler.parser.ast.clauses.WithClauseNode;
 import com.sqlcompiler.parser.ast.expressions.AggregateFunctionNode;
 import com.sqlcompiler.parser.ast.expressions.BinaryExpressionNode;
 import com.sqlcompiler.parser.ast.expressions.CaseexpressionNode;
@@ -15,7 +19,16 @@ import com.sqlcompiler.parser.ast.expressions.FunctionCallNode;
 import com.sqlcompiler.parser.ast.expressions.LiteralNode;
 import com.sqlcompiler.parser.ast.expressions.SubqueryNode;
 import com.sqlcompiler.parser.ast.expressions.TableNode;
+import com.sqlcompiler.parser.ast.other.DropDatabaseNode;
+import com.sqlcompiler.parser.ast.other.DropTableNode;
 import com.sqlcompiler.parser.ast.statements.AlterStatementNode;
+import com.sqlcompiler.parser.ast.statements.CloseCursorNode;
+import com.sqlcompiler.parser.ast.statements.DeallocateCursorNode;
+import com.sqlcompiler.parser.ast.statements.DeclareCursorNode;
+import com.sqlcompiler.parser.ast.statements.DeleteStatementNode;
+import com.sqlcompiler.parser.ast.statements.DropStatementNode;
+import com.sqlcompiler.parser.ast.statements.FetchCursorNode;
+import com.sqlcompiler.parser.ast.statements.OpenCursorNode;
 import com.sqlcompiler.parser.ast.statements.ProgramNode;
 import com.sqlcompiler.parser.ast.statements.SelectStatementNode;
 import com.sqlcompiler.parser.ast.statements.UpdateStatementNode;
@@ -29,6 +42,18 @@ public interface ASTVisitor<T> {
     T visit(UpdateStatementNode node);
     T visit(AlterStatementNode node);
     // T visit(DeleteStatementNode node);
+    T visit(DeclareCursorNode node);
+    T visit(OpenCursorNode node);
+    T visit(CloseCursorNode node);
+    T visit(FetchCursorNode node);
+    T visit(DeallocateCursorNode node);
+    //omar
+    T visit(DeleteStatementNode node);
+    T visit (DropStatementNode node); 
+    T visit(DeleteTargetNode node);
+    T visit(DeleteTargetItemNode node);
+    T visit(DropDatabaseNode node);
+    T visit (DropTableNode node);
     // Clauses
     T visit(SelectClauseNode node);
     T visit(FromClauseNode node);
@@ -37,6 +62,8 @@ public interface ASTVisitor<T> {
     T visit(GroupByClauseNode node);
     T visit(HavingClauseNode node);
     T visit(OrderByClauseNode node);
+    T visit(WithClauseNode node);
+    T visit(CTENode node);
     
     // Expressions
     T visit(ColumnNode node);

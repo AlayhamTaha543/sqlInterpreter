@@ -17,8 +17,10 @@ public class SelectStatementNode extends ASTNode {
     public final OrderByClauseNode orderByClause;
     public final ExpressionNode limit;
     public final ExpressionNode offset;
+    public final WithClauseNode withClause;
     
     public SelectStatementNode(
+        WithClauseNode withClause,
         SelectClauseNode selectClause,
         FromClauseNode fromClause,
         WhereClauseNode whereClause,
@@ -29,6 +31,7 @@ public class SelectStatementNode extends ASTNode {
         ExpressionNode limit,
         ExpressionNode offset
     ) {
+        this.withClause = withClause;
         this.selectClause = selectClause;
         this.fromClause = fromClause;
         this.whereClause = whereClause;
@@ -72,4 +75,7 @@ public class SelectStatementNode extends ASTNode {
         
         return children;
     }
+    public boolean hasWithClause() {
+    return withClause != null;
+}
 }
