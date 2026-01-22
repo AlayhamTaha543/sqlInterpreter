@@ -4,6 +4,7 @@ import com.sqlcompiler.parser.ast.ASTNode;
 import com.sqlcompiler.parser.ast.ASTVisitor;
 import com.sqlcompiler.parser.ast.clauses.*;
 import com.sqlcompiler.parser.ast.expressions.*;
+import com.sqlcompiler.parser.ast.statements.AlterStatementNode;
 import com.sqlcompiler.parser.ast.statements.ProgramNode;
 import com.sqlcompiler.parser.ast.statements.SelectStatementNode;
 import com.sqlcompiler.parser.ast.statements.UpdateStatementNode;
@@ -363,17 +364,51 @@ public class ASTVisualizer implements ASTVisitor<Integer> {
         return nodeId;
     }
     @Override
-public Integer visit(ProgramNode node) {
-    int nodeId = createNode("SQL Program [" + node.getStatementCount() + " stmt(s)]", "lightgray");
+    public Integer visit(ProgramNode node) {
+        int nodeId = createNode("SQL Program [" + node.getStatementCount() + " stmt(s)]", "lightgray");
+        
+        for (int i = 0; i < node.statements.size(); i++) {
+            int stmtId = node.statements.get(i).accept(this);
+            createEdge(nodeId, stmtId, "stmt" + (i + 1));
+        }
+        
+        return nodeId;
+    }
+
+    @Override
+public Integer visit(AlterStatementNode node) {
+    int nodeId = createNode("ALTER TABLE", "lightyellow");
     
-    for (int i = 0; i < node.statements.size(); i++) {
-        int stmtId = node.statements.get(i).accept(this);
-        createEdge(nodeId, stmtId, "stmt" + (i + 1));
+    // Table name
+    if (node.tableName != null) {
+        int tableId = node.tableName.accept(this);
+        createEdge(nodeId, tableId, "table");
+    }
+    
+    // Action
+    if (node.isAddColumn()) {
+        int actionId = createNode("ADD COLUMN", "khaki");
+        createEdge(nodeId, actionId, null);
+        
+        String colInfo = node.columnDefinition.columnName + ": " + 
+                        node.columnDefinition.dataType;
+        int colId = createNode(colInfo, "palegoldenrod");
+        createEdge(actionId, colId, null);
+        
+        if (node.columnDefinition.constraints != null) {
+            int constId = createNode("Constraints: " + node.columnDefinition.constraints, "lemonchiffon");
+            createEdge(colId, constId, null);
+        }
+    } else if (node.isDropColumn()) {
+        int actionId = createNode("DROP COLUMN", "khaki");
+        createEdge(nodeId, actionId, null);
+        
+        int colId = createNode("Column: " + node.dropColumnName, "palegoldenrod");
+        createEdge(actionId, colId, null);
     }
     
     return nodeId;
 }
-
     // ========== Expressions ==========
     @Override
     public Integer visit(ColumnNode node) {
