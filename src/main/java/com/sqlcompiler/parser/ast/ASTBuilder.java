@@ -560,5 +560,41 @@ public class ASTBuilder extends SQLParserBaseVisitor<ASTNode> {
         ExpressionNode condition = (ExpressionNode) visit(ctx.searchCondition());
         return new HavingClauseNode(condition);
     }
+    // =================================================
+// AGGREGATE FUNCTIONS
+// =================================================
+
+@Override
+public ASTNode visitAggregateFunction(SQLParser.AggregateFunctionContext ctx) {
+    // Determine the aggregate type
+    AggregateFunctionNode.AggregateType type;
+    if (ctx.COUNT() != null) {
+        type = AggregateFunctionNode.AggregateType.COUNT;
+    } else if (ctx.SUM() != null) {
+        type = AggregateFunctionNode.AggregateType.SUM;
+    } else if (ctx.AVG() != null) {
+        type = AggregateFunctionNode.AggregateType.AVG;
+    } else if (ctx.MIN() != null) {
+        type = AggregateFunctionNode.AggregateType.MIN;
+    } else if (ctx.MAX() != null) {
+        type = AggregateFunctionNode.AggregateType.MAX;
+    } else {
+        throw new RuntimeException("Unknown aggregate function");
+    }
+    
+    // Check for DISTINCT
+    boolean distinct = ctx.DISTINCT() != null;
+    
+    // Get the argument (expression or *)
+    ExpressionNode argument = null;
+    if (ctx.expression() != null) {
+        argument = (ExpressionNode) visit(ctx.expression());
+    } else if (ctx.STAR() != null) {
+        // For COUNT(*), we can use a special marker or null
+        argument = new ColumnNode("*");
+    }
+    
+    return new AggregateFunctionNode(type, argument, distinct, null);
+}
 
 }
