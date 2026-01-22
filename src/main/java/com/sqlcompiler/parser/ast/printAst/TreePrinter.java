@@ -24,7 +24,7 @@ import com.sqlcompiler.parser.ast.statements.UpdateStatementNode;
 public class TreePrinter implements ASTVisitor<Void> {
     private int level = 0;
     private final StringBuilder output = new StringBuilder();
-    
+
     public static String print(ASTNode node) {
         TreePrinter printer = new TreePrinter();
         if (node != null) {
@@ -32,7 +32,7 @@ public class TreePrinter implements ASTVisitor<Void> {
         }
         return printer.output.toString();
     }
-    
+
     private String getIndent() {
         StringBuilder indent = new StringBuilder();
         for (int i = 0; i < level; i++) {
@@ -40,11 +40,11 @@ public class TreePrinter implements ASTVisitor<Void> {
         }
         return indent.toString();
     }
-    
+
     private void addLine(String text) {
         output.append(getIndent()).append("+-- ").append(text).append("\n");
     }
-    
+
     // ========== Statements ==========
     @Override
 public Void visit(ProgramNode node) {
@@ -65,47 +65,47 @@ public Void visit(ProgramNode node) {
     public Void visit(SelectStatementNode node) {
         addLine("SelectStatement");
         level++;
-        
+
         // SELECT clause
         if (node.selectClause != null) {
             node.selectClause.accept(this);
         }
-        
+
         // FROM clause
         if (node.fromClause != null) {
             node.fromClause.accept(this);
         }
-        
+
         // WHERE clause
         if (node.whereClause != null) {
             node.whereClause.accept(this);
         }
-        
+
         // GROUP BY clause
         if (node.groupByClause != null) {
             node.groupByClause.accept(this);
         }
-        
+
         // HAVING clause
         if (node.havingClause != null) {
             node.havingClause.accept(this);
         }
-        
+
         // ORDER BY clause
-        if (node.orderByClause != null) {
-            node.orderByClause.accept(this);
+        if (node.havingClause != null && !node.havingClause.isEmpty()) {
+            node.havingClause.accept(this);
         }
-        
+
         // LIMIT (make sure you have this property in SelectStatementNode)
         if (node.limit != null) {
             addLine("LIMIT: " + node.limit);
         }
-        
+
         // OFFSET (make sure you have this property in SelectStatementNode)
         if (node.offset != null) {
             addLine("OFFSET: " + node.offset);
         }
-        
+
         level--;
         return null;
     }
@@ -177,11 +177,10 @@ public Void visit(ProgramNode node) {
     public Void visit(SelectClauseNode node) {
         addLine("SELECT" + (node.distinct ? " DISTINCT" : ""));
         level++;
-        
+
         for (SelectClauseNode.SelectItem item : node.selectItems) {
-            String aliasText = (item.alias != null && !item.alias.isEmpty()) ? 
-                             " AS " + item.alias : "";
-            
+            String aliasText = (item.alias != null && !item.alias.isEmpty()) ? " AS " + item.alias : "";
+
             if (item.expression != null) {
                 // Check if it's a wildcard column
                 if (item.expression instanceof ColumnNode) {
@@ -191,49 +190,48 @@ public Void visit(ProgramNode node) {
                         continue;
                     }
                 }
-                
+
                 addLine("SelectItem" + aliasText);
                 level++;
                 item.expression.accept(this);
                 level--;
             }
         }
-        
+
         level--;
         return null;
     }
-    
+
     @Override
     public Void visit(FromClauseNode node) {
         addLine("FROM");
         level++;
-        
+
         for (FromClauseNode.TableSource table : node.tableSources) {
-            String aliasText = (table.alias != null && !table.alias.isEmpty()) ? 
-                             " AS " + table.alias : "";
+            String aliasText = (table.alias != null && !table.alias.isEmpty()) ? " AS " + table.alias : "";
             addLine("TableSource" + aliasText);
-            
+
             level++;
-            
+
             // Print the table/subquery source
             if (table.source != null) {
                 table.source.accept(this);
             }
-            
+
             // Print all joins for this table source
             if (table.joins != null && !table.joins.isEmpty()) {
                 for (JoinClauseNode join : table.joins) {
                     join.accept(this);
                 }
             }
-            
+
             level--;
         }
-        
+
         level--;
         return null;
     }
-    
+
     @Override
     public Void visit(WhereClauseNode node) {
         if (node != null && node.condition != null) {
@@ -244,23 +242,22 @@ public Void visit(ProgramNode node) {
         }
         return null;
     }
-    
+
     @Override
     public Void visit(JoinClauseNode node) {
         if (node != null) {
             addLine("JOIN: " + node.joinType);
             level++;
-            
+
             // Print the joined table
             if (node.table != null) {
-                String aliasText = (node.alias != null && !node.alias.isEmpty()) ? 
-                                 " AS " + node.alias : "";
+                String aliasText = (node.alias != null && !node.alias.isEmpty()) ? " AS " + node.alias : "";
                 addLine("JoinedTable" + aliasText);
                 level++;
                 node.table.accept(this);
                 level--;
             }
-            
+
             // Print the join condition
             if (node.condition != null) {
                 addLine("ON");
@@ -268,12 +265,12 @@ public Void visit(ProgramNode node) {
                 node.condition.accept(this);
                 level--;
             }
-            
+
             level--;
         }
         return null;
     }
-    
+
     @Override
     public Void visit(GroupByClauseNode node) {
         if (node != null && node.groupingElements != null && !node.groupingElements.isEmpty()) {
@@ -288,7 +285,7 @@ public Void visit(ProgramNode node) {
         }
         return null;
     }
-    
+
     @Override
     public Void visit(HavingClauseNode node) {
         if (node != null && node.condition != null) {
@@ -299,7 +296,7 @@ public Void visit(ProgramNode node) {
         }
         return null;
     }
-    
+
     @Override
     public Void visit(OrderByClauseNode node) {
         if (node != null && node.sortItems != null && !node.sortItems.isEmpty()) {
@@ -328,29 +325,26 @@ public Void visit(ProgramNode node) {
         }
         return null;
     }
-    
+
     // ========== Expressions ==========
     @Override
     public Void visit(ColumnNode node) {
         if (node != null) {
-            String text = node.tableName != null ? 
-                         node.tableName + "." + node.columnName : 
-                         node.columnName;
+            String text = node.tableName != null ? node.tableName + "." + node.columnName : node.columnName;
             addLine("Column: " + text);
         }
         return null;
     }
-    
+
     @Override
     public Void visit(TableNode node) {
         if (node != null) {
-            String aliasText = (node.alias != null && !node.alias.isEmpty()) ? 
-                             " AS " + node.alias : "";
+            String aliasText = (node.alias != null && !node.alias.isEmpty()) ? " AS " + node.alias : "";
             addLine("Table: " + node.tableName + aliasText);
         }
         return null;
     }
-    
+
     @Override
     public Void visit(LiteralNode node) {
         if (node != null) {
@@ -358,13 +352,13 @@ public Void visit(ProgramNode node) {
         }
         return null;
     }
-    
+
     @Override
     public Void visit(BinaryExpressionNode node) {
         if (node != null) {
             addLine("BinaryExpr: " + node.operator);
             level++;
-            
+
             // Left operand
             if (node.left != null) {
                 addLine("Left:");
@@ -372,7 +366,7 @@ public Void visit(ProgramNode node) {
                 node.left.accept(this);
                 level--;
             }
-            
+
             // Right operand
             if (node.right != null) {
                 addLine("Right:");
@@ -380,17 +374,17 @@ public Void visit(ProgramNode node) {
                 node.right.accept(this);
                 level--;
             }
-            
+
             level--;
         }
         return null;
     }
-    
+
     @Override
     public Void visit(FunctionCallNode node) {
         if (node != null) {
             addLine("Function: " + node.functionName);
-            
+
             // If the function has arguments, print them
             if (node.arguments != null && !node.arguments.isEmpty()) {
                 level++;
@@ -405,13 +399,13 @@ public Void visit(ProgramNode node) {
         }
         return null;
     }
-    
+
     @Override
     public Void visit(AggregateFunctionNode node) {
         if (node != null) {
             String distinctText = node.distinct ? " DISTINCT" : "";
             addLine("Aggregate: " + node.type + distinctText);
-            
+
             // Print the argument
             if (node.argument != null) {
                 level++;
@@ -421,26 +415,25 @@ public Void visit(ProgramNode node) {
         }
         return null;
     }
-    
+
     @Override
     public Void visit(CaseexpressionNode node) {
         addLine("CaseExpression");
         level++;
-        
+
         // You would add logic here to print WHEN/THEN/ELSE branches
         // depending on your CaseExpressionNode implementation
-        
+
         level--;
         return null;
     }
-    
+
     @Override
     public Void visit(SubqueryNode node) {
         if (node != null) {
-            String aliasText = (node.getAlias() != null && !node.getAlias().isEmpty()) ? 
-                             " AS " + node.getAlias() : "";
+            String aliasText = (node.getAlias() != null && !node.getAlias().isEmpty()) ? " AS " + node.getAlias() : "";
             addLine("Subquery" + aliasText);
-            
+
             if (node.getQuery() != null) {
                 level++;
                 node.getQuery().accept(this);
