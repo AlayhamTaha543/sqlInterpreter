@@ -4,12 +4,20 @@ import com.sqlcompiler.parser.ast.ASTNode;
 import com.sqlcompiler.parser.ast.ASTVisitor;
 import com.sqlcompiler.parser.ast.clauses.*;
 import com.sqlcompiler.parser.ast.expressions.*;
+import com.sqlcompiler.parser.ast.other.DropDatabaseNode;
+import com.sqlcompiler.parser.ast.other.DropTableNode;
 import com.sqlcompiler.parser.ast.statements.AlterStatementNode;
+import com.sqlcompiler.parser.ast.statements.CloseCursorNode;
+import com.sqlcompiler.parser.ast.statements.DeallocateCursorNode;
+import com.sqlcompiler.parser.ast.statements.DeclareCursorNode;
+import com.sqlcompiler.parser.ast.statements.FetchCursorNode;
+import com.sqlcompiler.parser.ast.statements.OpenCursorNode;
 import com.sqlcompiler.parser.ast.statements.ProgramNode;
 import com.sqlcompiler.parser.ast.statements.RenameItemNode;
 import com.sqlcompiler.parser.ast.statements.RenameStatementNode;
 import com.sqlcompiler.parser.ast.statements.SelectStatementNode;
 import com.sqlcompiler.parser.ast.statements.UpdateStatementNode;
+import com.sqlcompiler.parser.ast.statements.*; 
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -153,7 +161,10 @@ public class ASTVisualizer implements ASTVisitor<Integer> {
     @Override
     public Integer visit(SelectStatementNode node) {
         int nodeId = createNode("SELECT STATEMENT", "lightgreen");
-
+            if (node.hasWithClause()) {
+        int withId = node.withClause.accept(this);
+        createEdge(nodeId, withId, null);
+    }
         if (node.selectClause != null) {
             int childId = node.selectClause.accept(this);
             createEdge(nodeId, childId, null);
@@ -538,6 +549,68 @@ public class ASTVisualizer implements ASTVisitor<Integer> {
     }
 
     @Override
+    public Integer visit(WhenClauseNode node) {
+        int nodeId = createNode("WHEN", "lemonchiffon");
+        try {
+            // Try common field names for condition
+            Object condition = null;
+            String[] condNames = { "condition", "whenExpression", "expression", "expr" };
+            for (String fname : condNames) {
+                try {
+                    java.lang.reflect.Field f = node.getClass().getField(fname);
+                    condition = f.get(node);
+                    if (condition != null) break;
+                } catch (NoSuchFieldException ignored) {
+                }
+            }
+            // Try common getter if field not found
+            if (condition == null) {
+                try {
+                    java.lang.reflect.Method m = node.getClass().getMethod("getCondition");
+                    condition = m.invoke(node);
+                } catch (NoSuchMethodException ignored) {
+                }
+            }
+            if (condition instanceof ASTNode) {
+                int condId = ((ASTNode) condition).accept(this);
+                createEdge(nodeId, condId, "condition");
+            }
+
+            // Try common field names for result/then expression
+            Object result = null;
+            String[] resNames = { "result", "thenExpression", "thenExpr", "resultExpression", "then" };
+            for (String fname : resNames) {
+                try {
+                    java.lang.reflect.Field f = node.getClass().getField(fname);
+                    result = f.get(node);
+                    if (result != null) break;
+                } catch (NoSuchFieldException ignored) {
+                }
+            }
+            // Try common getter if field not found
+            if (result == null) {
+                try {
+                    java.lang.reflect.Method m = node.getClass().getMethod("getResult");
+                    result = m.invoke(node);
+                } catch (NoSuchMethodException ignored) {
+                }
+                try {
+                    java.lang.reflect.Method m = node.getClass().getMethod("getThenExpression");
+                    if (result == null) result = m.invoke(node);
+                } catch (NoSuchMethodException ignored) {
+                }
+            }
+            if (result instanceof ASTNode) {
+                int resId = ((ASTNode) result).accept(this);
+                createEdge(nodeId, resId, "result");
+            }
+        } catch (Exception ignored) {
+            // best-effort visualization; ignore reflection errors
+        }
+        return nodeId;
+    }
+
+    @Override
     public Integer visit(SubqueryNode node) {
         String label = "Subquery";
         if (node.getAlias() != null && !node.getAlias().isEmpty()) {
@@ -567,22 +640,33 @@ public class ASTVisualizer implements ASTVisitor<Integer> {
             return false;
         }
     }
-
     @Override
-    public Integer visit(WhenClauseNode node) {
-        int nodeId = createNode("WHEN Clause", "violet");
+public Integer visit(WithClauseNode node) {
+    String label = "WITH";
+    if (node.recursive) label += " RECURSIVE";
+    int nodeId = createNode(label, "lavenderblush");
+    
+    for (int i = 0; i < node.ctes.size(); i++) {
+        int cteId = node.ctes.get(i).accept(this);
+        createEdge(nodeId, cteId, "cte" + (i + 1));
+    }
+    
+    return nodeId;
+}
 
-        if (node.whenCondition != null) {
-            int whenId = node.whenCondition.accept(this);
-            createEdge(nodeId, whenId, "condition");
+@Override
+    public Integer visit(CTENode node) {
+        String label = "CTE: " + node.name;
+        if (node.hasColumnAliases()) {
+            label += "\n(" + String.join(", ", node.columnAliases) + ")";
         }
-
-        // Visit THEN expression
-        if (node.thenExpression != null) {
-            int thenId = node.thenExpression.accept(this);
-            createEdge(nodeId, thenId, "then");
+        int nodeId = createNode(label, "mistyrose");
+        
+        if (node.query != null) {
+            int queryId = node.query.accept(this);
+            createEdge(nodeId, queryId, "query");
         }
-
+        
         return nodeId;
     }
 
@@ -610,4 +694,94 @@ public class ASTVisualizer implements ASTVisitor<Integer> {
 
         return itemId;
     }
+@Override
+public Integer visit(DeclareCursorNode node) {
+    int nodeId = createNode("DECLARE CURSOR : " + node.cursorName, "lightsteelblue");
+    
+    if (!node.options.isEmpty()) {
+        int optId = createNode("Options: " + String.join(", ", node.options), "aliceblue");
+        createEdge(nodeId, optId, null);
+    }
+    
+    if (node.query != null) {
+        int queryId = node.query.accept(this);
+        createEdge(nodeId, queryId, "query");
+    }
+    
+    return nodeId;
+}
+
+@Override
+public Integer visit(OpenCursorNode node) {
+    return createNode("OPEN CURSOR : " + node.cursorName, "lightblue");
+}
+
+@Override
+public Integer visit(CloseCursorNode node) {
+    return createNode("CLOSE CURSOR : " + node.cursorName, "lightblue");
+}
+
+@Override
+public Integer visit(FetchCursorNode node) {
+    String label = "FETCH ";
+    if (node.orientation != null) label += " " + node.orientation;
+    label +=   node.cursorName;
+    return createNode(label, "powderblue");
+}
+
+@Override
+public Integer visit(DeallocateCursorNode node) {
+    return createNode("DEALLOCATE\n" + node.cursorName, "lightblue");
+}
+
+// ======= Added missing visit implementations for Delete/Drop nodes =======
+
+@Override
+public Integer visit(DeleteTargetItemNode node) {
+    // Minimal visualization for Delete target item
+    return createNode("DELETE TARGET ITEM", "palegoldenrod");
+}
+
+@Override
+public Integer visit(DeleteTargetNode node) {
+    // Minimal visualization for Delete target (container)
+    return createNode("DELETE TARGET", "peachpuff");
+}
+
+@Override
+public Integer visit(DeleteStatementNode node) {
+    // Minimal visualization for a DELETE statement
+    int nodeId = createNode("DELETE STATEMENT", "lightcoral");
+    return nodeId;
+}
+
+@Override
+public Integer visit(DropStatementNode node) {
+    // Generic DROP statement node
+    return createNode("DROP STATEMENT", "khaki");
+}
+
+@Override
+public Integer visit(DropTableNode node) {
+    String label = "DROP TABLE";
+    // best-effort try to show table name if available via common field
+    try {
+        java.lang.reflect.Field f = node.getClass().getField("tableName");
+        Object val = f.get(node);
+        if (val != null) label += ": " + val.toString();
+    } catch (Exception ignored) {}
+    return createNode(label, "lightyellow");
+}
+
+@Override
+public Integer visit(DropDatabaseNode node) {
+    String label = "DROP DATABASE";
+    // best-effort try to show database name if available via common field
+    try {
+        java.lang.reflect.Field f = node.getClass().getField("databaseName");
+        Object val = f.get(node);
+        if (val != null) label += ": " + val.toString();
+    } catch (Exception ignored) {}
+    return createNode(label, "lightyellow");
+}
 }
