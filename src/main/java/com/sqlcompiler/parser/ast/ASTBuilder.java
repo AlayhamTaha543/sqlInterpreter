@@ -4,6 +4,7 @@ import com.sqlcompiler.parser.SQLParser;
 import com.sqlcompiler.parser.SQLParserBaseVisitor;
 import com.sqlcompiler.parser.ast.clauses.*;
 import com.sqlcompiler.parser.ast.expressions.*;
+import com.sqlcompiler.parser.ast.statements.AlterStatementNode;
 import com.sqlcompiler.parser.ast.statements.ProgramNode;
 import com.sqlcompiler.parser.ast.statements.SelectStatementNode;
 import com.sqlcompiler.parser.ast.statements.UpdateStatementNode;
@@ -12,34 +13,37 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ASTBuilder extends SQLParserBaseVisitor<ASTNode> {
-    @Override
-    public ASTNode visitSqlStatements(SQLParser.SqlStatementsContext ctx) {
-        ProgramNode program = new ProgramNode();
-
-        for (SQLParser.BatchContext batch : ctx.batch()) {
-            for (SQLParser.SqlStatementContext stmtCtx : batch.sqlStatement()) {
-                ASTNode stmt = null;
-
-                if (stmtCtx.selectStatement() != null) {
-                    stmt = visit(stmtCtx.selectStatement());
-                } else if (stmtCtx.updateStatement() != null) {
-                    stmt = visit(stmtCtx.updateStatement());
-                } else if (stmtCtx.insertStatement() != null) {
-                    // stmt = visit(stmtCtx.insertStatement());
-                    System.out.println("⚠️  INSERT statement found but not yet implemented");
-                } else if (stmtCtx.deleteStatement() != null) {
-                    // stmt = visit(stmtCtx.deleteStatement());
-                    System.out.println("⚠️  DELETE statement found but not yet implemented");
-                }
-
-                if (stmt != null) {
-                    program.addStatement(stmt);
-                }
+@Override
+public ASTNode visitSqlStatements(SQLParser.SqlStatementsContext ctx) {
+    ProgramNode program = new ProgramNode();
+    
+    for (SQLParser.BatchContext batch : ctx.batch()) {
+        for (SQLParser.SqlStatementContext stmtCtx : batch.sqlStatement()) {
+            ASTNode stmt = null;
+            
+            if (stmtCtx.selectStatement() != null) {
+                stmt = visit(stmtCtx.selectStatement());
+            } else if (stmtCtx.updateStatement() != null) {
+                stmt = visit(stmtCtx.updateStatement());
+            } else if (stmtCtx.insertStatement() != null) {
+                // stmt = visit(stmtCtx.insertStatement());
+                System.out.println("⚠️  INSERT statement found but not yet implemented");
+            } else if (stmtCtx.deleteStatement() != null) {
+                // stmt = visit(stmtCtx.deleteStatement());
+                System.out.println("⚠️  DELETE statement found but not yet implemented");
+            }
+            else if (stmtCtx.alterStatement() != null) {           
+                stmt = visit(stmtCtx.alterStatement());
+            }
+            
+            if (stmt != null) {
+                program.addStatement(stmt);
             }
         }
-
-        return program;
     }
+    
+    return program;
+}
     // =================================================
     // UPDATE STATEMENT
     // =================================================
@@ -98,7 +102,57 @@ public class ASTBuilder extends SQLParserBaseVisitor<ASTNode> {
                 topPercent,
                 topWithTies);
     }
+    // =================================================
+// ALTER STATEMENT
+// =================================================
 
+@Override
+public ASTNode visitAlterStatement(SQLParser.AlterStatementContext ctx) {
+    
+    // Get table name
+    ExpressionNode tableName = new TableNode(ctx.tableName().getText());
+    
+    // Check if it's ADD or DROP
+    if (ctx.ADD() != null && ctx.columnDefinition() != null) {
+        // ALTER TABLE ADD column
+        return buildAlterAddColumn(tableName, ctx.columnDefinition());
+        
+    } else if (ctx.DROP() != null && ctx.COLUMN() != null && ctx.columnName() != null) {
+        // ALTER TABLE DROP COLUMN
+        String dropColumnName = ctx.columnName().getText();
+        return new AlterStatementNode(tableName, dropColumnName);
+    }
+    
+    throw new RuntimeException("Unsupported ALTER TABLE operation");
+}
+
+/**
+ * Builds ALTER TABLE ADD COLUMN
+ */
+private AlterStatementNode buildAlterAddColumn(
+        ExpressionNode tableName, 
+        SQLParser.ColumnDefinitionContext ctx) {
+    
+    String columnName = ctx.columnName().getText();
+    String dataType = ctx.dataType().getText();
+    
+    // Build constraints string (simplified - you can make this more detailed)
+    StringBuilder constraints = new StringBuilder();
+    if (ctx.columnAttribute() != null && !ctx.columnAttribute().isEmpty()) {
+        for (SQLParser.ColumnAttributeContext attr : ctx.columnAttribute()) {
+            if (constraints.length() > 0) constraints.append(" ");
+            constraints.append(attr.getText());
+        }
+    }
+    
+    AlterStatementNode.ColumnDefinition colDef = new AlterStatementNode.ColumnDefinition(
+        columnName, 
+        dataType, 
+        constraints.length() > 0 ? constraints.toString() : null
+    );
+    
+    return new AlterStatementNode(tableName, colDef);
+}
     /**
      * Builds the update target (table name or variable)
      */

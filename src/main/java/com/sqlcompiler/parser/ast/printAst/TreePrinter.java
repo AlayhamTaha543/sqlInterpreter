@@ -17,6 +17,7 @@ import com.sqlcompiler.parser.ast.expressions.FunctionCallNode;
 import com.sqlcompiler.parser.ast.expressions.LiteralNode;
 import com.sqlcompiler.parser.ast.expressions.SubqueryNode;
 import com.sqlcompiler.parser.ast.expressions.TableNode;
+import com.sqlcompiler.parser.ast.statements.AlterStatementNode;
 import com.sqlcompiler.parser.ast.statements.ProgramNode;
 import com.sqlcompiler.parser.ast.statements.SelectStatementNode;
 import com.sqlcompiler.parser.ast.statements.UpdateStatementNode;
@@ -47,20 +48,20 @@ public class TreePrinter implements ASTVisitor<Void> {
 
     // ========== Statements ==========
     @Override
-public Void visit(ProgramNode node) {
-    addLine("Program [" + node.getStatementCount() + " statement(s)]");
-    level++;
-    
-    for (int i = 0; i < node.statements.size(); i++) {
-        addLine("Statement[" + (i + 1) + "]:");
+    public Void visit(ProgramNode node) {
+        addLine("Program [" + node.getStatementCount() + " statement(s)]");
         level++;
-        node.statements.get(i).accept(this);
+        
+        for (int i = 0; i < node.statements.size(); i++) {
+            addLine("Statement[" + (i + 1) + "]:");
+            level++;
+            node.statements.get(i).accept(this);
+            level--;
+        }
+        
         level--;
+        return null;
     }
-    
-    level--;
-    return null;
-}
     @Override
     public Void visit(SelectStatementNode node) {
         addLine("SelectStatement");
@@ -172,7 +173,40 @@ public Void visit(ProgramNode node) {
         return null;
     }
     
-    // ========== Clauses ==========
+    @Override
+    public Void visit(AlterStatementNode node) {
+        addLine("AlterStatement");
+        level++;
+        
+        // Table name
+        addLine("ALTER TABLE");
+        level++;
+        if (node.tableName != null) {
+            node.tableName.accept(this);
+        }
+        level--;
+        
+        // Action
+        if (node.isAddColumn()) {
+            addLine("ADD COLUMN");
+            level++;
+            addLine("Column: " + node.columnDefinition.columnName);
+            addLine("DataType: " + node.columnDefinition.dataType);
+            if (node.columnDefinition.constraints != null) {
+                addLine("Constraints: " + node.columnDefinition.constraints);
+            }
+            level--;
+        } else if (node.isDropColumn()) {
+            addLine("DROP COLUMN");
+            level++;
+            addLine("Column: " + node.dropColumnName);
+            level--;
+        }
+        
+        level--;
+        return null;
+    }
+        // ========== Clauses ==========
     @Override
     public Void visit(SelectClauseNode node) {
         addLine("SELECT" + (node.distinct ? " DISTINCT" : ""));

@@ -2,8 +2,7 @@ package com.sqlcompiler.compiler;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
+
 
 import org.antlr.v4.runtime.*;
 import com.sqlcompiler.parser.SQLLexer;
