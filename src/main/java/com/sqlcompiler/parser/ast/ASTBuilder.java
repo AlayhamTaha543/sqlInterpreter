@@ -13,62 +13,68 @@ import com.sqlcompiler.parser.ast.statements.DeclareCursorNode;
 import com.sqlcompiler.parser.ast.statements.DeleteStatementNode;
 import com.sqlcompiler.parser.ast.statements.DropStatementNode;
 import com.sqlcompiler.parser.ast.statements.FetchCursorNode;
+import com.sqlcompiler.parser.ast.statements.MergeStatementNode;
 import com.sqlcompiler.parser.ast.statements.OpenCursorNode;
 import com.sqlcompiler.parser.ast.statements.ProgramNode;
 import com.sqlcompiler.parser.ast.statements.RenameItemNode;
 import com.sqlcompiler.parser.ast.statements.RenameStatementNode;
 import com.sqlcompiler.parser.ast.statements.SelectStatementNode;
+import com.sqlcompiler.parser.ast.statements.TruncateStatementNode;
 import com.sqlcompiler.parser.ast.statements.UpdateStatementNode;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class ASTBuilder extends SQLParserBaseVisitor<ASTNode> {
-@Override
-public ASTNode visitSqlStatements(SQLParser.SqlStatementsContext ctx) {
-    ProgramNode program = new ProgramNode();
-    
-    for (SQLParser.BatchContext batch : ctx.batch()) {
-        for (SQLParser.SqlStatementContext stmtCtx : batch.sqlStatement()) {
-            ASTNode stmt = null;
-            
-            if (stmtCtx.selectStatement() != null) {
-                stmt = visit(stmtCtx.selectStatement());
-            } else if (stmtCtx.updateStatement() != null) {
-                stmt = visit(stmtCtx.updateStatement());
-            } else if (stmtCtx.insertStatement() != null) {
-                stmt = visit(stmtCtx.insertStatement());
-                System.out.println("⚠️  INSERT statement found but not yet implemented");
-            } else if (stmtCtx.deleteStatement() != null) {
-                stmt = visit(stmtCtx.deleteStatement());
-                System.out.println("⚠️  DELETE statement found but not yet implemented");
-            }
-            else if (stmtCtx.alterStatement() != null) {           
-                stmt = visit(stmtCtx.alterStatement());
-            }
-            else if (stmtCtx.declareCursorStatement() != null) {
-                stmt = visit(stmtCtx.declareCursorStatement());
-            } else if (stmtCtx.openCursorStatement() != null) {
-                stmt = visit(stmtCtx.openCursorStatement());
-            } else if (stmtCtx.closeCursorStatement() != null) {
-                stmt = visit(stmtCtx.closeCursorStatement());
-            } else if (stmtCtx.fetchStatement() != null) {
-                stmt = visit(stmtCtx.fetchStatement());
-            } else if (stmtCtx.deallocateCursorStatement() != null) {
-                stmt = visit(stmtCtx.deallocateCursorStatement());
-            }
-              else if (stmtCtx.renameStatement() != null) {
+    @Override
+    public ASTNode visitSqlStatements(SQLParser.SqlStatementsContext ctx) {
+        ProgramNode program = new ProgramNode();
+
+        for (SQLParser.BatchContext batch : ctx.batch()) {
+            for (SQLParser.SqlStatementContext stmtCtx : batch.sqlStatement()) {
+                ASTNode stmt = null;
+
+                if (stmtCtx.selectStatement() != null) {
+                    stmt = visit(stmtCtx.selectStatement());
+                } else if (stmtCtx.updateStatement() != null) {
+                    stmt = visit(stmtCtx.updateStatement());
+                } else if (stmtCtx.insertStatement() != null) {
+                    stmt = visit(stmtCtx.insertStatement());
+                    System.out.println("⚠️  INSERT statement found but not yet implemented");
+                } else if (stmtCtx.deleteStatement() != null) {
+                    stmt = visit(stmtCtx.deleteStatement());
+                    System.out.println("⚠️  DELETE statement found but not yet implemented");
+                } else if (stmtCtx.alterStatement() != null) {
+                    stmt = visit(stmtCtx.alterStatement());
+                } else if (stmtCtx.declareCursorStatement() != null) {
+                    stmt = visit(stmtCtx.declareCursorStatement());
+                } else if (stmtCtx.openCursorStatement() != null) {
+                    stmt = visit(stmtCtx.openCursorStatement());
+                } else if (stmtCtx.closeCursorStatement() != null) {
+                    stmt = visit(stmtCtx.closeCursorStatement());
+                } else if (stmtCtx.fetchStatement() != null) {
+                    stmt = visit(stmtCtx.fetchStatement());
+                } else if (stmtCtx.deallocateCursorStatement() != null) {
+                    stmt = visit(stmtCtx.deallocateCursorStatement());
+                } else if (stmtCtx.renameStatement() != null) {
                     stmt = visit(stmtCtx.renameStatement());
-            }
-            
-            if (stmt != null) {
-                program.addStatement(stmt);
+                } 
+                else if (stmtCtx.truncateStatement() != null) {
+                    stmt = visit(stmtCtx.truncateStatement());
+                } else if (stmtCtx.dropStatement() != null) {
+                    stmt = visit(stmtCtx.dropStatement());
+                } else if (stmtCtx.mergeStatement() != null) {
+                    stmt = visit(stmtCtx.mergeStatement());
+                }
+
+                if (stmt != null) {
+                    program.addStatement(stmt);
+                }
             }
         }
+
+        return program;
     }
-    
-    return program;
-}
     // =================================================
     // UPDATE STATEMENT
     // =================================================
@@ -127,8 +133,8 @@ public ASTNode visitSqlStatements(SQLParser.SqlStatementsContext ctx) {
                 topPercent,
                 topWithTies);
     }
-            // DELETE and DROP 
-        
+    // DELETE and DROP
+
     @Override
     public ASTNode visitDropStatement(SQLParser.DropStatementContext ctx) {
         DropTableNode table = null;
@@ -136,8 +142,7 @@ public ASTNode visitSqlStatements(SQLParser.SqlStatementsContext ctx) {
 
         if (ctx.dropTable() != null) {
             table = (DropTableNode) visit(ctx.dropTable());
-        }  
-
+        }
 
         if (ctx.dropDatabase() != null) {
             db = (DropDatabaseNode) visit(ctx.dropDatabase());
@@ -149,32 +154,33 @@ public ASTNode visitSqlStatements(SQLParser.SqlStatementsContext ctx) {
     @Override
     public ASTNode visitDropDatabase(SQLParser.DropDatabaseContext ctx) {
         String name = ctx.databaseName().getText();
-        
+
         System.out.println("DEBUG CHECK: The parser found database -> " + name);
-        
+
         return new DropDatabaseNode(name, ctx.ifExists() != null);
     }
 
     @Override
     public ASTNode visitDropTable(SQLParser.DropTableContext ctx) {
         List<String> names = new ArrayList<>();
-        
+
         for (SQLParser.TableNameContext nameCtx : ctx.tableName()) {
             names.add(nameCtx.getText());
         }
-        
+
         boolean exists = ctx.ifExists() != null;
         boolean temp = ctx.TEMPORARY() != null;
         String behavior = ctx.dropBehavior() != null ? ctx.dropBehavior().getText() : null;
-        
+
         return new DropTableNode(names, exists, temp, behavior);
     }
-        
-    //ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd             delete
+
+    // ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+    // delete
     @Override
     public ASTNode visitDeleteStatement(SQLParser.DeleteStatementContext ctx) {
         List<DeleteTargetItemNode> targetItems = new ArrayList<>();
-        
+
         if (ctx.deleteTarget() != null) {
             for (SQLParser.DeleteTargetItemContext item : ctx.deleteTarget().deleteTargetItem()) {
                 if (item.deleteQualifiedTableName() != null) {
@@ -182,9 +188,9 @@ public ASTNode visitSqlStatements(SQLParser.SqlStatementsContext ctx) {
                     List<SQLParser.IdentifierContext> identifiers = qn.identifier();
                     String schema = null;
                     String tableName = null;
-                    
+
                     String database = null;
-                    
+
                     if (identifiers.size() == 1) {
                         tableName = identifiers.get(0).getText();
                     } else if (identifiers.size() == 2) {
@@ -195,30 +201,27 @@ public ASTNode visitSqlStatements(SQLParser.SqlStatementsContext ctx) {
                         schema = identifiers.get(1).getText();
                         tableName = identifiers.get(2).getText();
                     }
-                    
+
                     String alias = qn.tableAlias() != null ? qn.tableAlias().getText() : null;
-                    
+
                     targetItems.add(new DeleteTargetItemNode(database, schema, tableName, alias));
-                    
+
                 } else if (item.tableAlias() != null) {
                     targetItems.add(new DeleteTargetItemNode(null, null, item.tableAlias().getText(), null));
                 }
             }
         }
-        
+
         DeleteTargetNode targetNode = new DeleteTargetNode(targetItems);
-        
+
         WhereClauseNode whereClause = null;
         if (ctx.whereClause() != null) {
             ExpressionNode condition = (ExpressionNode) visit(ctx.whereClause().searchCondition());
             whereClause = new WhereClauseNode(condition);
         }
-        
-    
+
         return new DeleteStatementNode(targetNode, null, whereClause, (ctx.fromDeleteTarget() != null));
     }
-
-
 
     @Override
     public ASTNode visitSqlStatement(SQLParser.SqlStatementContext ctx) {
@@ -229,7 +232,7 @@ public ASTNode visitSqlStatements(SQLParser.SqlStatementsContext ctx) {
         } else if (ctx.dropStatement() != null) {
             return visit(ctx.dropStatement());
         }
-        
+
         throw new UnsupportedOperationException("Unsupported SQL statement type");
     }
 
@@ -340,16 +343,14 @@ public ASTNode visitSqlStatements(SQLParser.SqlStatementsContext ctx) {
     // =================================================
 
     @Override
-   
+
     public ASTNode visitSelectStatement(SQLParser.SelectStatementContext ctx) {
 
-        SQLParser.QuerySpecificationContext qs =
-                extractQuerySpecification(ctx.queryExpression());
+        SQLParser.QuerySpecificationContext qs = extractQuerySpecification(ctx.queryExpression());
 
         if (qs == null) {
             throw new RuntimeException(
-                "Only simple SELECT queries are supported (no UNION yet)."
-            );
+                    "Only simple SELECT queries are supported (no UNION yet).");
         }
 
         SelectClauseNode selectClause = buildSelectClause(qs.selectList());
@@ -357,7 +358,8 @@ public ASTNode visitSqlStatements(SQLParser.SqlStatementsContext ctx) {
         WhereClauseNode whereClause = qs.whereClause() != null ? buildWhereClause(qs.whereClause()) : null;
         OrderByClauseNode orderByClause = ctx.orderByClause() != null ? buildOrderByClause(ctx.orderByClause()) : null;
         HavingClauseNode havingClause = qs.havingClause() != null ? buildHavingClause(qs.havingClause()) : null;
-        GroupByClauseNode groupByClause = qs.groupByClause() != null ? buildGroupByClause(qs.groupByClause()) : null;return new SelectStatementNode(
+        GroupByClauseNode groupByClause = qs.groupByClause() != null ? buildGroupByClause(qs.groupByClause()) : null;
+        return new SelectStatementNode(
                 null,
                 selectClause,
                 fromClause,
@@ -751,32 +753,33 @@ public ASTNode visitSqlStatements(SQLParser.SqlStatementsContext ctx) {
         ExpressionNode condition = (ExpressionNode) visit(ctx.searchCondition());
         return new HavingClauseNode(condition);
     }
-// =================================================
-// WITH CLAUSE (CTE)
-// =================================================
+    // =================================================
+    // WITH CLAUSE (CTE)
+    // =================================================
 
-/**
- * Builds WITH clause from withClause context
- */
+    /**
+     * Builds WITH clause from withClause context
+     */
     private WithClauseNode buildWithClause(SQLParser.WithClauseContext ctx) {
-        if (ctx == null) return null;
-        
+        if (ctx == null)
+            return null;
+
         boolean recursive = ctx.RECURSIVE() != null;
         List<CTENode> ctes = new ArrayList<>();
-        
+
         for (SQLParser.CteExpressionContext cteCtx : ctx.cteExpression()) {
             ctes.add(buildCTE(cteCtx));
         }
-        
+
         return new WithClauseNode(recursive, ctes);
     }
 
-/**
- * Builds a single CTE
- */
+    /**
+     * Builds a single CTE
+     */
     private CTENode buildCTE(SQLParser.CteExpressionContext ctx) {
         String name = ctx.identifier().getText();
-        
+
         // Get column aliases if provided
         List<String> columnAliases = new ArrayList<>();
         if (ctx.columnAliases() != null) {
@@ -784,38 +787,36 @@ public ASTNode visitSqlStatements(SQLParser.SqlStatementsContext ctx) {
                 columnAliases.add(idCtx.getText());
             }
         }
-        
+
         // Build the CTE query
         SQLParser.QueryExpressionContext queryCtx = ctx.queryExpression();
         SQLParser.QuerySpecificationContext qs = extractQuerySpecification(queryCtx);
-        
+
         if (qs == null) {
             throw new RuntimeException("Invalid CTE query");
         }
-        
+
         SelectClauseNode selectClause = buildSelectClause(qs.selectList());
         FromClauseNode fromClause = buildFromClause(qs.fromClause());
-        WhereClauseNode whereClause = 
-                qs.whereClause() != null ? buildWhereClause(qs.whereClause()) : null;
-        
+        WhereClauseNode whereClause = qs.whereClause() != null ? buildWhereClause(qs.whereClause()) : null;
+
         SelectStatementNode query = new SelectStatementNode(
-            null,  
-            selectClause,
-            fromClause,
-            whereClause,
-            null, null,null, null, null, null
-        );
-        
+                null,
+                selectClause,
+                fromClause,
+                whereClause,
+                null, null, null, null, null, null);
+
         return new CTENode(name, columnAliases.isEmpty() ? null : columnAliases, query);
     }
-// =================================================
-// CURSOR STATEMENTS
-// =================================================
+    // =================================================
+    // CURSOR STATEMENTS
+    // =================================================
 
     @Override
     public ASTNode visitDeclareCursorStatement(SQLParser.DeclareCursorStatementContext ctx) {
         String cursorName = ctx.identifier().getText();
-        
+
         // Get cursor options
         List<String> options = new ArrayList<>();
         if (ctx.cursorOptions() != null) {
@@ -823,21 +824,19 @@ public ASTNode visitSqlStatements(SQLParser.SqlStatementsContext ctx) {
                 options.add(opt.getText());
             }
         }
-        
+
         // Build the SELECT query
         SQLParser.QueryExpressionContext queryCtx = ctx.queryExpression();
         SQLParser.QuerySpecificationContext qs = extractQuerySpecification(queryCtx);
-        
+
         SelectClauseNode selectClause = buildSelectClause(qs.selectList());
         FromClauseNode fromClause = buildFromClause(qs.fromClause());
-        WhereClauseNode whereClause = 
-                qs.whereClause() != null ? buildWhereClause(qs.whereClause()) : null;
-        
+        WhereClauseNode whereClause = qs.whereClause() != null ? buildWhereClause(qs.whereClause()) : null;
+
         SelectStatementNode query = new SelectStatementNode(
-            null, selectClause, fromClause, whereClause,
-            null, null, null, null, null,null
-        );
-        
+                null, selectClause, fromClause, whereClause,
+                null, null, null, null, null, null);
+
         boolean readOnly = false;
         List<String> updateColumns = new ArrayList<>();
 
@@ -851,27 +850,23 @@ public ASTNode visitSqlStatements(SQLParser.SqlStatementsContext ctx) {
                 }
             }
         }
-        
+
         return new DeclareCursorNode(cursorName, options, query, readOnly, updateColumns);
     }
 
     @Override
     public ASTNode visitOpenCursorStatement(SQLParser.OpenCursorStatementContext ctx) {
         boolean global = ctx.GLOBAL() != null;
-        String cursorName = ctx.identifier() != null ? 
-                        ctx.identifier().getText() : 
-                        ctx.USER_VARIABLE().getText();
-        
+        String cursorName = ctx.identifier() != null ? ctx.identifier().getText() : ctx.USER_VARIABLE().getText();
+
         return new OpenCursorNode(cursorName, global);
     }
 
     @Override
     public ASTNode visitCloseCursorStatement(SQLParser.CloseCursorStatementContext ctx) {
         boolean global = ctx.GLOBAL() != null;
-        String cursorName = ctx.identifier() != null ? 
-                        ctx.identifier().getText() : 
-                        ctx.USER_VARIABLE().getText();
-        
+        String cursorName = ctx.identifier() != null ? ctx.identifier().getText() : ctx.USER_VARIABLE().getText();
+
         return new CloseCursorNode(cursorName, global);
     }
 
@@ -879,13 +874,17 @@ public ASTNode visitSqlStatements(SQLParser.SqlStatementsContext ctx) {
     public ASTNode visitFetchStatement(SQLParser.FetchStatementContext ctx) {
         String orientation = null;
         ExpressionNode position = null;
-        
+
         if (ctx.fetchOrientation() != null) {
             SQLParser.FetchOrientationContext orient = ctx.fetchOrientation();
-            if (orient.NEXT() != null) orientation = "NEXT";
-            else if (orient.PRIOR() != null) orientation = "PRIOR";
-            else if (orient.FIRST() != null) orientation = "FIRST";
-            else if (orient.LAST() != null) orientation = "LAST";
+            if (orient.NEXT() != null)
+                orientation = "NEXT";
+            else if (orient.PRIOR() != null)
+                orientation = "PRIOR";
+            else if (orient.FIRST() != null)
+                orientation = "FIRST";
+            else if (orient.LAST() != null)
+                orientation = "LAST";
             else if (orient.ABSOLUTE() != null) {
                 orientation = "ABSOLUTE";
                 if (orient.expression() != null) {
@@ -898,7 +897,7 @@ public ASTNode visitSqlStatements(SQLParser.SqlStatementsContext ctx) {
                 }
             }
         }
-        
+
         boolean global = ctx.GLOBAL() != null;
         String cursorName;
 
@@ -917,19 +916,17 @@ public ASTNode visitSqlStatements(SQLParser.SqlStatementsContext ctx) {
                 intoVars.add(ctx.USER_VARIABLE(i).getText());
             }
         }
-        
+
         return new FetchCursorNode(orientation, position, cursorName, global, intoVars);
     }
 
     @Override
     public ASTNode visitDeallocateCursorStatement(SQLParser.DeallocateCursorStatementContext ctx) {
         boolean global = ctx.GLOBAL() != null;
-        String cursorName = ctx.identifier() != null ? 
-                        ctx.identifier().getText() : 
-                        ctx.USER_VARIABLE().getText();
-        
+        String cursorName = ctx.identifier() != null ? ctx.identifier().getText() : ctx.USER_VARIABLE().getText();
+
         return new DeallocateCursorNode(cursorName, global);
-    }    // =================================================
+    } // =================================================
     // AGGREGATE FUNCTIONS
     // =================================================
 
@@ -1040,6 +1037,91 @@ public ASTNode visitSqlStatements(SQLParser.SqlStatementsContext ctx) {
         }
 
         return new RenameStatementNode(renameItems);
+    }
+
+    // =================================================
+    // TRUNCATE STATEMENT
+    // =================================================
+    @Override
+    public ASTNode visitTruncateStatement(SQLParser.TruncateStatementContext ctx) {
+        String tableName = ctx.truncateTarget().tableName().getText();
+        String option = null;
+
+        if (ctx.truncateTarget().truncateOption() != null) {
+            option = ctx.truncateTarget().truncateOption().getText();
+        }
+
+        return new TruncateStatementNode(tableName, option);
+    }
+
+    // =================================================
+    // MERGE STATEMENT
+    // =================================================
+    @Override
+    public ASTNode visitMergeStatement(SQLParser.MergeStatementContext ctx) {
+        WithClauseNode withClause = ctx.withClause() != null ? buildWithClause(ctx.withClause()) : null;
+
+        // Build Target
+        ExpressionNode target = new TableNode(ctx.mergeTarget().tableName().getText());
+
+        // Build Source
+        ExpressionNode source;
+        if (ctx.mergeSource().tableName() != null) {
+            source = new TableNode(ctx.mergeSource().tableName().getText());
+        } else {
+            source = buildSubquery(ctx.mergeSource().queryExpression());
+        }
+
+        ExpressionNode onCondition = (ExpressionNode) visit(ctx.searchCondition());
+
+        List<MergeWhenClauseNode> whenClauses = new ArrayList<>();
+        for (SQLParser.MergeWhenClauseContext whenCtx : ctx.mergeWhenClause()) {
+            whenClauses.add(buildMergeWhenClause(whenCtx));
+        }
+
+        return new MergeStatementNode(withClause, target, source, onCondition, whenClauses);
+    }
+
+    private MergeWhenClauseNode buildMergeWhenClause(SQLParser.MergeWhenClauseContext ctx) {
+        if (ctx.mergeWhenMatched() != null) {
+            SQLParser.MergeWhenMatchedContext m = ctx.mergeWhenMatched();
+            ExpressionNode condition = m.searchCondition() != null ? (ExpressionNode) visit(m.searchCondition()) : null;
+
+            if (m.mergeMatchedAction().DELETE() != null) {
+                return new MergeWhenClauseNode(MergeWhenClauseNode.MergeType.MATCHED, condition,
+                        MergeWhenClauseNode.ActionType.DELETE, null, null, null);
+            } else {
+                // UPDATE SET
+                List<UpdateStatementNode.SetAssignment> assignments = new ArrayList<>();
+                for (SQLParser.MergeSetClauseContext setCtx : m.mergeMatchedAction().mergeSetClause()) {
+                    ExpressionNode col = buildFullColumnName(setCtx.fullColumnName());
+                    ExpressionNode val = (ExpressionNode) visit(setCtx.expression());
+                    assignments.add(new UpdateStatementNode.SetAssignment(col, "=", val));
+                }
+                return new MergeWhenClauseNode(MergeWhenClauseNode.MergeType.MATCHED, condition,
+                        MergeWhenClauseNode.ActionType.UPDATE, assignments, null, null);
+            }
+        } else {
+            // NOT MATCHED (INSERT)
+            SQLParser.MergeWhenNotMatchedContext nm = ctx.mergeWhenNotMatched();
+            ExpressionNode condition = nm.searchCondition() != null ? (ExpressionNode) visit(nm.searchCondition())
+                    : null;
+
+            List<String> cols = new ArrayList<>();
+            if (nm.mergeNotMatchedAction().columnName() != null) {
+                for (SQLParser.ColumnNameContext c : nm.mergeNotMatchedAction().columnName()) {
+                    cols.add(c.getText());
+                }
+            }
+
+            List<ExpressionNode> values = new ArrayList<>();
+            for (SQLParser.ExpressionContext eCtx : nm.mergeNotMatchedAction().expressionList().expression()) {
+                values.add((ExpressionNode) visit(eCtx));
+            }
+
+            return new MergeWhenClauseNode(MergeWhenClauseNode.MergeType.NOT_MATCHED, condition,
+                    MergeWhenClauseNode.ActionType.INSERT, null, cols, values);
+        }
     }
 
 }

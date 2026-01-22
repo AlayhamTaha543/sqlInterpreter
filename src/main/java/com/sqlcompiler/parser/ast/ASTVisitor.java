@@ -7,6 +7,7 @@ import com.sqlcompiler.parser.ast.clauses.FromClauseNode;
 import com.sqlcompiler.parser.ast.clauses.GroupByClauseNode;
 import com.sqlcompiler.parser.ast.clauses.HavingClauseNode;
 import com.sqlcompiler.parser.ast.clauses.JoinClauseNode;
+import com.sqlcompiler.parser.ast.clauses.MergeWhenClauseNode;
 import com.sqlcompiler.parser.ast.clauses.OrderByClauseNode;
 import com.sqlcompiler.parser.ast.clauses.SelectClauseNode;
 import com.sqlcompiler.parser.ast.clauses.WhenClauseNode;
@@ -29,11 +30,13 @@ import com.sqlcompiler.parser.ast.statements.DeclareCursorNode;
 import com.sqlcompiler.parser.ast.statements.DeleteStatementNode;
 import com.sqlcompiler.parser.ast.statements.DropStatementNode;
 import com.sqlcompiler.parser.ast.statements.FetchCursorNode;
+import com.sqlcompiler.parser.ast.statements.MergeStatementNode;
 import com.sqlcompiler.parser.ast.statements.OpenCursorNode;
 import com.sqlcompiler.parser.ast.statements.ProgramNode;
 import com.sqlcompiler.parser.ast.statements.RenameItemNode;
 import com.sqlcompiler.parser.ast.statements.RenameStatementNode;
 import com.sqlcompiler.parser.ast.statements.SelectStatementNode;
+import com.sqlcompiler.parser.ast.statements.TruncateStatementNode;
 import com.sqlcompiler.parser.ast.statements.UpdateStatementNode;
 
 
@@ -80,4 +83,7 @@ public interface ASTVisitor<T> {
     T visit(WhenClauseNode  node);
     T visit(RenameStatementNode node);
     T visit(RenameItemNode node);
+    T visit(MergeStatementNode node);
+    T visit(MergeWhenClauseNode node);
+    T visit(TruncateStatementNode node);
 }
