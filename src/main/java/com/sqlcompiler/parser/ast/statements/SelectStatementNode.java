@@ -44,4 +44,32 @@ public class SelectStatementNode extends ASTNode {
     public <T> T accept(ASTVisitor<T> visitor) {
         return visitor.visit(this);
     }
+     public List<ASTNode> getChildren() {
+        List<ASTNode> children = new ArrayList<>();
+        
+        if (selectClause != null) {
+            children.add(selectClause);
+        }
+        if (fromClause != null) {
+            children.add(fromClause);
+        }
+        if (whereClause != null) {
+            children.add(whereClause);
+        }
+        if (groupByClause != null) {
+            children.add(groupByClause);
+        }
+        // IMPORTANT: Add HAVING clause to children
+        if (havingClause != null && !havingClause.isEmpty()) {
+            children.add(havingClause);
+        }
+        if (orderByClause != null) {
+            children.add(orderByClause);
+        }
+        if (limit != null) {
+            children.add(limit);
+        }
+        
+        return children;
+    }
 }
