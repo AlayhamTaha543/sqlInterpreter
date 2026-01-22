@@ -1,0 +1,67 @@
+# ========================================
+# Build outputs
+# ========================================
+target/
+build/
+out/
+dist/
+*.class
+*.jar
+*.war
+*.ear
+
+# ========================================
+# Logs
+# ========================================
+*.log
+
+# ========================================
+# OS files
+# ========================================
+.DS_Store
+Thumbs.db
+
+# ========================================
+# IDE
+# ========================================
+.idea/
+.vscode/
+*.iml
+*.swp
+*.swo
+
+# ========================================
+# ANTLR generated files
+# ========================================
+*.tokens
+*.interp
+
+# Ignore generated parser/lexer ONLY
+src/main/java/**/SQLLexer*.java
+src/main/java/**/SQLParser*.java
+src/main/java/**/SQLBaseListener.java
+src/main/java/**/SQLBaseVisitor.java
+src/main/java/**/SQLListener.java
+src/main/java/**/SQLVisitor.java
+
+# ========================================
+# Java files (ignore all EXCEPT AST)
+# ========================================
+*.java
+
+# ✅ ALLOW AST FILES
+!src/main/java/com/sqlcompiler/parser/ast/**
+!src/main/java/com/sqlcompiler/parser/ast/**/*.java
+
+# ========================================
+# Output files
+# ========================================
+sqlInterpreter-output.md
+sqlInterpreter-output.txt
+
+# ========================================
+# Parse tree files
+# ========================================
+parse_tree.dot
+parse_tree.png
+parse_tree.svg
