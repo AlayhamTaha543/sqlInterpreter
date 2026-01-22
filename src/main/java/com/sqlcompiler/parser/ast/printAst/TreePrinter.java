@@ -9,6 +9,7 @@ import com.sqlcompiler.parser.ast.clauses.FromClauseNode;
 import com.sqlcompiler.parser.ast.clauses.GroupByClauseNode;
 import com.sqlcompiler.parser.ast.clauses.HavingClauseNode;
 import com.sqlcompiler.parser.ast.clauses.JoinClauseNode;
+import com.sqlcompiler.parser.ast.clauses.MergeWhenClauseNode;
 import com.sqlcompiler.parser.ast.clauses.OrderByClauseNode;
 import com.sqlcompiler.parser.ast.clauses.SelectClauseNode;
 import com.sqlcompiler.parser.ast.clauses.WhenClauseNode;
@@ -35,12 +36,14 @@ import com.sqlcompiler.parser.ast.statements.DeclareCursorNode;
 import com.sqlcompiler.parser.ast.statements.DeleteStatementNode;
 import com.sqlcompiler.parser.ast.statements.DropStatementNode;
 import com.sqlcompiler.parser.ast.statements.FetchCursorNode;
+import com.sqlcompiler.parser.ast.statements.MergeStatementNode;
 import com.sqlcompiler.parser.ast.statements.IfStatementNode;
 import com.sqlcompiler.parser.ast.statements.OpenCursorNode;
 import com.sqlcompiler.parser.ast.statements.ProgramNode;
 import com.sqlcompiler.parser.ast.statements.RenameItemNode;
 import com.sqlcompiler.parser.ast.statements.RenameStatementNode;
 import com.sqlcompiler.parser.ast.statements.SelectStatementNode;
+import com.sqlcompiler.parser.ast.statements.TruncateStatementNode;
 import com.sqlcompiler.parser.ast.statements.InsertStatementNode;
 import com.sqlcompiler.parser.ast.statements.UpdateStatementNode;
 import com.sqlcompiler.parser.ast.statements.ValuesClauseNode;
@@ -91,7 +94,7 @@ public class TreePrinter implements ASTVisitor<Void> {
     public Void visit(SelectStatementNode node) {
         addLine("SelectStatement");
         level++;
-        if (node.hasWithClause()) {                    
+        if (node.hasWithClause()) {
             node.withClause.accept(this);
         }
         // SELECT clause
@@ -237,73 +240,68 @@ public class TreePrinter implements ASTVisitor<Void> {
     }
 
     // ========== Clauses ==========
-      
-    
-    
-    //ddddddddddddddrop drop drop drop drop drop 
+
+    // ddddddddddddddrop drop drop drop drop drop
     @Override
     public Void visit(DropStatementNode node) {
         addLine("DropStatementNode");
         level++;
-        
+
         if (node.dropTable != null) {
             node.dropTable.accept(this);
         }
         if (node.dropDatabase != null) {
             node.dropDatabase.accept(this);
         }
-        
+
         level--;
         return null;
     }
 
-
-//helper drop 
+    // helper drop
     @Override
     public Void visit(DropTableNode node) {
         addLine("DropTableNode");
         level++;
 
-        if (node.ifExists) addLine("IF EXISTS");
-        if (node.isTemporary) addLine("TEMPORARY");
+        if (node.ifExists)
+            addLine("IF EXISTS");
+        if (node.isTemporary)
+            addLine("TEMPORARY");
 
-    
         if (node.tableNames != null) {
             for (String name : node.tableNames) {
                 addLine("Table: " + name);
             }
         }
 
-        if (node.behavior != null) addLine("Behavior: " + node.behavior);
+        if (node.behavior != null)
+            addLine("Behavior: " + node.behavior);
 
         level--;
         return null;
     }
-        
 
     @Override
     public Void visit(DropDatabaseNode node) {
         addLine("DropDatabaseNode");
-        
+
         level++;
-        
+
         if (node.ifExists) {
             addLine("IF EXISTS");
         }
-        
-    
+
         if (node.databaseName != null) {
-            addLine("Name: " + node.databaseName); 
+            addLine("Name: " + node.databaseName);
         }
-        
+
         level--;
         return null;
     }
 
-
-
-//
-//detlet delte delte detlete deltet 
+    //
+    // detlet delte delte detlete deltet
     @Override
     public Void visit(DeleteStatementNode node) {
         addLine("DeleteStatementNode");
@@ -480,35 +478,39 @@ public class TreePrinter implements ASTVisitor<Void> {
         return null;
     }
 
-     @Override
+    @Override
     public Void visit(DeleteTargetNode node) {
         addLine("DeleteTarget"); // This creates a box labeled 'DeleteTarget'
         level++;
-        
+
         // Tell the printer to go down into each item (the actual tables)
         for (DeleteTargetItemNode item : node.items) {
-            item.accept(this); 
+            item.accept(this);
         }
-        
+
         level--;
         return null;
     }
-        @Override
+
+    @Override
     public Void visit(DeleteTargetItemNode node) {
         // This uses your toString() which returns "database.schema.table"
-        addLine("Table: " + node.toString()); 
-        
+        addLine("Table: " + node.toString());
+
         // If you want even more detail in the photo, you can add these:
         if (node.database != null || node.schema != null) {
             level++;
-            if (node.database != null) addLine("DB: " + node.database);
-            if (node.schema != null) addLine("Schema: " + node.schema);
+            if (node.database != null)
+                addLine("DB: " + node.database);
+            if (node.schema != null)
+                addLine("Schema: " + node.schema);
             addLine("Name: " + node.tableName);
             level--;
         }
-        
+
         return null;
     }
+
     // ========== Expressions ==========
     @Override
     public Void visit(ColumnNode node) {
@@ -625,6 +627,7 @@ public class TreePrinter implements ASTVisitor<Void> {
         }
         return null;
     }
+
     @Override
     public Void visit(NotExpressionNode node) {
         if (node != null) {
@@ -640,17 +643,18 @@ public class TreePrinter implements ASTVisitor<Void> {
     @Override
     public Void visit(WithClauseNode node) {
         String label = "WITH";
-        if (node.recursive) label += " RECURSIVE";
+        if (node.recursive)
+            label += " RECURSIVE";
         addLine(label + " [" + node.getCTECount() + " CTE(s)]");
         level++;
-        
+
         for (int i = 0; i < node.ctes.size(); i++) {
             addLine("CTE[" + (i + 1) + "]:");
             level++;
             node.ctes.get(i).accept(this);
             level--;
         }
-        
+
         level--;
         return null;
     }
@@ -663,39 +667,40 @@ public class TreePrinter implements ASTVisitor<Void> {
         }
         addLine(label);
         level++;
-        
+
         if (node.query != null) {
             addLine("Query:");
             level++;
             node.query.accept(this);
             level--;
         }
-        
+
         level--;
         return null;
     }
+
     @Override
     public Void visit(DeclareCursorNode node) {
         addLine("DECLARE CURSOR: " + node.cursorName);
         level++;
-        
+
         if (!node.options.isEmpty()) {
             addLine("Options: " + String.join(", ", node.options));
         }
-        
+
         addLine("Query:");
         level++;
         if (node.query != null) {
             node.query.accept(this);
         }
         level--;
-        
+
         if (node.readOnly) {
             addLine("Mode: READ ONLY");
         } else if (!node.updateColumns.isEmpty()) {
             addLine("FOR UPDATE OF: " + String.join(", ", node.updateColumns));
         }
-        
+
         level--;
         return null;
     }
@@ -723,13 +728,13 @@ public class TreePrinter implements ASTVisitor<Void> {
         }
         label += ": " + (node.global ? "GLOBAL " : "") + node.cursorName;
         addLine(label);
-        
+
         if (!node.intoVariables.isEmpty()) {
             level++;
             addLine("INTO: " + String.join(", ", node.intoVariables));
             level--;
         }
-        
+
         return null;
     }
 
@@ -738,7 +743,8 @@ public class TreePrinter implements ASTVisitor<Void> {
         addLine("DEALLOCATE CURSOR: " + (node.global ? "GLOBAL " : "") + node.cursorName);
         return null;
     }
-    // Add other visit methods for different ASTNode types as needed    
+
+    // Add other visit methods for different ASTNode types as needed
     public Void visit(WhenClauseNode node) {
         if (node != null) {
             addLine("WhenClause");
@@ -794,6 +800,17 @@ public class TreePrinter implements ASTVisitor<Void> {
         level--;
         return null;
     }
+
+    @Override
+    public Void visit(TruncateStatementNode node) {
+        getIndent();
+        System.out.println("TRUNCATE TABLE: " + node.tableName);
+        if (node.option != null) {
+            level++;
+            getIndent();
+            System.out.println("Option: " + node.option);
+            level--;
+        }
     @Override
     public Void visit(InsertStatementNode node) {
         addLine("InsertStatement");
@@ -908,6 +925,27 @@ public class TreePrinter implements ASTVisitor<Void> {
     }
 
     @Override
+    public Void visit(MergeStatementNode node) {
+        getIndent();
+        System.out.println("MERGE STATEMENT");
+        level++;
+
+        getIndent();
+        System.out.println("Target: " + node.targetTable.toString());
+
+        getIndent();
+        System.out.println("Source: " + node.sourceTable.toString());
+
+        getIndent();
+        System.out.println("ON Condition:");
+        level++;
+        node.onCondition.accept(this);
+        level--;
+
+        for (MergeWhenClauseNode when : node.whenClauses) {
+            when.accept(this);
+        }
+
     public Void visit(CreateStatementNode node) {
         addLine("CreateStatement");
         level++;
@@ -964,6 +1002,12 @@ public class TreePrinter implements ASTVisitor<Void> {
     }
 
     @Override
+    public Void visit(MergeWhenClauseNode node) {
+        getIndent();
+        System.out.println("WHEN " + node.mergeType + " THEN " + node.actionType);
+        // Add logic to print assignments for UPDATE or values for INSERT
+        return null;
+    }
     public Void visit(DataTypeNode node) {
         addLine("DataType: " + node.toString());
         return null;
