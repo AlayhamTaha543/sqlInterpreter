@@ -41,6 +41,7 @@ import com.sqlcompiler.parser.ast.statements.ProgramNode;
 import com.sqlcompiler.parser.ast.statements.RenameItemNode;
 import com.sqlcompiler.parser.ast.statements.RenameStatementNode;
 import com.sqlcompiler.parser.ast.statements.SelectStatementNode;
+import com.sqlcompiler.parser.ast.statements.StatementBlockNode;
 import com.sqlcompiler.parser.ast.statements.TruncateStatementNode;
 import com.sqlcompiler.parser.ast.statements.InsertStatementNode;
 import com.sqlcompiler.parser.ast.statements.UpdateStatementNode;
@@ -98,7 +99,7 @@ public interface ASTVisitor<T> {
 
     T visit(CreateStatementNode node);
 
-
+T visit(StatementBlockNode node);
 T visit(ValuesClauseNode node);
 
     T visit(ValuesRowNode node);

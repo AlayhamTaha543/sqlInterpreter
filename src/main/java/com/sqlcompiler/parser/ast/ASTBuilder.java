@@ -23,6 +23,7 @@ import com.sqlcompiler.parser.ast.statements.ProgramNode;
 import com.sqlcompiler.parser.ast.statements.RenameItemNode;
 import com.sqlcompiler.parser.ast.statements.RenameStatementNode;
 import com.sqlcompiler.parser.ast.statements.SelectStatementNode;
+import com.sqlcompiler.parser.ast.statements.StatementBlockNode;
 import com.sqlcompiler.parser.ast.statements.TruncateStatementNode;
 import com.sqlcompiler.parser.ast.statements.UpdateStatementNode;
 import com.sqlcompiler.parser.ast.statements.InsertStatementNode;
@@ -1156,23 +1157,56 @@ public ASTNode visitSqlStatements(SQLParser.SqlStatementsContext ctx) {
 
         return new RenameStatementNode(renameItems);
     }
+/**
+ * Visits a statementList and wraps multiple statements in a block
+ */
 @Override
 public ASTNode visitIfStatement(SQLParser.IfStatementContext ctx) {
-    // 1. Visit the condition (usually a searchCondition in T-SQL)
     ExpressionNode condition = (ExpressionNode) visit(ctx.searchCondition());
 
-    // 2. Visit the 'THEN' statement (the statement immediately after IF)
-    ASTNode thenStmt = visit(ctx.sqlStatement(0));
+    ASTNode thenStmt = null;
+    
+    if (ctx.BEGIN() != null && ctx.statementList() != null && ctx.statementList().size() > 0) {
+        thenStmt = buildStatementBlock(ctx.statementList(0));  
+    } else if (ctx.sqlStatement() != null && ctx.sqlStatement().size() > 0) {
+        thenStmt = visit(ctx.sqlStatement(0));
+    }
 
-    // 3. Visit the 'ELSE' statement if it exists
     ASTNode elseStmt = null;
-    if (ctx.ELSE() != null && ctx.sqlStatement().size() > 1) {
-        elseStmt = visit(ctx.sqlStatement(1));
+    if (ctx.ELSE() != null) {
+        if (ctx.BEGIN() != null && ctx.statementList().size() > 1) {
+            elseStmt = buildStatementBlock(ctx.statementList(1));  
+        } else if (ctx.sqlStatement().size() > 1) {
+            elseStmt = visit(ctx.sqlStatement(1));
+        }
     }
 
     return new IfStatementNode(condition, thenStmt, elseStmt);
 }
-    // =================================================
+/**
+ * Builds a statement block from a statementList
+ */
+private ASTNode buildStatementBlock(SQLParser.StatementListContext ctx) {
+    if (ctx == null) return null;
+    
+    List<ASTNode> statements = new ArrayList<>();
+    
+    for (SQLParser.StatementContext stmtCtx : ctx.statement()) {
+        ASTNode stmt = visit(stmtCtx);
+        if (stmt != null) {
+            statements.add(stmt);
+        }
+    }
+    
+    // If only one statement, return it directly
+    if (statements.size() == 1) {
+        return statements.get(0);
+    }
+    
+    // Multiple statements - wrap in block
+    return new StatementBlockNode(statements);
+}
+// =================================================
     // TRUNCATE STATEMENT
     // =================================================
     @Override

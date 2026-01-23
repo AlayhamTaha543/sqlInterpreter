@@ -11,33 +11,14 @@ import com.sqlcompiler.parser.ast.statements.*;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Utility to visualize custom AST using Graphviz DOT format.
  * Uses the Visitor pattern for proper traversal.
  */
 public class ASTVisualizer implements ASTVisitor<Integer> {
-            @Override
-            public Integer visit(CreateStatementNode node) {
-                int nodeId = createNode("CREATE STATEMENT", "lightyellow");
 
-                if (node.table != null) {
-                    int tableId = node.table.accept(this);
-                    createEdge(nodeId, tableId, "table");
-                }
-
-                if (node.tableElements != null && !node.tableElements.isEmpty()) {
-                    int elemsId = createNode("Elements", "khaki");
-                    createEdge(nodeId, elemsId, null);
-                    for (com.sqlcompiler.parser.ast.ASTNode element : node.tableElements) {
-                        int elemId = element.accept(this);
-                        createEdge(elemsId, elemId, null);
-                    }
-                }
-
-                return nodeId;
-            }
-        // Implement missing visit for DataTypeNode
         @Override
         public Integer visit(com.sqlcompiler.parser.ast.other.DataTypeNode node) {
             String label = "DataType: " + (node.typeName != null ? node.typeName : "?");
@@ -214,59 +195,59 @@ public class ASTVisualizer implements ASTVisitor<Integer> {
         return nodeId;
     }
 
-     @Override
-    public Integer visit(InsertStatementNode node) {
-        int nodeId = createNode("INSERT STATEMENT", "lightblue");
+@Override
+public Integer visit(InsertStatementNode node) {
+    int nodeId = createNode("INSERT STATEMENT", "lightblue");
 
+    // Target table
+    if (node.target != null && !node.target.isEmpty()) {
+        int targetId = createNode("Target: " + node.target, "lightcyan");
+        createEdge(nodeId, targetId, "into");
+    }
 
-        // Use reflection to access table and source fields or getters
-        Object tableObj = null;
-        try {
-            java.lang.reflect.Field f = node.getClass().getField("table");
-            tableObj = f.get(node);
-        } catch (Exception e) {
-            try {
-                java.lang.reflect.Method m = node.getClass().getMethod("getTable");
-                tableObj = m.invoke(node);
-            } catch (Exception ignored) {}
-        }
-        if (tableObj instanceof ASTNode) {
-            int tableId = ((ASTNode) tableObj).accept(this);
-            createEdge(nodeId, tableId, "table");
-        }
+    // Columns
+    if (node.columns != null && !node.columns.isEmpty()) {
+        String colsLabel = "Columns: " + String.join(", ", node.columns);
+        int colsId = createNode(colsLabel, "paleturquoise");
+        createEdge(nodeId, colsId, null);
+    }
 
-        if (node.columns != null && !node.columns.isEmpty()) {
-            int colsId = createNode("Columns", "lightcyan");
-            createEdge(nodeId, colsId, null);
-            for (Object colObj : node.columns) {
-                if (colObj instanceof com.sqlcompiler.parser.ast.expressions.ColumnNode) {
-                    int colId = ((com.sqlcompiler.parser.ast.expressions.ColumnNode) colObj).accept(this);
-                    createEdge(colsId, colId, null);
-                } else if (colObj instanceof String) {
-                    int colId = createNode("Column: " + colObj, "lightcyan");
-                    createEdge(colsId, colId, null);
+    // Source
+    int sourceId = createNode("Source", "aliceblue");
+    createEdge(nodeId, sourceId, null);
+
+    // Values
+    if (node.valueRows != null && !node.valueRows.isEmpty()) {
+        int valuesId = createNode("VALUES", "lightsteelblue");
+        createEdge(sourceId, valuesId, null);
+        
+        for (int i = 0; i < node.valueRows.size(); i++) {
+            int rowId = createNode("Row " + (i + 1), "powderblue");
+            createEdge(valuesId, rowId, null);
+            
+            List<ExpressionNode> row = node.valueRows.get(i);
+            for (ExpressionNode expr : row) {
+                if (expr != null) {
+                    int valId = expr.accept(this);
+                    createEdge(rowId, valId, null);
                 }
             }
         }
-
-        Object sourceObj = null;
-        try {
-            java.lang.reflect.Field f = node.getClass().getField("source");
-            sourceObj = f.get(node);
-        } catch (Exception e) {
-            try {
-                java.lang.reflect.Method m = node.getClass().getMethod("getSource");
-                sourceObj = m.invoke(node);
-            } catch (Exception ignored) {}
-        }
-        if (sourceObj instanceof ASTNode) {
-            int sourceId = ((ASTNode) sourceObj).accept(this);
-            createEdge(nodeId, sourceId, "source");
-        }
-
-        return nodeId;
     }
- @Override
+    // Query source (INSERT ... SELECT)
+    else if (node.querySource != null) {
+        int queryId = node.querySource.accept(this);
+        createEdge(sourceId, queryId, "select");
+    }
+    // Default values
+    else if (node.defaultValues) {
+        int defaultId = createNode("DEFAULT VALUES", "lightblue");
+        createEdge(sourceId, defaultId, null);
+    }
+
+    return nodeId;
+}
+@Override
     public Integer visit(ValuesClauseNode node) {
         int nodeId = createNode("VALUES", "lightgray");
         for (com.sqlcompiler.parser.ast.statements.ValuesRowNode row : node.rows) {
@@ -882,22 +863,70 @@ public class ASTVisualizer implements ASTVisitor<Integer> {
 
     // ======= Added missing visit implementations for Delete/Drop nodes =======
 
-    @Override
-    public Integer visit(DeleteTargetItemNode node) {
-        // Minimal visualization for Delete target item
-        return createNode("DELETE TARGET ITEM", "palegoldenrod");
+@Override
+public Integer visit(DeleteTargetItemNode node) {
+    String label = "Table: " + node.toString();
+    int nodeId = createNode(label, "palegoldenrod");
+    
+    // Add detailed breakdown if needed
+    if (node.database != null || node.schema != null) {
+        if (node.database != null) {
+            int dbId = createNode("DB: " + node.database, "lightgoldenrodyellow");
+            createEdge(nodeId, dbId, null);
+        }
+        if (node.schema != null) {
+            int schemaId = createNode("Schema: " + node.schema, "lightgoldenrodyellow");
+            createEdge(nodeId, schemaId, null);
+        }
+        int nameId = createNode("Name: " + node.tableName, "lightgoldenrodyellow");
+        createEdge(nodeId, nameId, null);
     }
-
-    @Override
-    public Integer visit(DeleteTargetNode node) {
-        // Minimal visualization for Delete target (container)
-        return createNode("DELETE TARGET", "peachpuff");
+    
+    return nodeId;
+}
+@Override
+public Integer visit(DeleteTargetNode node) {
+    int nodeId = createNode("DELETE TARGET", "peachpuff");
+    
+    // Show all target items
+    if (node.items != null && !node.items.isEmpty()) {
+        for (DeleteTargetItemNode item : node.items) {
+            int itemId = item.accept(this);
+            createEdge(nodeId, itemId, "table");
+        }
     }
+    
+    return nodeId;
+}
 
     @Override
     public Integer visit(DeleteStatementNode node) {
-        // Minimal visualization for a DELETE statement
         int nodeId = createNode("DELETE STATEMENT", "lightcoral");
+        
+        // Delete target (which table(s) to delete from)
+        if (node.target != null) {
+            int targetId = node.target.accept(this);
+            createEdge(nodeId, targetId, "target");
+        }
+        
+        // FROM clause (for joins)
+        if (node.fromClause != null) {
+            int fromId = node.fromClause.accept(this);
+            createEdge(nodeId, fromId, "from");
+        }
+        
+        // WHERE clause
+        if (node.whereClause != null) {
+            int whereId = node.whereClause.accept(this);
+            createEdge(nodeId, whereId, "where");
+        }
+        
+        // Show if has FROM keyword
+        if (node.hasFromKeyword) {
+            int infoId = createNode("Has FROM keyword", "mistyrose");
+            createEdge(nodeId, infoId, null);
+        }
+        
         return nodeId;
     }
 
@@ -1065,6 +1094,57 @@ public Integer visit(TruncateStatementNode node) {
 
     return nodeId;
 }
+@Override
+public Integer visit(StatementBlockNode node) {
+    int nodeId = createNode("BLOCK [" + node.statements.size() + " stmts]", "lightgray");
+    
+    for (int i = 0; i < node.statements.size(); i++) {
+        int stmtId = node.statements.get(i).accept(this);
+        createEdge(nodeId, stmtId, "stmt" + (i + 1));
+    }
+    
+    return nodeId;
+}
+@Override
+public Integer visit(IfStatementNode node) {
+    int nodeId = createNode("IF STATEMENT", "orange");
 
+    if (node.condition != null) {
+        int condId = node.condition.accept(this);
+        createEdge(nodeId, condId, "condition");
+    }
+
+    if (node.thenStatement != null) {
+        int thenId = node.thenStatement.accept(this);
+        createEdge(nodeId, thenId, "then");
+    }
+
+    if (node.elseStatement != null) {
+        int elseId = node.elseStatement.accept(this);
+        createEdge(nodeId, elseId, "else");
+    }
+
+    return nodeId;
+}
+@Override
+public Integer visit(CreateStatementNode node) {
+    int nodeId = createNode("CREATE TABLE", "lightyellow");
+
+    if (node.table != null) {
+        int tableId = node.table.accept(this);
+        createEdge(nodeId, tableId, "table");
+    }
+
+    if (node.tableElements != null && !node.tableElements.isEmpty()) {
+        int elemsId = createNode("Elements", "khaki");
+        createEdge(nodeId, elemsId, null);
+        
+        for (ASTNode element : node.tableElements) {
+            int elemId = element.accept(this);
+            createEdge(elemsId, elemId, null);
+        }
+    }
+
+    return nodeId;
 }
 }

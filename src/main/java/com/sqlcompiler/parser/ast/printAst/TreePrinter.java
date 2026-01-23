@@ -1,5 +1,7 @@
 package com.sqlcompiler.parser.ast.printAst;
 
+import java.util.List;
+
 import com.sqlcompiler.parser.ast.ASTNode;
 import com.sqlcompiler.parser.ast.ASTVisitor;
 import com.sqlcompiler.parser.ast.clauses.CTENode;
@@ -19,6 +21,7 @@ import com.sqlcompiler.parser.ast.expressions.AggregateFunctionNode;
 import com.sqlcompiler.parser.ast.expressions.BinaryExpressionNode;
 import com.sqlcompiler.parser.ast.expressions.CaseexpressionNode;
 import com.sqlcompiler.parser.ast.expressions.ColumnNode;
+import com.sqlcompiler.parser.ast.expressions.ExpressionNode;
 import com.sqlcompiler.parser.ast.expressions.FunctionCallNode;
 import com.sqlcompiler.parser.ast.expressions.LiteralNode;
 import com.sqlcompiler.parser.ast.expressions.SubqueryNode;
@@ -43,6 +46,7 @@ import com.sqlcompiler.parser.ast.statements.ProgramNode;
 import com.sqlcompiler.parser.ast.statements.RenameItemNode;
 import com.sqlcompiler.parser.ast.statements.RenameStatementNode;
 import com.sqlcompiler.parser.ast.statements.SelectStatementNode;
+import com.sqlcompiler.parser.ast.statements.StatementBlockNode;
 import com.sqlcompiler.parser.ast.statements.TruncateStatementNode;
 import com.sqlcompiler.parser.ast.statements.InsertStatementNode;
 import com.sqlcompiler.parser.ast.statements.UpdateStatementNode;
@@ -811,120 +815,60 @@ public class TreePrinter implements ASTVisitor<Void> {
             System.out.println("Option: " + node.option);
             level--;
         }
-    @Override
-    public Void visit(InsertStatementNode node) {
-        addLine("InsertStatement");
-        level++;
+        return null;}
 
-        // Access table via reflection/getter to support different AST implementations
-        Object tableObj = null;
-        try {
-            java.lang.reflect.Field f = node.getClass().getField("table");
-            tableObj = f.get(node);
-        } catch (Exception e) {
-            try {
-                java.lang.reflect.Method m = node.getClass().getMethod("getTable");
-                tableObj = m.invoke(node);
-            } catch (Exception ignored) {
-            }
-        }
+@Override
+public Void visit(InsertStatementNode node) {
+    addLine("InsertStatement");
+    level++;
 
-        if (tableObj != null) {
-            String tname = null;
-            try {
-                java.lang.reflect.Field fn = tableObj.getClass().getField("tableName");
-                Object v = fn.get(tableObj);
-                if (v != null) tname = v.toString();
-            } catch (Exception e) {
-                try {
-                    java.lang.reflect.Method mn = tableObj.getClass().getMethod("getTableName");
-                    Object v = mn.invoke(tableObj);
-                    if (v != null) tname = v.toString();
-                } catch (Exception ignored) {
-                }
-            }
-
-            if (tname != null) {
-                addLine("TargetTable: " + tname);
-            } else if (tableObj instanceof ASTNode) {
-                addLine("TargetTable:");
-                level++;
-                ((ASTNode) tableObj).accept(this);
-                level--;
-            } else {
-                addLine("TargetTable: " + tableObj.toString());
-            }
-        }
-
-        // Columns (reflectively get list)
-        Object colsObj = null;
-        try {
-            java.lang.reflect.Field f = node.getClass().getField("columns");
-            colsObj = f.get(node);
-        } catch (Exception e) {
-            try {
-                java.lang.reflect.Method m = node.getClass().getMethod("getColumns");
-                colsObj = m.invoke(node);
-            } catch (Exception ignored) {
-            }
-        }
-
-        if (colsObj instanceof java.util.List) {
-            java.util.List<?> colsList = (java.util.List<?>) colsObj;
-            if (!colsList.isEmpty()) {
-                StringBuilder cols = new StringBuilder("Columns: ");
-                for (int i = 0; i < colsList.size(); i++) {
-                    Object col = colsList.get(i);
-                    String colName = null;
-                    if (col != null) {
-                        try {
-                            java.lang.reflect.Field fn = col.getClass().getField("columnName");
-                            Object v = fn.get(col);
-                            if (v != null) colName = v.toString();
-                        } catch (Exception e) {
-                            try {
-                                java.lang.reflect.Method mn = col.getClass().getMethod("getColumnName");
-                                Object v = mn.invoke(col);
-                                if (v != null) colName = v.toString();
-                            } catch (Exception ignored) {
-                            }
-                        }
-                        if (colName == null) colName = col.toString();
-                    } else {
-                        colName = "null";
-                    }
-                    cols.append(colName);
-                    if (i < colsList.size() - 1) cols.append(", ");
-                }
-                addLine(cols.toString());
-            }
-        }
-
-        // Source (reflective)
-        Object sourceObj = null;
-        try {
-            java.lang.reflect.Field f = node.getClass().getField("source");
-            sourceObj = f.get(node);
-        } catch (Exception e) {
-            try {
-                java.lang.reflect.Method m = node.getClass().getMethod("getSource");
-                sourceObj = m.invoke(node);
-            } catch (Exception ignored) {
-            }
-        }
-
-        if (sourceObj instanceof ASTNode) {
-            addLine("Source:");
-            level++;
-            ((ASTNode) sourceObj).accept(this);
-            level--;
-        }
-
-        level--;
-        return null;
+    // Target table
+    if (node.target != null && !node.target.isEmpty()) {
+        addLine("TargetTable: " + node.target);
     }
 
-    @Override
+    // Columns
+    if (node.columns != null && !node.columns.isEmpty()) {
+        addLine("Columns: " + String.join(", ", node.columns));
+    }
+
+    // Source
+    addLine("Source:");
+    level++;
+    
+    // Check for VALUES
+    if (node.valueRows != null && !node.valueRows.isEmpty()) {
+        addLine("VALUES");
+        level++;
+        for (List<ExpressionNode> row : node.valueRows) {
+            addLine("Row");
+            level++;
+            for (ExpressionNode expr : row) {
+                if (expr != null) {
+                    expr.accept(this);
+                }
+            }
+            level--;
+        }
+        level--;
+    }
+    // Check for SELECT query
+    else if (node.querySource != null) {
+        addLine("SELECT Query");
+        level++;
+        node.querySource.accept(this);
+        level--;
+    }
+    // Check for DEFAULT VALUES
+    else if (node.defaultValues) {
+        addLine("DEFAULT VALUES");
+    }
+    
+    level--;
+    level--;
+    return null;
+}
+@Override
     public Void visit(MergeStatementNode node) {
         getIndent();
         System.out.println("MERGE STATEMENT");
@@ -945,6 +889,7 @@ public class TreePrinter implements ASTVisitor<Void> {
         for (MergeWhenClauseNode when : node.whenClauses) {
             when.accept(this);
         }
+        return null;}
 
     public Void visit(CreateStatementNode node) {
         addLine("CreateStatement");
@@ -1038,6 +983,21 @@ public Void visit(IfStatementNode node) {
         level--;
     }
 
+    level--;
+    return null;
+}
+@Override
+public Void visit(StatementBlockNode node) {
+    addLine("StatementBlock [" + node.statements.size() + " statement(s)]");
+    level++;
+    
+    for (int i = 0; i < node.statements.size(); i++) {
+        addLine("Statement[" + (i + 1) + "]:");
+        level++;
+        node.statements.get(i).accept(this);
+        level--;
+    }
+    
     level--;
     return null;
 }
