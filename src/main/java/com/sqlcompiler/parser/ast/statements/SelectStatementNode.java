@@ -1,0 +1,81 @@
+package com.sqlcompiler.parser.ast.statements;
+
+import com.sqlcompiler.parser.ast.ASTNode;
+import com.sqlcompiler.parser.ast.ASTVisitor;
+import com.sqlcompiler.parser.ast.clauses.*;
+import com.sqlcompiler.parser.ast.expressions.ExpressionNode;
+import java.util.ArrayList;
+import java.util.List;
+
+public class SelectStatementNode extends ASTNode {
+    public final SelectClauseNode selectClause;
+    public final FromClauseNode fromClause;
+    public final WhereClauseNode whereClause;
+    public final List<JoinClauseNode> joins;
+    public final GroupByClauseNode groupByClause;
+    public final HavingClauseNode havingClause;
+    public final OrderByClauseNode orderByClause;
+    public final ExpressionNode limit;
+    public final ExpressionNode offset;
+    public final WithClauseNode withClause;
+    
+    public SelectStatementNode(
+        WithClauseNode withClause,
+        SelectClauseNode selectClause,
+        FromClauseNode fromClause,
+        WhereClauseNode whereClause,
+        List<JoinClauseNode> joins,
+        GroupByClauseNode groupByClause,
+        HavingClauseNode havingClause,
+        OrderByClauseNode orderByClause,
+        ExpressionNode limit,
+        ExpressionNode offset
+    ) {
+        this.withClause = withClause;
+        this.selectClause = selectClause;
+        this.fromClause = fromClause;
+        this.whereClause = whereClause;
+        this.joins = joins != null ? joins : new ArrayList<>();
+        this.groupByClause = groupByClause;
+        this.havingClause = havingClause;
+        this.orderByClause = orderByClause;
+        this.limit = limit;
+        this.offset = offset;
+    }
+    
+    @Override
+    public <T> T accept(ASTVisitor<T> visitor) {
+        return visitor.visit(this);
+    }
+     public List<ASTNode> getChildren() {
+        List<ASTNode> children = new ArrayList<>();
+        
+        if (selectClause != null) {
+            children.add(selectClause);
+        }
+        if (fromClause != null) {
+            children.add(fromClause);
+        }
+        if (whereClause != null) {
+            children.add(whereClause);
+        }
+        if (groupByClause != null) {
+            children.add(groupByClause);
+        }
+        // IMPORTANT: Add HAVING clause to children
+        if (havingClause != null && !havingClause.isEmpty()) {
+            children.add(havingClause);
+        }
+        if (orderByClause != null) {
+            children.add(orderByClause);
+        }
+        if (limit != null) {
+            children.add(limit);
+        }
+        
+        return children;
+    }
+    public boolean hasWithClause() {
+    return withClause != null;
+}
+}
